@@ -5,6 +5,13 @@
 package com.mapbox.mapboxgl;
 
 import android.graphics.Point;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.mapbox.geojson.Polygon;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
@@ -13,10 +20,14 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.log.Logger;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.style.expressions.Expression;
+import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
+import com.mapbox.mapboxsdk.style.layers.PropertyValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -546,4 +557,281 @@ class Convert {
       sink.setDraggable(toBoolean(draggable));
     }
   }
+
+  static PropertyValue[] interpretSymbolLayerProperties(Object o) {
+    final Map<String, String> data = (Map<String, String>) toMap(o);
+    final List<PropertyValue> properties = new LinkedList();
+
+    for (Map.Entry<String, String> entry : data.entrySet()) {
+      Expression expression = Expression.Converter.convert(entry.getValue());
+      switch (entry.getKey()) {
+        case "icon-allow-overlap":
+          properties.add(PropertyFactory.iconAllowOverlap(expression));
+          break;
+        case "icon-anchor":
+          properties.add(PropertyFactory.iconAnchor(expression));
+          break;
+        case "icon-color":
+          properties.add(PropertyFactory.iconColor(expression));
+          break;
+        case "icon-halo-blur":
+          properties.add(PropertyFactory.iconHaloBlur(expression));
+          break;
+        case "icon-halo-color":
+          properties.add(PropertyFactory.iconHaloColor(expression));
+          break;
+        case "icon-halo-width":
+          properties.add(PropertyFactory.iconHaloWidth(expression));
+          break;
+        case "icon-ignore-placement":
+          properties.add(PropertyFactory.iconIgnorePlacement(expression));
+          break;
+        case "icon-image":
+          properties.add(PropertyFactory.iconImage(expression));
+          break;
+        case "icon-keep-upright":
+          properties.add(PropertyFactory.iconKeepUpright(expression));
+          break;
+        case "icon-offset":
+          properties.add(PropertyFactory.iconOffset(expression));
+          break;
+        case "icon-opacity":
+          properties.add(PropertyFactory.iconOpacity(expression));
+          break;
+        case "icon-optional":
+          properties.add(PropertyFactory.iconOptional(expression));
+          break;
+        case "icon-padding":
+          properties.add(PropertyFactory.iconPadding(expression));
+          break;
+        case "icon-pitch-alignment":
+          properties.add(PropertyFactory.iconPitchAlignment(expression));
+          break;
+        case "icon-rotate":
+          properties.add(PropertyFactory.iconRotate(expression));
+          break;
+        case "icon-rotation-alignment":
+          properties.add(PropertyFactory.iconRotationAlignment(expression));
+          break;
+        case "icon-size":
+          properties.add(PropertyFactory.iconSize(expression));
+          break;
+        case "icon-text-fit":
+          properties.add(PropertyFactory.iconTextFit(expression));
+          break;
+        case "icon-text-fit-padding":
+          properties.add(PropertyFactory.iconTextFitPadding(expression));
+          break;
+        case "icon-translate":
+          properties.add(PropertyFactory.iconTranslate(expression));
+          break;
+        case "icon-translate-anchor":
+          properties.add(PropertyFactory.iconTranslateAnchor(expression));
+          break;
+        case "symbol-avoid-edges":
+          properties.add(PropertyFactory.symbolAvoidEdges(expression));
+          break;
+        case "symbol-placement":
+          properties.add(PropertyFactory.symbolPlacement(expression));
+          break;
+        case "symbol-sort-key":
+          properties.add(PropertyFactory.symbolSortKey(expression));
+          break;
+        case "symbol-spacing":
+          properties.add(PropertyFactory.symbolSpacing(expression));
+          break;
+        case "symbol-z-order":
+          properties.add(PropertyFactory.symbolZOrder(expression));
+          break;
+        case "text-allow-overlap":
+          properties.add(PropertyFactory.textAllowOverlap(expression));
+          break;
+        case "text-anchor":
+          properties.add(PropertyFactory.textAnchor(expression));
+          break;
+        case "text-color":
+          properties.add(PropertyFactory.textColor(expression));
+          break;
+        case "text-field":
+          properties.add(PropertyFactory.textField(expression));
+          break;
+        case "text-font":
+          properties.add(PropertyFactory.textFont(expression));
+          break;
+        case "text-halo-blur":
+          properties.add(PropertyFactory.textHaloBlur(expression));
+          break;
+        case "text-halo-color":
+          properties.add(PropertyFactory.textHaloColor(expression));
+          break;
+        case "text-halo-width":
+          properties.add(PropertyFactory.textHaloWidth(expression));
+          break;
+        case "text-ignore-placement":
+          properties.add(PropertyFactory.textIgnorePlacement(expression));
+          break;
+        case "text-justify":
+          properties.add(PropertyFactory.textJustify(expression));
+          break;
+        case "text-keep-upright":
+          properties.add(PropertyFactory.textKeepUpright(expression));
+          break;
+        case "text-letter-spacing":
+          properties.add(PropertyFactory.textLetterSpacing(expression));
+          break;
+        case "text-line-height":
+          properties.add(PropertyFactory.textLineHeight(expression));
+          break;
+        case "text-max-angle":
+          properties.add(PropertyFactory.textMaxAngle(expression));
+          break;
+        case "text-max-width":
+          properties.add(PropertyFactory.textMaxWidth(expression));
+          break;
+        case "text-offset":
+          properties.add(PropertyFactory.textOffset(expression));
+          break;
+        case "text-opacity":
+          properties.add(PropertyFactory.textOpacity(expression));
+          break;
+        case "text-optional":
+          properties.add(PropertyFactory.textOptional(expression));
+          break;
+        case "text-padding":
+          properties.add(PropertyFactory.textPadding(expression));
+          break;
+        case "text-pitch-alignment":
+          properties.add(PropertyFactory.textPitchAlignment(expression));
+          break;
+        case "text-radial-offset":
+          properties.add(PropertyFactory.textRadialOffset(expression));
+          break;
+        case "text-rotate":
+          properties.add(PropertyFactory.textRotate(expression));
+          break;
+        case "text-rotation-alignment":
+          properties.add(PropertyFactory.textRotationAlignment(expression));
+          break;
+        case "text-size":
+          properties.add(PropertyFactory.textSize(expression));
+          break;
+        case "text-transform":
+          properties.add(PropertyFactory.textTransform(expression));
+          break;
+        case "text-translate":
+          properties.add(PropertyFactory.textTranslate(expression));
+          break;
+        case "text-translate-anchor":
+          properties.add(PropertyFactory.textTranslateAnchor(expression));
+          break;
+        case "text-variable-anchor":
+          properties.add(PropertyFactory.textVariableAnchor(expression));
+          break;
+        case "text-writing-mode":
+          properties.add(PropertyFactory.textWritingMode(expression));
+          break;
+        default:
+          break;
+      }
+    }
+
+    return properties.toArray(new PropertyValue[properties.size()]);
+  }
+
+  static PropertyValue[] interpretLineLayerProperties(Object o) {
+    final Map<String, Map<String, ?>> data = (Map<String, Map<String, ?>>) toMap(o);
+    final List<PropertyValue> properties = new LinkedList();
+
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+    for (Map.Entry<String, Map<String, ?>> category : data.entrySet()) {
+
+      for (Map.Entry<String, ?> entry : category.getValue().entrySet()) {
+
+        String jsonValue = gson.toJson(entry.getValue());
+
+        JsonElement jsonElement = JsonParser.parseString(jsonValue);
+
+        switch (entry.getKey()) {
+          case "line-blur":
+            properties.add(PropertyFactory.lineBlur(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-cap":
+            properties.add(PropertyFactory.lineCap(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-color":
+            properties.add(PropertyFactory.lineColor(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-dasharray":
+            properties.add(PropertyFactory.lineDasharray(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-gap-width":
+            properties.add(PropertyFactory.lineGapWidth(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-gradient":
+            properties.add(PropertyFactory.lineGradient(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-join":
+            properties.add(PropertyFactory.lineJoin(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-miter-limit":
+            properties.add(PropertyFactory.lineMiterLimit(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-offset":
+            properties.add(PropertyFactory.lineOffset(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-pattern":
+            properties.add(PropertyFactory.linePattern(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-round-limit":
+            properties.add(PropertyFactory.lineRoundLimit(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-translate":
+            properties.add(PropertyFactory.lineTranslate(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-translate-anchor":
+            properties.add(PropertyFactory.lineTranslateAnchor(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          case "line-width":
+            properties.add(PropertyFactory.lineWidth(
+                    Expression.Converter.convert(jsonElement)
+            ));
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    return properties.toArray(new PropertyValue[properties.size()]);
+  }
+
+
+
 }

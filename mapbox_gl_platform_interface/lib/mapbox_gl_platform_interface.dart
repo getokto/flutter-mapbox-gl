@@ -20,3 +20,7 @@ part 'src/symbol.dart';
 part 'src/fill.dart';
 part 'src/ui.dart';
 part 'src/mapbox_gl_platform_interface.dart';
+part 'src/sources/source.dart';
+part 'src/layers/layers.dart';
+part 'src/layers/symbol_layer.dart';
+part 'src/layers/line_layer.dart';

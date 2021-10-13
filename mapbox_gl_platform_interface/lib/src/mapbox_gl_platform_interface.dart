@@ -288,4 +288,30 @@ abstract class MapboxGlPlatform {
     throw UnimplementedError(
         'getMetersPerPixelAtLatitude() has not been implemented.');
   }
+
+  Future<void> addGeoJsonSource(String sourceId, String geojson) async {
+    throw UnimplementedError(
+        'addGeoJsonSource() has not been implemented.');
+  }
+
+  Future<void> addVectorSource(String sourceId, Map<String, dynamic> properties) async {
+    throw UnimplementedError(
+        'addVectorSource() has not been implemented.');
+  }
+
+  Future<void> addSymbolLayer(String layerId, String sourceId,  {
+    String? sourceLayer,
+    required Map<String, dynamic> properties,
+  }) async {
+    throw UnimplementedError(
+        'addSymbolLayer() has not been implemented.');
+  }
+
+  Future<void> addLineLayer(String layerId, String sourceId,  {
+    String? sourceLayer,
+    required Map<String, dynamic> properties,
+  }) async {
+    throw UnimplementedError(
+        'addLineLayer() has not been implemented.');
+  }
 }

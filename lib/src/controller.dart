@@ -295,6 +295,65 @@ class MapboxMapController extends ChangeNotifier {
     return MapboxGlPlatform.getInstance(_id).moveCamera(cameraUpdate);
   }
 
+
+  /// Adds a mapbox gl geojson source
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> addGeoJsonSource(String sourceId, String geojson) async {
+    await MapboxGlPlatform.getInstance(_id).addGeoJsonSource(sourceId, geojson);
+  }
+
+
+  /// Adds a mapbox gl geojson source
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> addVectorSource(String sourceId, Map<String, dynamic> properties) async {
+    await MapboxGlPlatform.getInstance(_id).addVectorSource(
+      sourceId,
+      properties,
+      // properties.entries.fold(<String, String>{}, (initialValue, element) {
+      //   initialValue[element.key] = json.encode(element.value);
+      //   return initialValue;
+      // }),
+    );
+  }
+
+  /// Adds a mapbox symbol layer
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> addSymbolLayer(SymbolLayer layer) async {
+    await MapboxGlPlatform.getInstance(_id).addSymbolLayer(
+      layer.id,
+      layer.source,
+      // sourceLayer: layer.sourceLayer,
+      properties: layer.options.toMap(),
+      // properties: layer.options.toMap().entries.fold(<String, String>{}, (initialValue, element) {
+      //   initialValue[element.key] = json.encode(element.value);
+      //   return initialValue;
+      // }),
+    );
+  }
+
+  /// Adds a mapbox gl line layer
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> addLineLayer(LineLayer layer) async {
+    await MapboxGlPlatform.getInstance(_id).addLineLayer(
+      layer.id,
+      layer.source,
+      sourceLayer: layer.sourceLayer,
+      properties: layer.options.toMap(),
+      // properties: layer.options.toMap().entries.fold(<String, String>{}, (initialValue, element) {
+      //   initialValue[element.key] = json.encode(element.value);
+      //   return initialValue;
+      // }),
+    );
+  }
+
   /// Updates user location tracking mode.
   ///
   /// The returned [Future] completes after the change has been made on the

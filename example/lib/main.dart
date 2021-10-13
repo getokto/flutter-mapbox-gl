@@ -23,6 +23,7 @@ import 'place_source.dart';
 import 'place_symbol.dart';
 import 'place_fill.dart';
 import 'scrolling_map.dart';
+import 'vector_source.dart';
 
 final List<ExamplePage> _allPages = <ExamplePage>[
   MapUiPage(),
@@ -40,11 +41,12 @@ final List<ExamplePage> _allPages = <ExamplePage>[
   AnnotationOrderPage(),
   CustomMarkerPage(),
   BatchAddPage(),
+  VectorSourceExamplePage(),
 ];
 
 class MapsDemo extends StatelessWidget {
   //FIXME: Add your Mapbox access token here
-  static const String ACCESS_TOKEN = "YOUR_TOKEN_HERE";
+  static const String ACCESS_TOKEN = "pk.eyJ1IjoiYmphcnRlYm9yZSIsImEiOiJja3VnaTV2N3QwcWh5MnVva21tNWJhZHZ5In0.MCrnbGAC3tKA1piTeqqrkw";
 
   void _pushPage(BuildContext context, ExamplePage page) async {
     if (!kIsWeb) {

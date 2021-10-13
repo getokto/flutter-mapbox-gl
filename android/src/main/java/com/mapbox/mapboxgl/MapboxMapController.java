@@ -34,6 +34,7 @@ import com.mapbox.android.core.location.LocationEngineProvider;
 import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.telemetry.TelemetryEnabler;
 import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
@@ -69,8 +70,14 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager;
 import com.mapbox.mapboxsdk.plugins.annotation.SymbolOptions;
 import com.mapbox.mapboxsdk.plugins.localization.LocalizationPlugin;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
+import com.mapbox.mapboxsdk.style.layers.LineLayer;
+import com.mapbox.mapboxsdk.style.layers.PropertyValue;
 import com.mapbox.mapboxsdk.style.layers.RasterLayer;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.style.sources.ImageSource;
+import com.mapbox.mapboxsdk.style.sources.TileSet;
+import com.mapbox.mapboxsdk.style.sources.VectorSource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -373,6 +380,78 @@ final class MapboxMapController
     final Map<String, Object> arguments = new HashMap<>(1);
     arguments.put("userLocation", userLocation);
     methodChannel.invokeMethod("map#onUserLocationUpdated", arguments);
+  }
+
+  private void addGeoJsonSource(String sourceName, String geojson) {
+    FeatureCollection featureCollection = FeatureCollection.fromJson(geojson);
+    GeoJsonSource geoJsonSource = new GeoJsonSource(sourceName, featureCollection);
+
+    style.addSource(geoJsonSource);
+  }
+
+  private void addVectorSource(String sourceName, HashMap<String, ?> properties) {
+
+    if (properties.containsKey("url")) {
+      VectorSource vectorSource = new VectorSource(sourceName, (String)properties.get("url"));
+      style.addSource(vectorSource);
+      Number a = 1;
+    } else {
+      String tileVersion = (String)properties.get("tileVersion");
+      if (tileVersion == null) {
+        tileVersion = "2.2.0";
+      }
+
+      String[] tileUrls = (String[])properties.get("tiles");
+
+      TileSet tileSet = new TileSet(
+              tileVersion,
+              tileUrls
+      );
+
+      Number minZoom = (Number)properties.get("minZoom");
+      if(minZoom != null) {
+        tileSet.setMinZoom(minZoom.floatValue());
+      }
+      Number maxZoom = (Number)properties.get("maxZoom");
+      if(maxZoom != null) {
+        tileSet.setMaxZoom(maxZoom.floatValue());
+      }
+
+      VectorSource vectorSource = new VectorSource(sourceName, tileSet);
+      style.addSource(vectorSource);
+      Number a = 1;
+    }
+  }
+
+  private void addSymbolLayer(String layerName,
+                              String sourceName,
+                              String sourceLayer,
+                              PropertyValue[] properties) {
+    SymbolLayer symbolLayer = new SymbolLayer(layerName, sourceName);
+
+    if (sourceLayer != null) {
+      symbolLayer.setSourceLayer(sourceLayer);
+    }
+
+
+    symbolLayer.setProperties(properties);
+
+    style.addLayer(symbolLayer);
+  }
+
+  private void addLineLayer(String layerName,
+                            String sourceName,
+                            String sourceLayer,
+                            PropertyValue[] properties) {
+    LineLayer lineLayer = new LineLayer(layerName, sourceName);
+
+    if (sourceLayer != null) {
+      lineLayer.setSourceLayer(sourceLayer);
+    }
+
+    lineLayer.setProperties(properties);
+
+    style.addLayer(lineLayer);
   }
 
   private void enableSymbolManager(@NonNull Style style) {
@@ -904,6 +983,38 @@ final class MapboxMapController
         final FillController fill = fill(fillId);
         Convert.interpretFillOptions(call.argument("options"), fill);
         fill.update(fillManager);
+        result.success(null);
+        break;
+      }
+      case "vectorSource#add": {
+        final String sourceId = call.argument("sourceId");
+        final HashMap<String, ?> properties = call.argument("properties");
+        addVectorSource(sourceId, properties);
+        result.success(null);
+        break;
+      }
+      case "geoJsonSource#add": {
+        final String sourceId = call.argument("sourceId");
+        final String geoJson = call.argument("geojson");
+        addGeoJsonSource(sourceId, geoJson);
+        result.success(null);
+        break;
+      }
+      case "symbolLayer#add": {
+        final String sourceId = call.argument("source");
+        final String layerId = call.argument("id");
+        final String sourceLayerId = call.argument("source-layer");
+        final PropertyValue[] properties = Convert.interpretSymbolLayerProperties(call.argument("properties"));
+        addSymbolLayer(layerId, sourceId, sourceLayerId, properties);
+        result.success(null);
+        break;
+      }
+      case "lineLayer#add": {
+        final String sourceId = call.argument("source");
+        final String layerId = call.argument("id");
+        final String sourceLayerId = call.argument("source-layer");
+        final PropertyValue[] properties = Convert.interpretLineLayerProperties(call.argument("properties"));
+        addLineLayer(layerId, sourceId, sourceLayerId,  properties);
         result.success(null);
         break;
       }

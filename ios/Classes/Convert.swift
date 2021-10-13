@@ -355,4 +355,257 @@ class Convert {
         }
         return polygons
     }
+    
+    class func addSymbolProperties(symbolLayer: MGLSymbolStyleLayer, properties: [String: String]) {
+        for (propertyName, propertyValue) in properties {
+            let expression = interpretExpression(expression: propertyValue)
+            switch propertyName {
+                case "icon-allow-overlap":
+                    symbolLayer.iconAllowsOverlap = expression
+                case "icon-anchor":
+                    symbolLayer.iconAnchor = expression
+                case "icon-color":
+                    symbolLayer.iconColor = expression
+                case "icon-halo-blur":
+                    symbolLayer.iconHaloBlur = expression
+                case "icon-halo-color":
+                    symbolLayer.iconHaloColor = expression
+                case "icon-halo-width":
+                    symbolLayer.iconHaloWidth = expression
+                case "icon-ignore-placement":
+                    symbolLayer.iconIgnoresPlacement = expression
+                case "icon-image":
+                    symbolLayer.iconImageName = expression
+                case "icon-keep-upright":
+                    symbolLayer.keepsIconUpright = expression
+                case "icon-offset":
+                    symbolLayer.iconOffset = expression
+                case "icon-opacity":
+                    symbolLayer.iconOpacity = expression
+                case "icon-optional":
+                    symbolLayer.iconOptional = expression
+                case "icon-padding":
+                    symbolLayer.iconPadding = expression
+                case "icon-pitch-alignment":
+                    symbolLayer.iconPitchAlignment = expression
+                case "icon-rotate":
+                    symbolLayer.iconRotation = expression
+                case "icon-rotation-alignment":
+                    symbolLayer.iconRotationAlignment = expression
+                case "icon-size":
+                    symbolLayer.iconScale = expression
+                case "icon-text-fit":
+                    symbolLayer.iconTextFit = expression
+                case "icon-text-fit-padding":
+                    symbolLayer.iconTextFitPadding = expression
+                case "icon-translate":
+                    symbolLayer.iconTranslation = expression
+                case "icon-translate-anchor":
+                    symbolLayer.iconTranslationAnchor = expression
+                case "symbol-avoid-edges":
+                    symbolLayer.symbolAvoidsEdges = expression
+                case "symbol-placement":
+                    symbolLayer.symbolPlacement = expression
+                case "symbol-sort-key":
+                    symbolLayer.symbolSortKey = expression
+                case "symbol-spacing":
+                    symbolLayer.symbolSpacing = expression
+                case "symbol-z-order":
+                    symbolLayer.symbolZOrder = expression
+                case "text-allow-overlap":
+                    symbolLayer.textAllowsOverlap = expression
+                case "text-anchor":
+                    symbolLayer.textAnchor = expression
+                case "text-color":
+                    symbolLayer.textColor = expression
+                case "text-field":
+                    symbolLayer.text = expression
+                case "text-font":
+                    symbolLayer.textFontNames = expression
+                case "text-halo-blur":
+                    symbolLayer.textHaloBlur = expression
+                case "text-halo-color":
+                    symbolLayer.textHaloColor = expression
+                case "text-halo-width":
+                    symbolLayer.textHaloWidth = expression
+                case "text-ignore-placement":
+                    symbolLayer.textIgnoresPlacement = expression
+                case "text-justify":
+                    symbolLayer.textJustification = expression
+                case "text-keep-upright":
+                    symbolLayer.keepsTextUpright = expression
+                case "text-letter-spacing":
+                    symbolLayer.textLetterSpacing = expression
+                case "text-line-height":
+                    symbolLayer.textLineHeight = expression
+                case "text-max-angle":
+                    symbolLayer.maximumTextAngle = expression
+                case "text-max-width":
+                    symbolLayer.maximumTextWidth = expression
+                case "text-offset":
+                    symbolLayer.textOffset = expression
+                case "text-opacity":
+                    symbolLayer.textOpacity = expression
+                case "text-optional":
+                    symbolLayer.textOptional = expression
+                case "text-padding":
+                    symbolLayer.textPadding = expression
+                case "text-pitch-alignment":
+                    symbolLayer.textPitchAlignment = expression
+                case "text-radial-offset":
+                    symbolLayer.textRadialOffset = expression
+                case "text-rotate":
+                    symbolLayer.textRotation = expression
+                case "text-rotation-alignment":
+                    symbolLayer.textRotationAlignment = expression
+                case "text-size":
+                    symbolLayer.textFontSize = expression
+                case "text-transform":
+                    symbolLayer.textTransform = expression
+                case "text-translate":
+                    symbolLayer.textTranslation = expression
+                case "text-translate-anchor":
+                    symbolLayer.textTranslationAnchor = expression
+                case "text-variable-anchor":
+                    symbolLayer.textVariableAnchor = expression
+                case "text-writing-mode":
+                    symbolLayer.textWritingModes = expression
+                default:
+                    break
+            }
+        }
+    }
+
+    class func addLineProperties(lineLayer: MGLLineStyleLayer, properties: [String: Any]) {
+
+        for (propertyTypeName, propertyTypeValue) in properties {
+            
+            for (propertyName, propertyValue) in propertyTypeValue as! [String: Any] {
+                switch propertyName {
+                    case "line-blur":
+                        lineLayer.lineBlur = NSExpression(forConstantValue: propertyValue)
+                    case "line-cap":
+                        lineLayer.lineCap = NSExpression(forConstantValue: "round")
+                    case "line-color":
+                    if let color = propertyValue as? String {
+                        lineLayer.lineColor = NSExpression(forConstantValue: UIColor.red)
+                    }
+                    case "line-dasharray":
+                        lineLayer.lineDashPattern = NSExpression(forConstantValue: propertyValue)
+                    case "line-gap-width":
+                        lineLayer.lineGapWidth = NSExpression(forConstantValue: propertyValue)
+                    case "line-gradient":
+                        lineLayer.lineGradient = NSExpression(forConstantValue: propertyValue)
+                    case "line-join":
+                        lineLayer.lineJoin = NSExpression(forConstantValue: "round")
+                    case "line-miter-limit":
+                        lineLayer.lineMiterLimit = NSExpression(forConstantValue: propertyValue)
+                    case "line-offset":
+                        lineLayer.lineOffset = NSExpression(forConstantValue: propertyValue)
+                    case "line-pattern":
+                        lineLayer.linePattern = NSExpression(forConstantValue: propertyValue)
+                    case "line-round-limit":
+                        lineLayer.lineRoundLimit = NSExpression(forConstantValue: propertyValue)
+                    case "line-translate":
+                        lineLayer.lineTranslation = NSExpression(forConstantValue: propertyValue)
+                    case "line-translate-anchor":
+                        lineLayer.lineTranslationAnchor = NSExpression(forConstantValue: propertyValue)
+                    case "line-width":
+                        lineLayer.lineWidth = NSExpression(forConstantValue: 1)
+                    default:
+                        break
+                }
+            }
+        }
+    }
+
+    class func getVectorURLTemplated( properties: [String: Any]) -> [String] {
+        var urls: [String] = []
+        for (propertyName, propertyValue) in properties {
+            //let expression = interpretExpression(expression: propertyValue)
+            switch propertyName {
+                case "tiles":
+                let uriList = propertyValue as? [String] // decodeUriList(json: propertyValue);
+                if uriList != nil {
+                    for uri in uriList! {
+                        let nextUri = uri.removingPercentEncoding!;
+                        urls.append(uri.removingPercentEncoding!);
+                    }
+                    //urls.append(contentsOf: uriList!)
+                }
+                    
+                default:
+                    break
+            }
+        }
+        return urls
+    }
+    
+    class func getVectorSourceOptions( properties: [String: Any]) -> [MGLTileSourceOption: Any] {
+        var options: [MGLTileSourceOption: Any] = [:]
+        for (propertyName, propertyValue) in properties {
+            
+            //let expression = interpretExpression(expression: propertyValue)
+            switch propertyName {
+                case "maxZoom":
+                    options[.maximumZoomLevel] = propertyValue
+                case "minZoom":
+                    options[.minimumZoomLevel] = propertyValue
+                default:
+                    break
+            }
+        }
+        return options
+    }
+
+    private class func decodeUriList(json: String) -> [String]? {
+        let jsonArrayData = json.data(using: .utf8)!
+        
+        let array = try? JSONSerialization.jsonObject(
+            with: jsonArrayData,
+            options: []
+        ) as? [String]
+
+        // Cast to a Swift Array
+        return array as? [String]
+    }
+    
+    private class func interpretExpression(expression: Any) -> NSExpression? {
+        do {
+            return NSExpression(forConstantValue: expression)
+//            let json = try JSONSerialization.jsonObject(with: expression.data(using: .utf8)!, options: [])
+//            return NSExpression.init(mglJSONObject: json)
+        } catch {
+        }
+        return nil
+    }
+}
+
+
+extension UIColor {
+    public convenience init?(hex: String) {
+        let r, g, b, a: CGFloat
+
+        if hex.hasPrefix("#") {
+            let start = hex.index(hex.startIndex, offsetBy: 1)
+            let hexColor = String(hex[start...])
+
+            if hexColor.count == 8 {
+                let scanner = Scanner(string: hexColor)
+                var hexNumber: UInt64 = 0
+
+                if scanner.scanHexInt64(&hexNumber) {
+                    r = CGFloat((hexNumber & 0xff000000) >> 24) / 255
+                    g = CGFloat((hexNumber & 0x00ff0000) >> 16) / 255
+                    b = CGFloat((hexNumber & 0x0000ff00) >> 8) / 255
+                    a = CGFloat(hexNumber & 0x000000ff) / 255
+
+                    self.init(red: r, green: g, blue: b, alpha: a)
+                    return
+                }
+            }
+        }
+
+        return nil
+    }
 }

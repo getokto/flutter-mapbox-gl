@@ -1,0 +1,509 @@
+part of mapbox_gl_platform_interface;
+
+abstract class LayerProperty<T> {
+
+  const LayerProperty(this.value);
+
+  final T? value;
+
+  dynamic serialize() {
+    final _value = value;
+    if (_value is EnumLike) {
+      return _value.toString();
+    } if (_value is Color) {
+      return _value.toHex();
+    }
+    return _value;
+  }
+}
+
+class ConstantLayerProperty<T> extends LayerProperty<T> {
+  const ConstantLayerProperty(T value): super(value);
+}
+
+/// This will accept any raw value to this propery
+/// The value is unsafe and must be directly (json) serializable
+/// to a value acceptable to the style specification.
+/// https://docs.mapbox.com/mapbox-gl-js/style-spec/
+///
+/// This is especially useful when building expressions
+class RawLayerProperty<T> extends LayerProperty<T> {
+  const RawLayerProperty(dynamic value): super(value);
+
+  dynamic serialize() => value;
+}
+
+abstract class StyleLayer<T extends StyleLayerOptions> {
+
+  StyleLayerOptions get options;
+
+  Map<String, dynamic> toMap();
+
+  Map<K, V> cleanMap<K, V>(Map<K, V> map) {
+
+    return map.entries.fold({}, (previousValue, element) {
+      final value = element.value;
+      final key = element.key;
+      if (value is Map) {
+        if (value.isNotEmpty) {
+          previousValue[key] = value;
+        }
+      } else {
+        previousValue[key] = value;
+      }
+      return previousValue;
+    });
+  }
+
+}
+
+abstract class StyleLayerOptions {
+  Map<String, dynamic> toMap();
+}
+
+abstract class EnumLike {
+  int get value;
+
+}
+
+extension HexColor on Color {
+  /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
+  static Color fromHex(String hexString) {
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+    buffer.write(hexString.replaceFirst('#', ''));
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+
+  String toHex({
+    bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
+  '${red.toRadixString(16).padLeft(2, '0')}'
+  '${green.toRadixString(16).padLeft(2, '0')}'
+  '${blue.toRadixString(16).padLeft(2, '0')}';
+}
+
+class SymbolPlacement implements EnumLike {
+  const SymbolPlacement._(this.value);
+  final int value;
+
+  static const Point = SymbolPlacement._(0);
+  static const Line = SymbolPlacement._(1);
+  static const LineCenter = SymbolPlacement._(2);
+
+  @override
+  String toString() {
+    switch (this) {
+      case Point:
+        return 'point';
+      case Line:
+        return 'line';
+      case LineCenter:
+        return 'line-center';
+    }
+    throw Error();
+  }
+
+  static SymbolPlacement? fromString(String? str) {
+    switch (str) {
+      case 'point':
+        return Point;
+      case 'line':
+        return Line;
+      case 'line-center':
+        return LineCenter;
+    }
+  }
+}
+
+class Anchor implements EnumLike {
+  const Anchor._(this.value);
+  final int value;
+
+  static const Center = Anchor._(0);
+  static const Left = Anchor._(1);
+  static const Right = Anchor._(2);
+  static const Top = Anchor._(3);
+  static const Bottom = Anchor._(4);
+  static const TopLeft = Anchor._(5);
+  static const TopRight = Anchor._(6);
+  static const BottomLeft = Anchor._(7);
+  static const BottomRigh = Anchor._(8);
+
+  @override
+  String toString() {
+    switch (this) {
+      case Center:
+        return 'center';
+      case Left:
+        return 'left';
+      case Right:
+        return 'right';
+      case Top:
+        return 'top';
+      case Bottom:
+        return 'bottom';
+      case TopLeft:
+        return 'top-left';
+      case TopRight:
+        return 'top-right';
+      case BottomLeft:
+        return 'bottom-left';
+      case BottomRigh:
+        return 'bottom-righ';
+    }
+    throw Error();
+  }
+
+  static Anchor? fromString(String? str) {
+    switch (str) {
+      case 'center':
+        return Center;
+      case 'left':
+        return Left;
+      case 'right':
+        return Right;
+      case 'top':
+        return Top;
+      case 'bottom':
+        return Bottom;
+      case 'top-left':
+        return TopLeft;
+      case 'top-right':
+        return TopRight;
+      case 'bottom-left':
+        return BottomLeft;
+      case 'bottom-righ':
+        return BottomRigh;
+    }
+  }
+}
+
+class MapAligment implements EnumLike {
+  const MapAligment._(this.value);
+  final int value;
+
+  static const Map = MapAligment._(0);
+  static const Viewport = MapAligment._(1);
+  static const Auto = MapAligment._(2);
+
+  @override
+  String toString() {
+    switch (this) {
+      case Map:
+        return 'map';
+      case Viewport:
+        return 'viewport';
+      case Auto:
+        return 'auto';
+    }
+    throw Error();
+  }
+
+  static MapAligment? fromString(String? str) {
+    switch (str) {
+      case 'map':
+        return Map;
+      case 'viewport':
+        return Viewport;
+      case 'auto':
+        return Auto;
+    }
+  }
+}
+
+class AnchorAligment implements EnumLike {
+  const AnchorAligment._(this.value);
+  final int value;
+
+  static const Map = AnchorAligment._(0);
+  static const Viewport = AnchorAligment._(1);
+
+  @override
+  String toString() {
+    switch (this) {
+      case Map:
+        return 'map';
+      case Viewport:
+        return 'viewport';
+    }
+    throw Error();
+  }
+
+  static AnchorAligment? fromString(String? str) {
+    switch (str) {
+      case 'map':
+        return Map;
+      case 'viewport':
+        return Viewport;
+    }
+  }
+}
+
+class MapFit implements EnumLike {
+  const MapFit._(this.value);
+  final int value;
+
+  static const None = MapFit._(0);
+  static const Width = MapFit._(1);
+  static const Height = MapFit._(2);
+  static const Both = MapFit._(3);
+
+  @override
+  String toString() {
+    switch (this) {
+      case None:
+        return 'none';
+      case Width:
+        return 'width';
+      case Height:
+        return 'height';
+      case Both:
+        return 'both';
+    }
+    throw Error();
+  }
+
+  static MapFit? fromString(String? str) {
+    switch (str) {
+      case 'none':
+        return None;
+      case 'width':
+        return Width;
+      case 'height':
+        return Height;
+      case 'both':
+        return Both;
+    }
+  }
+}
+
+class ZOrder implements EnumLike {
+  const ZOrder._(this.value);
+  final int value;
+
+  static const Auto = ZOrder._(0);
+  static const ViewportY = ZOrder._(1);
+  static const Source = ZOrder._(2);
+
+  @override
+  String toString() {
+    switch (this) {
+
+      case Auto:
+        return 'auto';
+      case ViewportY:
+        return 'viewport-y';
+      case Source:
+        return 'source';
+    }
+    throw Error();
+  }
+
+  static ZOrder? fromString(String? str) {
+    switch (str) {
+
+      case 'auto':
+        return Auto;
+      case 'viewport-y':
+        return ViewportY;
+      case 'source':
+        return Source;
+    }
+  }
+}
+
+
+class Justify implements EnumLike {
+  const Justify._(this.value);
+  final int value;
+
+  static const Auto = Justify._(3);
+  static const Left = Justify._(2);
+  static const Center = Justify._(1);
+  static const Right = Justify._(0);
+
+  @override
+  String toString() {
+    switch (this) {
+      case Auto:
+        return 'auto';
+      case Left:
+        return 'left';
+      case Center:
+        return 'center';
+      case Right:
+        return 'right';
+    }
+    throw Error();
+  }
+
+  static Justify? fromString(String? str) {
+    switch (str) {
+      case 'auto':
+        return Auto;
+      case 'left':
+        return Left;
+      case 'center':
+        return Center;
+      case 'right':
+        return Right;
+    }
+  }
+}
+
+
+class TextTransform implements EnumLike {
+  const TextTransform._(this.value);
+  final int value;
+
+  static const None = TextTransform._(2);
+  static const Uppercase = TextTransform._(1);
+  static const Lowercase = TextTransform._(0);
+
+  @override
+  String toString() {
+    switch (this) {
+      case None:
+        return 'none';
+      case Uppercase:
+        return 'uppercase';
+      case Lowercase:
+        return 'lowercase';
+    }
+    throw Error();
+  }
+
+  static TextTransform? fromString(String? str) {
+    switch (str) {
+      case 'none':
+        return None;
+      case 'uppercase':
+        return Uppercase;
+      case 'lowercase':
+        return Lowercase;
+    }
+  }
+}
+
+
+class TextWritingMode implements EnumLike {
+  const TextWritingMode._(this.value);
+  final int value;
+
+  static const Horizontal = TextWritingMode._(0);
+  static const Vertical = TextWritingMode._(1);
+
+  @override
+  String toString() {
+    switch (this) {
+      case Horizontal:
+        return 'horizontal';
+      case Vertical:
+        return 'vertical';
+    }
+    throw Error();
+  }
+
+  static TextWritingMode? fromString(String? str) {
+    switch (str) {
+      case 'horizontal':
+        return Horizontal;
+      case 'vertical':
+        return Vertical;
+    }
+  }
+}
+
+class LineCap implements EnumLike {
+  const LineCap._(this.value);
+  final int value;
+
+  static const But = LineCap._(0);
+  static const Round = LineCap._(1);
+  static const Square = LineCap._(2);
+
+  @override
+  String toString() {
+    switch (this) {
+      case But:
+        return 'but';
+      case Round:
+        return 'round';
+      case Square:
+        return 'square';
+    }
+    throw Error();
+  }
+
+  static LineCap? fromString(String? str) {
+    switch (str) {
+      case 'but':
+        return But;
+      case 'round':
+        return Round;
+      case 'square':
+        return Square;
+    }
+  }
+}
+
+class LineJoin implements EnumLike {
+  const LineJoin._(this.value);
+  final int value;
+
+  static const Bevel = LineJoin._(0);
+  static const Round = LineJoin._(1);
+  static const Miter = LineJoin._(2);
+
+  @override
+  String toString() {
+    switch (this) {
+      case Bevel:
+        return 'bevel';
+      case Round:
+        return 'round';
+      case Miter:
+        return 'miter';
+    }
+    throw Error();
+  }
+
+  static LineJoin? fromString(String? str) {
+    switch (str) {
+      case 'bevel':
+        return Bevel;
+      case 'round':
+        return Round;
+      case 'miter':
+        return Miter;
+    }
+  }
+}
+
+class Visibility implements EnumLike {
+  const Visibility._(this.value);
+  final int value;
+
+  static const Visible = Visibility._(0);
+  static const None = Visibility._(1);
+
+  @override
+  String toString() {
+    switch (this) {
+      case Visible:
+        return 'visible';
+      case None:
+        return 'none';
+    }
+    throw Error();
+  }
+
+  static Visibility? fromString(String? str) {
+    switch (str) {
+      case 'visible':
+        return Visible;
+      case 'none':
+        return None;
+    }
+  }
+}

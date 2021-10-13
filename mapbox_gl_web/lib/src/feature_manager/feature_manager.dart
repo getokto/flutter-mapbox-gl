@@ -18,7 +18,7 @@ abstract class FeatureManager<T> {
     required this.map,
     this.onTap,
   }) {
-    var featureSource = GeoJsonSource(data: FeatureCollection(features: []));
+    var featureSource = mapbox.GeoJsonSource(data: FeatureCollection(features: []));
     map.addSource(sourceId, featureSource);
     initLayer();
     _initClickHandler();
@@ -108,7 +108,7 @@ abstract class FeatureManager<T> {
   }
 
   void _updateSource() {
-    GeoJsonSource featureSource = map.getSource(sourceId);
+    mapbox.GeoJsonSource featureSource = map.getSource(sourceId);
     featureSource
         .setData(FeatureCollection(features: _features.values.toList()));
   }

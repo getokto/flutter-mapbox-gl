@@ -500,6 +500,39 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             removeAllForController(controller:lineAnnotationController, ids:ids)
             result(nil)
 
+        case "geoJsonSource#add":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let sourceId = arguments["sourceId"] as? String else { return }
+            guard let geojson = arguments["geojson"] as? String else { return }
+
+            addGeoJsonSource(sourceId: sourceId, geojson: geojson)
+
+            result(nil)
+        case "vectorSource#add":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let sourceId = arguments["sourceId"] as? String else { return }
+            guard let properties = arguments["properties"] as? [String: Any] else { return }
+
+            addVectorSource(sourceId: sourceId, properties: properties)
+
+            result(nil)
+        case "symbolLayer#add":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let sourceId = arguments["source"] as? String else { return }
+            guard let layerId = arguments["id"] as? String else { return }
+            guard let properties = arguments["properties"] as? [String: String] else { return }
+            let sourceLayerId = arguments["source-layer"] as? String
+            
+            addSymbolLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties)
+        case "lineLayer#add":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let sourceId = arguments["source"] as? String else { return }
+            guard let layerId = arguments["id"] as? String else { return }
+            guard let properties = arguments["properties"] as? [String: Any] else { return }
+            let sourceLayerId = arguments["source-layer"] as? String
+            
+            addLineLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties)
+            
         case "line#getGeometry":
             guard let lineAnnotationController = lineAnnotationController else { return }
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
@@ -952,6 +985,65 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             channel.invokeMethod("map#onCameraTrackingChanged", arguments: ["mode": mode.rawValue])
             if mode == .none {
                 channel.invokeMethod("map#onCameraTrackingDismissed", arguments: [])
+            }
+        }
+    }
+    
+    func addGeoJsonSource(sourceId: String, geojson: String) {
+        do {
+            let parsed = try MGLShape.init(data: geojson.data(using: .utf8)!, encoding: String.Encoding.utf8.rawValue)
+            let source = MGLShapeSource(identifier: sourceId, shape: parsed, options: [:])
+            mapView.style?.addSource(source)
+        } catch {
+        }
+    }
+    
+    func addVectorSource(sourceId: String, properties: [String: Any]) {
+        do {
+            
+            if let style = mapView.style {
+                var options = Convert.getVectorSourceOptions(properties: properties)
+                var tileUrls = Convert.getVectorURLTemplated(properties: properties)
+                
+                if let url = properties["url"] as? String {
+                    if let url = URL(string: url) {
+                        let source = MGLVectorTileSource(identifier: sourceId, configurationURL: url)
+                        style.addSource(source)
+                    }
+                } else if tileUrls.count > 1 {
+                    let source = MGLVectorTileSource(
+                        identifier: sourceId,
+                        tileURLTemplates:tileUrls,
+                        options: options
+                    )
+                    style.addSource(source)
+                }
+
+            }
+
+        } catch {
+        }
+    }
+
+    func addSymbolLayer(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: String]) {
+        if let style = mapView.style {
+            if let source = style.source(withIdentifier: sourceId) {
+                let layer = MGLSymbolStyleLayer(identifier: layerId, source: source)
+                layer.sourceLayerIdentifier = sourceLayerId
+                Convert.addSymbolProperties(symbolLayer: layer, properties: properties)
+                style.addLayer(layer)
+            }
+        }
+    }
+
+    func addLineLayer(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: Any]) {
+        if let style = mapView.style {
+            if let source = style.source(withIdentifier: sourceId) {
+                let layer = MGLLineStyleLayer(identifier: layerId, source: source)
+                layer.sourceLayerIdentifier = sourceLayerId
+                Convert.addLineProperties(lineLayer: layer, properties: properties)
+                style.addLayer(layer)
+                layer.isVisible = true
             }
         }
     }
