@@ -51,6 +51,7 @@ class LineLayer extends StyleLayer<StyleLayerOptions> {
     return other is LineLayer && (
       other.id == id
       && other.source == source
+      && other.sourceLayer == sourceLayer
       && other.options == options
     );
   }
@@ -59,6 +60,7 @@ class LineLayer extends StyleLayer<StyleLayerOptions> {
   int get hashCode => hashValues(
     id,
     source,
+    sourceLayer,
     options,
   );
 
@@ -163,40 +165,56 @@ class LineLayerOptions extends StyleLayerOptions {
 
   static fromMap(Map<String, dynamic> map) {
     return LineLayerOptions(
-      visibility: _deserializeJson(map,'layout', 'visibility'),
+      lineBlur: deserializeJson(map, 'paint', 'line-blur'),
+      lineCap: deserializeJson(map, 'layout', 'line-cap'),
+      lineColor: deserializeJson(map, 'paint', 'line-color'),
+      lineDasharray: deserializeJson(map, 'paint', 'line-dasharray'),
+      lineGapWidth: deserializeJson(map, 'paint', 'line-gap-width'),
+      lineGradient: deserializeJson(map, 'paint', 'line-gradient'),
+      lineJoin: deserializeJson(map, 'layout', 'line-join'),
+      lineMiterLimit: deserializeJson(map, 'layout', 'line-miter-limit'),
+      lineOffset: deserializeJson(map, 'paint', 'line-offset'),
+      lineOpacity: deserializeJson(map, 'paint', 'line-opacity'),
+      linePattern: deserializeJson(map, 'paint', 'line-pattern'),
+      lineRoundLimit: deserializeJson(map, 'layout', 'line-round-limit'),
+      lineSortKey: deserializeJson(map, 'layout', 'line-sort-key'),
+      lineTranslate: deserializeJson(map, 'paint', 'line-translate'),
+      lineTranslateAnchor: deserializeJson(map, 'paint', 'line-translate-anchor'),
+      lineWidth: deserializeJson(map, 'paint', 'line-width'),
+      visibility: deserializeJson(map,'layout', 'visibility'),
     );
   }
 
-  static T? _deserializeJson<T>(Map<String, dynamic> map, String type, String key) {
-    final value = map.containsKey(type) && map[type] is Map
-      ? map[type][key]
-      : null;
-    if (value == null) {
-      return null;
-    }
+  // static T? _deserializeJson<T>(Map<String, dynamic> map, String type, String key) {
+  //   final value = map.containsKey(type) && map[type] is Map
+  //     ? map[type][key]
+  //     : null;
+  //   if (value == null) {
+  //     return null;
+  //   }
 
-    // Simple values
-    if ([String, double, bool, int].contains(T)) {
-      return value as T;
-    }
+  //   // Simple values
+  //   if ([String, double, bool, int].contains(T)) {
+  //     return value as T;
+  //   }
 
-    if (T == Color) {
-      return HexColor.fromHex(value) as T;
-    }
+  //   if (T == Color) {
+  //     return HexColor.fromHex(value) as T;
+  //   }
 
-    // Enum values
-    if (T == LineJoin) {
-      return LineJoin.fromString(value as String) as T;
-    } if (T == LineCap) {
-      return LineCap.fromString(value as String) as T;
-    } if (T == AnchorAligment) {
-      return AnchorAligment.fromString(value as String) as T;
-    } if (T == Visibility) {
-      return Visibility.fromString(value as String) as T;
-    }
+  //   // Enum values
+  //   if (T == LineJoin) {
+  //     return LineJoin.fromString(value as String) as T;
+  //   } if (T == LineCap) {
+  //     return LineCap.fromString(value as String) as T;
+  //   } if (T == AnchorAligment) {
+  //     return AnchorAligment.fromString(value as String) as T;
+  //   } if (T == Visibility) {
+  //     return Visibility.fromString(value as String) as T;
+  //   }
 
-    throw UnimplementedError();
-  }
+  //   throw UnimplementedError();
+  // }
 
   @override
   bool operator ==(Object other) {

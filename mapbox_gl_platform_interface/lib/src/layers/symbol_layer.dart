@@ -84,11 +84,17 @@ class SymbolLayer extends StyleLayer<SymbolLayerOptions> {
   }
 
   @override
-  int get hashCode => hashValues(
-    id,
-    source,
-    options,
-  );
+  int get hashCode {
+    try {
+      return  hashValues(
+        id,
+        source,
+        options,
+      );
+    } catch(e) {
+      rethrow;
+    }
+  }
 
 }
 
@@ -156,22 +162,22 @@ class SymbolLayerOptions extends StyleLayerOptions {
   });
 
 
-  final LayerProperty<bool>? iconAllowOverlap;
-  final LayerProperty<Anchor>? iconAnchor;
+  final bool? iconAllowOverlap;
+  final Anchor? iconAnchor;
   final LayerProperty<Color>? iconColor;
   final LayerProperty<double>? iconHaloBlur;
   final LayerProperty<Color>? iconHaloColor;
   final LayerProperty<double>? iconHaloWidth;
-  final LayerProperty<bool>? iconIgnorePlacement;
-  final LayerProperty<String>? iconImage;
-  final LayerProperty<bool>? iconKeepUpright;
+  final bool? iconIgnorePlacement;
+  final String? iconImage;
+  final bool? iconKeepUpright;
   final LayerProperty<Offset>? iconOffset;
   final LayerProperty<double>? iconOpacity;
-  final LayerProperty<bool>? iconOptional;
+  final bool? iconOptional;
   final LayerProperty<int>? iconPadding;
-  final LayerProperty<MapAligment>? iconPitchAlignment;
+  final MapAligment? iconPitchAlignment;
   final LayerProperty<double>? iconRotate;
-  final LayerProperty<MapAligment>? iconRotationAlignment;
+  final MapAligment? iconRotationAlignment;
 
   /// Optional [double] greater than or equal to 0. Units in factor of the original icon size.
   /// Defaults to 1. Requires [iconImage].
@@ -183,7 +189,7 @@ class SymbolLayerOptions extends StyleLayerOptions {
 
   /// Optional enum. One of "none", "width", "height", "both". Defaults to "none".
   /// Requires [iconImage]. Requires [textField].
-  final LayerProperty<MapFit>? iconTextFit;
+  final MapFit? iconTextFit;
 
   /// Optional array of numbers. Units in pixels. Defaults to [0,0,0,0]. Requires icon-image.
   /// Requires [textField].
@@ -194,40 +200,40 @@ class SymbolLayerOptions extends StyleLayerOptions {
   final LayerProperty<Offset>? iconTranslate;
 
   ///  Optional enum. One of "map", "viewport". Defaults to "map". Requires icon-image. Requires icon-translate.
-  final LayerProperty<AnchorAligment>? iconTranslateAnchor;
+  final AnchorAligment? iconTranslateAnchor;
 
   /// Optional boolean. Defaults to false.
-  final LayerProperty<bool>? symbolAvoidEdges;
+  final bool? symbolAvoidEdges;
 
   /// Optional enum. One of "point", "line", "line-center". Defaults to "point".
-  final LayerProperty<SymbolPlacement>? symbolPlacement;
+  final SymbolPlacement? symbolPlacement;
 
   /// Optional number.
-  final LayerProperty<int>? symbolSortKey;
+  final int? symbolSortKey;
 
   /// Optional number greater than or equal to 1. Units in pixels. Defaults to 250. Requires symbol-placement to be "line".
   final LayerProperty<int>? symbolSpacing;
 
   /// Optional enum. One of "auto", "viewport-y", "source". Defaults to "auto".
-  final LayerProperty<ZOrder>? symbolZOrder;
+  final ZOrder? symbolZOrder;
 
   /// Optional boolean. Defaults to false. Requires text-field.
-  final LayerProperty<bool>? textAllowOverlap;
+  final bool? textAllowOverlap;
 
   /// Optional enum. One of "center", "left", "right", "top", "bottom", "top-left",
   /// "top-right", "bottom-left", "bottom-right". Defaults to "center".
   /// Requires text-field. Disabled by text-variable-anchor.
-  final LayerProperty<Anchor>? textAnchor;
+  final Anchor? textAnchor;
 
   /// Optional color. Defaults to "#000000". Requires text-field.
   final LayerProperty<Color>? textColor;
 
   /// Optional formatted. Defaults to "".
-  final LayerProperty<String>? textField;
+  final String? textField;
 
   /// Optional array of strings. Defaults to ["Open Sans Regular","Arial Unicode MS Regular"].
   /// Requires text-field.
-  final LayerProperty<List<String>>? textFont;
+  final List<String>? textFont;
 
   /// Optional number greater than or equal to 0. Units in pixels. Defaults to 0.
   /// Requires text-field. Supports
@@ -240,14 +246,14 @@ class SymbolLayerOptions extends StyleLayerOptions {
   final LayerProperty<double>? textHaloWidth;
 
   /// Optional boolean. Defaults to false. Requires text-field.
-  final LayerProperty<bool>? textIgnorePlacement;
+  final bool? textIgnorePlacement;
 
   /// Optional enum. One of "auto", "left", "center", "right". Defaults to "center". Requires text-field.
-  final LayerProperty<Justify>? textJustify;
+  final Justify? textJustify;
 
   /// Optional boolean. Defaults to true. Requires text-field. Requires text-rotation-alignment
   /// to be "map". Requires symbol-placement to be "line", or "line-center".
-  final LayerProperty<bool>? textKeepUpright;
+  final bool? textKeepUpright;
 
   /// Units in ems. Defaults to 0. Requires text-field
   final LayerProperty<double>? textLetterSpacing;
@@ -268,13 +274,13 @@ class SymbolLayerOptions extends StyleLayerOptions {
   final LayerProperty<double>? textOpacity;
 
   /// Optional boolean. Defaults to false. Requires text-field. Requires icon-image.
-  final LayerProperty<bool>? textOptional;
+  final bool? textOptional;
 
   /// Optional number greater than or equal to 0. Units in pixels. Defaults to 2. Requires text-field
   final LayerProperty<double>? textPadding;
 
   /// Optional enum. One of "map", "viewport", "auto". Defaults to "auto". Requires text-field.
-  final LayerProperty<Alignment>? textPitchAlignment;
+  final MapAligment? textPitchAlignment;
 
   /// Optional number. Units in ems. Defaults to 0. Requires text-field.
   final LayerProperty<double>? textRadialOffset;
@@ -283,28 +289,28 @@ class SymbolLayerOptions extends StyleLayerOptions {
   final LayerProperty<double>? textRotate;
 
   /// Optional enum. One of "map", "viewport", "auto". Defaults to "auto". Requires text-field.
-  final LayerProperty<Alignment>? textRotationAlignment;
+  final MapAligment? textRotationAlignment;
 
   /// Optional number greater than or equal to 0. Units in pixels. Defaults to 16. Requires text-field.
   final LayerProperty<double>? textSize;
 
   /// Optional enum. One of "none", "uppercase", "lowercase". Defaults to "none".
-  final LayerProperty<TextTransform>? textTransform;
+  final TextTransform? textTransform;
 
   /// Optional array of numbers. Units in pixels. Defaults to [0,0]. Requires text-field.
   final LayerProperty<Offset>? textTranslate;
 
   /// Optional enum. One of "map", "viewport". Defaults to "map". Requires text-field.
-  final LayerProperty<AnchorAligment>? textTranslateAnchor;
+  final AnchorAligment? textTranslateAnchor;
 
   /// Optional array of enums. One of "center", "left", "right", "top", "bottom", "top-left", "top-right", "bottom-left", "bottom-right". Requires text-field. Requires symbol-placement to be "point".
-  final LayerProperty<Anchor>? textVariableAnchor;
+  final Anchor? textVariableAnchor;
 
   /// Optional array of enums. One of "horizontal", "vertical". Requires text-field.
-  final LayerProperty<TextWritingMode>? textWritingMode;
+  final TextWritingMode? textWritingMode;
 
   /// Optional enum. One of "visible", "none". Defaults to "visible".
-  final LayerProperty<Visibility>? visibility;
+  final Visibility? visibility;
 
   Map<String, dynamic> toMap() => {
     'layout': {
@@ -373,66 +379,69 @@ class SymbolLayerOptions extends StyleLayerOptions {
 
   static fromMap(Map<String, dynamic> map) {
     return SymbolLayerOptions(
-      iconAllowOverlap: _deserializeJson(map,'layout', 'icon-allow-overlap'),
-      iconAnchor: _deserializeJson(map,'layout', 'icon-anchor'),
-      iconColor: _deserializeJson(map,'paint', 'icon-color'),
-      iconHaloBlur: _deserializeJson(map,'paint', 'icon-halo-blur'),
-      iconHaloColor: _deserializeJson(map,'paint', 'icon-halo-color'),
-      iconHaloWidth: _deserializeJson(map,'paint', 'icon-halo-width'),
-      iconIgnorePlacement: _deserializeJson(map,'layout', 'icon-ignore-placement'),
-      iconImage: _deserializeJson(map,'layout', 'icon-image'),
-      iconKeepUpright: _deserializeJson(map,'layout', 'icon-keep-upright'),
-      iconOffset: _deserializeJson(map,'layout', 'icon-offset'),
-      iconOpacity: _deserializeJson(map,'paint', 'icon-opacity'),
-      iconOptional: _deserializeJson(map,'layout', 'icon-optional'),
-      iconPadding: _deserializeJson(map,'layout', 'icon-padding'),
-      iconPitchAlignment: _deserializeJson(map,'layout', 'icon-pitch-alignment'),
-      iconRotate: _deserializeJson(map,'layout', 'icon-rotate'),
-      iconRotationAlignment: _deserializeJson(map,'layout', 'icon-rotation-alignment'),
-      iconSize: _deserializeJson(map,'layout', 'icon-size'),
-      iconTextFit: _deserializeJson(map,'layout', 'icon-text-fit'),
-      iconTextFitPadding: _deserializeJson(map,'layout', 'icon-text-fit-padding'),
-      iconTranslate: _deserializeJson(map,'paint', 'icon-translate'),
-      iconTranslateAnchor: _deserializeJson(map,'paint', 'icon-translate-anchor'),
-      symbolAvoidEdges: _deserializeJson(map,'layout', 'symbol-avoid-edges'),
-      symbolPlacement: _deserializeJson(map,'layout', 'symbol-placement'),
-      symbolSortKey: _deserializeJson(map,'layout', 'symbol-sort-key'),
-      symbolSpacing: _deserializeJson(map,'layout', 'symbol-spacing'),
-      symbolZOrder: _deserializeJson(map,'layout', 'symbol-z-order'),
-      textAllowOverlap: _deserializeJson(map,'layout', 'text-allow-overlap'),
-      textAnchor: _deserializeJson(map,'layout', 'text-anchor'),
-      textColor: _deserializeJson(map,'paint', 'text-color'),
-      textField: _deserializeJson(map,'layout', 'text-field'),
-      textFont: _deserializeJson(map,'layout', 'text-font'),
-      textHaloBlur: _deserializeJson(map,'paint', 'text-halo-blur'),
-      textHaloColor: _deserializeJson(map,'paint', 'text-halo-color'),
-      textHaloWidth: _deserializeJson(map,'paint', 'text-halo-width'),
-      textIgnorePlacement: _deserializeJson(map,'layout', 'text-ignore-placement'),
-      textJustify: _deserializeJson(map,'layout', 'text-justify'),
-      textKeepUpright: _deserializeJson(map,'layout', 'text-keep-upright'),
-      textLetterSpacing: _deserializeJson(map,'layout', 'text-letter-spacing'),
-      textLineHeight: _deserializeJson(map,'layout', 'text-line-height'),
-      textMaxAngle: _deserializeJson(map,'layout', 'text-max-angle'),
-      textMaxWidth: _deserializeJson(map,'layout', 'text-max-width'),
-      textOffset: _deserializeJson(map,'layout', 'text-offset'),
-      textOpacity: _deserializeJson(map,'paint', 'text-opacity'),
-      textOptional: _deserializeJson(map,'layout', 'text-optional'),
-      textPadding: _deserializeJson(map,'layout', 'text-padding'),
-      textPitchAlignment: _deserializeJson(map,'layout', 'text-pitch-alignment'),
-      textRadialOffset: _deserializeJson(map,'layout', 'text-radial-offset'),
-      textRotate: _deserializeJson(map,'layout', 'text-rotate'),
-      textRotationAlignment: _deserializeJson(map,'layout', 'text-rotation-alignment'),
-      textSize: _deserializeJson(map,'layout', 'text-size'),
-      textTransform: _deserializeJson(map,'layout', 'text-transform'),
-      textTranslate: _deserializeJson(map,'paint', 'text-translate'),
-      textTranslateAnchor: _deserializeJson(map,'paint', 'text-translate-anchor'),
-      textVariableAnchor: _deserializeJson(map,'layout', 'text-variable-anchor'),
-      textWritingMode: _deserializeJson(map,'layout', 'text-writing-mode'),
-      visibility: _deserializeJson(map,'layout', 'visibility'),
+      iconAllowOverlap: deserializeJson(map,'layout', 'icon-allow-overlap'),
+      iconAnchor: deserializeJson(map,'layout', 'icon-anchor'),
+      iconColor: deserializeJson(map,'paint', 'icon-color'),
+      iconHaloBlur: deserializeJson(map,'paint', 'icon-halo-blur'),
+      iconHaloColor: deserializeJson(map,'paint', 'icon-halo-color'),
+      iconHaloWidth: deserializeJson(map,'paint', 'icon-halo-width'),
+      iconIgnorePlacement: deserializeJson(map,'layout', 'icon-ignore-placement'),
+      iconImage: deserializeJson(map,'layout', 'icon-image'),
+      iconKeepUpright: deserializeJson(map,'layout', 'icon-keep-upright'),
+      iconOffset: deserializeJson(map,'layout', 'icon-offset'),
+      iconOpacity: deserializeJson(map,'paint', 'icon-opacity'),
+      iconOptional: deserializeJson(map,'layout', 'icon-optional'),
+      iconPadding: deserializeJson(map,'layout', 'icon-padding'),
+      iconPitchAlignment: deserializeJson(map,'layout', 'icon-pitch-alignment'),
+      iconRotate: deserializeJson(map,'layout', 'icon-rotate'),
+      iconRotationAlignment: deserializeJson(map,'layout', 'icon-rotation-alignment'),
+      iconSize: deserializeJson(map,'layout', 'icon-size'),
+      iconTextFit: deserializeJson(map,'layout', 'icon-text-fit'),
+      iconTextFitPadding: deserializeJson(map,'layout', 'icon-text-fit-padding'),
+      iconTranslate: deserializeJson(map,'paint', 'icon-translate'),
+      iconTranslateAnchor: deserializeJson(map,'paint', 'icon-translate-anchor'),
+      symbolAvoidEdges: deserializeJson(map,'layout', 'symbol-avoid-edges'),
+      symbolPlacement: deserializeJson(map,'layout', 'symbol-placement'),
+      symbolSortKey: deserializeJson(map,'layout', 'symbol-sort-key'),
+      symbolSpacing: deserializeJson(map,'layout', 'symbol-spacing'),
+      symbolZOrder: deserializeJson(map,'layout', 'symbol-z-order'),
+      textAllowOverlap: deserializeJson(map,'layout', 'text-allow-overlap'),
+      textAnchor: deserializeJson(map,'layout', 'text-anchor'),
+      textColor: deserializeJson(map,'paint', 'text-color'),
+      textField: deserializeJson(map,'layout', 'text-field'),
+      textFont: deserializeJson(map,'layout', 'text-font'),
+      textHaloBlur: deserializeJson(map,'paint', 'text-halo-blur'),
+      textHaloColor: deserializeJson(map,'paint', 'text-halo-color'),
+      textHaloWidth: deserializeJson(map,'paint', 'text-halo-width'),
+      textIgnorePlacement: deserializeJson(map,'layout', 'text-ignore-placement'),
+      textJustify: deserializeJson(map,'layout', 'text-justify'),
+      textKeepUpright: deserializeJson(map,'layout', 'text-keep-upright'),
+      textLetterSpacing: deserializeJson(map,'layout', 'text-letter-spacing'),
+      textLineHeight: deserializeJson(map,'layout', 'text-line-height'),
+      textMaxAngle: deserializeJson(map,'layout', 'text-max-angle'),
+      textMaxWidth: deserializeJson(map,'layout', 'text-max-width'),
+      textOffset: deserializeJson(map,'layout', 'text-offset'),
+      textOpacity: deserializeJson(map,'paint', 'text-opacity'),
+      textOptional: deserializeJson(map,'layout', 'text-optional'),
+      textPadding: deserializeJson(map,'layout', 'text-padding'),
+      textPitchAlignment: deserializeJson(map,'layout', 'text-pitch-alignment'),
+      textRadialOffset: deserializeJson(map,'layout', 'text-radial-offset'),
+      textRotate: deserializeJson(map,'layout', 'text-rotate'),
+      textRotationAlignment: deserializeJson(map,'layout', 'text-rotation-alignment'),
+      textSize: deserializeJson(map,'layout', 'text-size'),
+      textTransform: deserializeJson(map,'layout', 'text-transform'),
+      textTranslate: deserializeJson(map,'paint', 'text-translate'),
+      textTranslateAnchor: deserializeJson(map,'paint', 'text-translate-anchor'),
+      textVariableAnchor: deserializeJson(map,'layout', 'text-variable-anchor'),
+      textWritingMode: deserializeJson(map,'layout', 'text-writing-mode'),
+      visibility: deserializeJson(map,'layout', 'visibility'),
     );
   }
 
   dynamic _serializeJson<T>(T value) {
+    if (value is LayerProperty) {
+      return value.serialize();
+    }
     if (value is EnumLike) {
       return value.toString();
     } if (value is Color) {
@@ -442,49 +451,101 @@ class SymbolLayerOptions extends StyleLayerOptions {
   }
 
 
-  static T? _deserializeJson<T>(Map<String, dynamic> map, String type, String key) {
-    final value = map.containsKey(type) && map[type] is Map
-      ? map[type][key]
-      : null;
-    if (value == null) {
-      return null;
-    }
+  // static T? _deserializeJson<T>(Map<String, dynamic> map, String type, String key) {
+  //   final value = map.containsKey(type) && map[type] is Map
+  //     ? map[type][key]
+  //     : null;
+  //   if (value == null) {
+  //     return null;
+  //   }
 
-    // Simple values
-    if ([String, double, bool, int].contains(T)) {
-      return value as T;
-    }
 
-    if (T == Color) {
-      return HexColor.fromHex(value) as T;
-    }
+  //   if (typesEqualOrNull<T, LayerProperty<bool>>()) {
+  //       return ConstantLayerProperty<bool>(_deserialzeValue<bool>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<double>>()) {
+  //       return ConstantLayerProperty<double>(_deserialzeValue<double>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<int>>()) {
+  //       return ConstantLayerProperty<int>(_deserialzeValue<int>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<Color>>()) {
+  //       return ConstantLayerProperty<Color>(_deserialzeValue<Color>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<SymbolPlacement>>()) {
+  //       return ConstantLayerProperty<SymbolPlacement>(_deserialzeValue<SymbolPlacement>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<Anchor>>()) {
+  //       return ConstantLayerProperty<Anchor>(_deserialzeValue<Anchor>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<MapAligment>>()) {
+  //       return ConstantLayerProperty<MapAligment>(_deserialzeValue<MapAligment>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<AnchorAligment>>()) {
+  //       return ConstantLayerProperty<AnchorAligment>(_deserialzeValue<AnchorAligment>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<MapFit>>()) {
+  //       return ConstantLayerProperty<MapFit>(_deserialzeValue<MapFit>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<ZOrder>>()) {
+  //       return ConstantLayerProperty<ZOrder>(_deserialzeValue<ZOrder>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<Justify>>()) {
+  //       return ConstantLayerProperty<Justify>(_deserialzeValue<Justify>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<TextWritingMode>>()) {
+  //       return ConstantLayerProperty<TextWritingMode>(_deserialzeValue<TextWritingMode>(value!)) as T;
+  //   } if (typesEqualOrNull<T, LayerProperty<Visibility>>()) {
+  //       return ConstantLayerProperty<Visibility>(_deserialzeValue<Visibility>(value!)) as T;
+  //   }  if (typesEqualOrNull<T, LayerProperty<Offset>>()) {
+  //       return ConstantLayerProperty<Offset>(_deserialzeValue<Offset>(value!)) as T;
+  //   }  if (typesEqualOrNull<T, LayerProperty<EdgeInsets>>()) {
+  //       return ConstantLayerProperty<EdgeInsets>(_deserialzeValue<EdgeInsets>(value!)) as T;
+  //   }
 
-    // Enum values
-    if (T == SymbolPlacement) {
-      return SymbolPlacement.fromString(value as String) as T;
-    } if (T == Anchor) {
-      return Anchor.fromString(value as String) as T;
-    } if (T == MapAligment) {
-      return MapAligment.fromString(value as String) as T;
-    } if (T == AnchorAligment) {
-      return AnchorAligment.fromString(value as String) as T;
-    } if (T == MapFit) {
-      return MapFit.fromString(value as String) as T;
-    } if (T == ZOrder) {
-      return ZOrder.fromString(value as String) as T;
-    } if (T == Justify) {
-      return Justify.fromString(value as String) as T;
-    } if (T == TextTransform) {
-      return TextTransform.fromString(value as String) as T;
-    } if (T == TextWritingMode) {
-      return TextWritingMode.fromString(value as String) as T;
-    } if (T == Visibility) {
-      return Visibility.fromString(value as String) as T;
-    }
-    // List values
+  //   return _deserialzeValue(value!);
+  // }
 
-    throw UnimplementedError();
-  }
+  // // static bool typesEqual<T1, T2>() => T1 == T2;
+
+  // // static bool typesEqualOrNull<T1, T2>() => typesEqual<T1, T2>() || typesEqual<T1, T2?>();
+
+  // static T _deserialzeValue<T>(dynamic value) {
+
+  //   if (typesEqualOrNull<T, String>() ) {
+  //      return value as T;
+  //   } if (typesEqualOrNull<T, double>() ) {
+  //      return value * 1.0 as T;
+  //   } if (typesEqualOrNull<T, bool>() ) {
+  //      return value as T;
+  //   } if (typesEqualOrNull<T, int>() ) {
+  //      return value as T;
+  //   }  if (typesEqualOrNull<T, List<String>>() ) {
+  //      return value as T;
+  //   }
+
+  //   if (typesEqualOrNull<T, Color>() ) {
+  //     return HexColor.fromHex(value) as T;
+  //   } if (typesEqualOrNull<T, Offset>() ) {
+  //     return Offset(value[0] * 1.0, value[1] * 1.0) as T;
+  //   } if (typesEqualOrNull<T, EdgeInsets>() ) {
+  //     return EdgeInsets.fromLTRB(value[3] * 1.0, value[0] * 1.0, value[1] * 1.0, value[2] * 1.0) as T;
+  //   }
+
+  //   // Enum values
+  //   if (typesEqualOrNull<T, SymbolPlacement>()) {
+  //     return SymbolPlacement.fromString(value as String) as T;
+  //   } if (typesEqualOrNull<T, Anchor>()) {
+  //     return Anchor.fromString(value as String) as T;
+  //   } if (typesEqualOrNull<T, MapAligment>() ) {
+  //     return MapAligment.fromString(value as String) as T;
+  //   } if (typesEqualOrNull<T, AnchorAligment>() ) {
+  //     return AnchorAligment.fromString(value as String) as T;
+  //   } if (typesEqualOrNull<T, MapFit>() ) {
+  //     return MapFit.fromString(value as String) as T;
+  //   } if (typesEqualOrNull<T, ZOrder>() ) {
+  //     return ZOrder.fromString(value as String) as T;
+  //   } if (typesEqualOrNull<T, Justify>() ) {
+  //     return Justify.fromString(value as String) as T;
+  //   } if (typesEqualOrNull<T, TextTransform>() ) {
+  //     return TextTransform.fromString(value as String) as T;
+  //   } if (typesEqualOrNull<T, TextWritingMode>() ) {
+  //     return TextWritingMode.fromString(value as String) as T;
+  //   } if (typesEqualOrNull<T, Visibility>() ) {
+  //     return Visibility.fromString(value as String) as T;
+  //   }
+
+  //   throw UnimplementedError();
+  // }
 
   @override
   bool operator ==(Object other) {
@@ -519,7 +580,7 @@ class SymbolLayerOptions extends StyleLayerOptions {
     && other.textAnchor == textAnchor
     && other.textColor == textColor
     && other.textField == textField
-    && other.textFont == textFont
+    && listEquals<String>(other.textFont, textFont)
     && other.textHaloBlur == textHaloBlur
     && other.textHaloColor == textHaloColor
     && other.textHaloWidth == textHaloWidth
@@ -570,7 +631,6 @@ class SymbolLayerOptions extends StyleLayerOptions {
       iconTextFit,
       iconTextFitPadding,
       iconTranslate,
-
     ),
     hashValues(
       iconTranslateAnchor,
@@ -583,7 +643,7 @@ class SymbolLayerOptions extends StyleLayerOptions {
       textAnchor,
       textColor,
       textField,
-      textFont,
+      hashList(textFont),
       textHaloBlur,
       textHaloColor,
       textHaloWidth,

@@ -1,10 +1,120 @@
 part of mapbox_gl_platform_interface;
 
+
+bool typesEqual<T1, T2>() => T1 == T2;
+
+bool typesEqualOrNull<T1, T2>() => typesEqual<T1, T2>() || typesEqual<T1, T2?>();
+
+
+T? deserializeJson<T>(Map<String, dynamic> map, String type, String key) {
+  final value = map.containsKey(type) && map[type] is Map
+    ? map[type][key]
+    : null;
+  if (value == null) {
+    return null;
+  }
+
+
+  if (typesEqualOrNull<T, LayerProperty<bool>>()) {
+      return ConstantLayerProperty<bool>(deserialzeValue<bool>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<double>>()) {
+      return ConstantLayerProperty<double>(deserialzeValue<double>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<int>>()) {
+      return ConstantLayerProperty<int>(deserialzeValue<int>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<Color>>()) {
+      return ConstantLayerProperty<Color>(deserialzeValue<Color>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<SymbolPlacement>>()) {
+      return ConstantLayerProperty<SymbolPlacement>(deserialzeValue<SymbolPlacement>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<Anchor>>()) {
+      return ConstantLayerProperty<Anchor>(deserialzeValue<Anchor>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<MapAligment>>()) {
+      return ConstantLayerProperty<MapAligment>(deserialzeValue<MapAligment>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<AnchorAligment>>()) {
+      return ConstantLayerProperty<AnchorAligment>(deserialzeValue<AnchorAligment>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<MapFit>>()) {
+      return ConstantLayerProperty<MapFit>(deserialzeValue<MapFit>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<ZOrder>>()) {
+      return ConstantLayerProperty<ZOrder>(deserialzeValue<ZOrder>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<Justify>>()) {
+      return ConstantLayerProperty<Justify>(deserialzeValue<Justify>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<TextWritingMode>>()) {
+      return ConstantLayerProperty<TextWritingMode>(deserialzeValue<TextWritingMode>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<Visibility>>()) {
+      return ConstantLayerProperty<Visibility>(deserialzeValue<Visibility>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<LineCap>>()) {
+      return ConstantLayerProperty<LineCap>(deserialzeValue<LineCap>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<LineJoin>>()) {
+      return ConstantLayerProperty<LineJoin>(deserialzeValue<LineJoin>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<Offset>>()) {
+      return ConstantLayerProperty<Offset>(deserialzeValue<Offset>(value!)) as T;
+  } if (typesEqualOrNull<T, LayerProperty<EdgeInsets>>()) {
+      return ConstantLayerProperty<EdgeInsets>(deserialzeValue<EdgeInsets>(value!)) as T;
+  }
+
+  return deserialzeValue(value!);
+}
+
+// static bool typesEqual<T1, T2>() => T1 == T2;
+
+// static bool typesEqualOrNull<T1, T2>() => typesEqual<T1, T2>() || typesEqual<T1, T2?>();
+
+T deserialzeValue<T>(dynamic value) {
+
+  if (typesEqualOrNull<T, String>() ) {
+      return value as T;
+  } if (typesEqualOrNull<T, double>() ) {
+      return value * 1.0 as T;
+  } if (typesEqualOrNull<T, bool>() ) {
+      return value as T;
+  } if (typesEqualOrNull<T, int>() ) {
+      return value as T;
+  }  if (typesEqualOrNull<T, List<String>>() ) {
+      return value as T;
+  }
+
+  if (typesEqualOrNull<T, Color>() ) {
+    return HexColor.fromHex(value) as T;
+  } if (typesEqualOrNull<T, Offset>() ) {
+    return Offset(value[0] * 1.0, value[1] * 1.0) as T;
+  } if (typesEqualOrNull<T, EdgeInsets>() ) {
+    return EdgeInsets.fromLTRB(value[3] * 1.0, value[0] * 1.0, value[1] * 1.0, value[2] * 1.0) as T;
+  }
+
+  // Enum values
+  if (typesEqualOrNull<T, SymbolPlacement>()) {
+    return SymbolPlacement.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, Anchor>()) {
+    return Anchor.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, MapAligment>() ) {
+    return MapAligment.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, AnchorAligment>() ) {
+    return AnchorAligment.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, MapFit>() ) {
+    return MapFit.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, ZOrder>() ) {
+    return ZOrder.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, Justify>() ) {
+    return Justify.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, TextTransform>() ) {
+    return TextTransform.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, TextWritingMode>() ) {
+    return TextWritingMode.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, Visibility>() ) {
+    return Visibility.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, LineCap>() ) {
+    return LineCap.fromString(value as String) as T;
+  } if (typesEqualOrNull<T, LineJoin>() ) {
+    return LineJoin.fromString(value as String) as T;
+  }
+
+  throw UnimplementedError();
+}
+
 abstract class LayerProperty<T> {
 
   const LayerProperty(this.value);
 
-  final T? value;
+  final T value;
 
   dynamic serialize() {
     final _value = value;
@@ -12,9 +122,28 @@ abstract class LayerProperty<T> {
       return _value.toString();
     } if (_value is Color) {
       return _value.toHex();
+    } if (_value  is Offset) {
+      return [_value.dx, _value.dy];
+    } if (_value is EdgeInsets) {
+      return [_value.top, _value.right, _value.bottom, _value.left];
     }
     return _value;
   }
+
+  static T deserialize<T>(dynamic value, T Function(dynamic) callback) {
+    return callback(value);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LayerProperty && (
+      other.value == value
+    );
+  }
+
+  @override
+  int get hashCode => value.hashCode;
+
 }
 
 class ConstantLayerProperty<T> extends LayerProperty<T> {
@@ -63,7 +192,6 @@ abstract class StyleLayerOptions {
 
 abstract class EnumLike {
   int get value;
-
 }
 
 extension HexColor on Color {
