@@ -289,7 +289,7 @@ abstract class MapboxGlPlatform {
         'getMetersPerPixelAtLatitude() has not been implemented.');
   }
 
-  Future<void> addGeoJsonSource(String sourceId, String geojson) async {
+  Future<void> addGeoJsonSource(String sourceId, Map<String, dynamic> geojson, Map<String, dynamic> properties) async {
     throw UnimplementedError(
         'addGeoJsonSource() has not been implemented.');
   }

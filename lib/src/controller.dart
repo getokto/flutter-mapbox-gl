@@ -300,8 +300,8 @@ class MapboxMapController extends ChangeNotifier {
   ///
   /// The returned [Future] completes after the change has been made on the
   /// platform side.
-  Future<void> addGeoJsonSource(String sourceId, String geojson) async {
-    await MapboxGlPlatform.getInstance(_id).addGeoJsonSource(sourceId, geojson);
+  Future<void> addGeoJsonSource(String sourceId, FeatureBase geojson, Map<String, dynamic> properties) async {
+    await MapboxGlPlatform.getInstance(_id).addGeoJsonSource(sourceId, geojson.toMap(), properties);
   }
 
 

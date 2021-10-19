@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:mapbox_gl_platform_interface/mapbox_gl_platform_interface.dart' hide Visibility;
 import 'package:mapbox_gl_platform_interface/mapbox_gl_platform_interface.dart' as mb;

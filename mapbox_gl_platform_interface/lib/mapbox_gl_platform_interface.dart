@@ -24,3 +24,4 @@ part 'src/sources/source.dart';
 part 'src/layers/layers.dart';
 part 'src/layers/symbol_layer.dart';
 part 'src/layers/line_layer.dart';
+part 'src/geojson/geometry.dart';

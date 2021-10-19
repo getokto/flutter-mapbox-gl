@@ -114,7 +114,6 @@ abstract class Source {
       case SourceType.Vector:
         return VectorSource.fromMap(map);
       case SourceType.GeoJson:
-        return GeoJsonSource.fromMap(map);
       default:
         throw UnimplementedError();
     }
@@ -236,7 +235,7 @@ class GeoJsonSource implements Source {
   final double? clusterMinPoints;
   final Map<String, dynamic>? clusterProperties;
   final double? clusterRadius;
-  final String? data;
+  final FeatureBase? data;
   final dynamic filter;
   final bool? generateId;
   final bool? lineMetrics;
@@ -254,7 +253,7 @@ class GeoJsonSource implements Source {
     if (clusterMinPoints != null) 'clusterMinPoints': clusterMinPoints,
     if (clusterProperties != null) 'clusterProperties': clusterProperties,
     if (clusterRadius != null) 'clusterRadius': clusterRadius,
-    if (data != null) 'data': data,
+    if (data != null) 'data': data?.toMap(),
     if (filter != null) 'filter': filter,
     if (generateId != null) 'generateId': generateId,
     if (lineMetrics != null) 'lineMetrics': lineMetrics,
@@ -263,24 +262,24 @@ class GeoJsonSource implements Source {
     if (tolerance != null) 'tolerance': tolerance,
   };
 
-  static GeoJsonSource fromMap(Map<String, dynamic> map) {
-    return GeoJsonSource(
-      attribution: map['attribution'] as String?,
-      buffer: map['buffer'] as double?,
-      cluster: map['cluster'] as bool?,
-      clusterMaxZoom: map['clusterMaxZoom'] as double?,
-      clusterMinPoints: map['clusterMinPoints'] as double?,
-      clusterProperties: map['clusterProperties'] as Map<String, dynamic>,
-      clusterRadius: map['clusterRadius'] as double?,
-      data: map['data'] as dynamic,
-      filter: map['filter'] as dynamic,
-      generateId: map['generateId'] as bool?,
-      lineMetrics: map['lineMetrics'] as bool?,
-      maxZoom: map['maxZoom'] as double?,
-      promoteId: map['promoteId'] as String?,
-      tolerance: map['tolerance'] as double,
-    );
-  }
+  // static GeoJsonSource fromMap(Map<String, dynamic> map) {
+  //   return GeoJsonSource(
+  //     attribution: map['attribution'] as String?,
+  //     buffer: map['buffer'] as double?,
+  //     cluster: map['cluster'] as bool?,
+  //     clusterMaxZoom: map['clusterMaxZoom'] as double?,
+  //     clusterMinPoints: map['clusterMinPoints'] as double?,
+  //     clusterProperties: map['clusterProperties'] as Map<String, dynamic>,
+  //     clusterRadius: map['clusterRadius'] as double?,
+  //     data: map['data'] as dynamic,
+  //     filter: map['filter'] as dynamic,
+  //     generateId: map['generateId'] as bool?,
+  //     lineMetrics: map['lineMetrics'] as bool?,
+  //     maxZoom: map['maxZoom'] as double?,
+  //     promoteId: map['promoteId'] as String?,
+  //     tolerance: map['tolerance'] as double,
+  //   );
+  // }
 
   @override
   bool operator ==(Object other) {

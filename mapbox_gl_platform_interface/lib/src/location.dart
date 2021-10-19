@@ -32,7 +32,7 @@ class LatLng {
     return LatLng(latitude - o.latitude, longitude - o.longitude);
   }
 
-  dynamic toJson() {
+  List<double> toJson() {
     return <double>[latitude, longitude];
   }
 

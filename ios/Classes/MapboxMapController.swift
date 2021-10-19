@@ -504,8 +504,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["sourceId"] as? String else { return }
             guard let geojson = arguments["geojson"] as? String else { return }
+            let properties = arguments["properties"] as? [String: Any] ?? [:]
 
-            addGeoJsonSource(sourceId: sourceId, geojson: geojson)
+            addGeoJsonSource(sourceId: sourceId, geojson: geojson, properties: properties)
 
             result(nil)
         case "vectorSource#add":
@@ -989,10 +990,11 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
     }
     
-    func addGeoJsonSource(sourceId: String, geojson: String) {
+    func addGeoJsonSource(sourceId: String, geojson: String, properties: [String: Any]) {
         do {
             let parsed = try MGLShape.init(data: geojson.data(using: .utf8)!, encoding: String.Encoding.utf8.rawValue)
-            let source = MGLShapeSource(identifier: sourceId, shape: parsed, options: [:])
+            let options = Convert.getGeoJsonSourceOptions(properties: properties)
+            let source = MGLShapeSource(identifier: sourceId, shape: parsed, options:options)
             mapView.style?.addSource(source)
         } catch {
         }
@@ -1002,8 +1004,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         do {
             
             if let style = mapView.style {
-                var options = Convert.getVectorSourceOptions(properties: properties)
-                var tileUrls = Convert.getVectorURLTemplated(properties: properties)
+                let options = Convert.getVectorSourceOptions(properties: properties)
+                let tileUrls = Convert.getVectorURLTemplated(properties: properties)
                 
                 if let url = properties["url"] as? String {
                     if let url = URL(string: url) {

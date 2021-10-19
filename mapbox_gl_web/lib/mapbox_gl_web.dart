@@ -14,7 +14,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:mapbox_gl_platform_interface/mapbox_gl_platform_interface.dart';
+import 'package:mapbox_gl_platform_interface/mapbox_gl_platform_interface.dart' hide Feature, FeatureCollection, Geometry;
 import 'package:mapbox_gl_dart/mapbox_gl_dart.dart' hide Point, GeoJsonSource;
 import 'package:mapbox_gl_dart/mapbox_gl_dart.dart' as mapbox show Point, GeoJsonSource;
 import 'package:image/image.dart' hide Point;

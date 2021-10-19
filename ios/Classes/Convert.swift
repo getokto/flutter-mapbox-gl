@@ -557,6 +557,34 @@ class Convert {
         }
         return options
     }
+    
+    class func getGeoJsonSourceOptions( properties: [String: Any]) -> [MGLShapeSourceOption: Any] {
+        var options: [MGLShapeSourceOption: Any] = [:]
+        for (propertyName, propertyValue) in properties {
+            
+            switch propertyName {
+                case "maxZoom":
+                    options[.maximumZoomLevel] = propertyValue
+                case "buffer":
+                    options[.buffer] = propertyValue
+                case "cluster":
+                    options[.clustered] = propertyValue
+                case "clusterMaxZoom":
+                    options[.maximumZoomLevelForClustering] = propertyValue
+                case "clusterProperties":
+                    options[.clusterProperties] = propertyValue
+                case "clusterRadius":
+                    options[.clusterRadius] = propertyValue
+                case "lineMetrics":
+                    options[.lineDistanceMetrics] = propertyValue
+                case "tolerance":
+                    options[.simplificationTolerance] = propertyValue
+                default:
+                    break
+            }
+        }
+        return options
+    }
 
     private class func decodeUriList(json: String) -> [String]? {
         let jsonArrayData = json.data(using: .utf8)!
