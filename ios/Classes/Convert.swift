@@ -356,139 +356,147 @@ class Convert {
         return polygons
     }
     
-    class func addSymbolProperties(symbolLayer: MGLSymbolStyleLayer, properties: [String: String]) {
-        for (propertyName, propertyValue) in properties {
-            let expression = interpretExpression(expression: propertyValue)
-            switch propertyName {
-                case "icon-allow-overlap":
-                    symbolLayer.iconAllowsOverlap = expression
-                case "icon-anchor":
-                    symbolLayer.iconAnchor = expression
-                case "icon-color":
-                    symbolLayer.iconColor = expression
-                case "icon-halo-blur":
-                    symbolLayer.iconHaloBlur = expression
-                case "icon-halo-color":
-                    symbolLayer.iconHaloColor = expression
-                case "icon-halo-width":
-                    symbolLayer.iconHaloWidth = expression
-                case "icon-ignore-placement":
-                    symbolLayer.iconIgnoresPlacement = expression
-                case "icon-image":
-                    symbolLayer.iconImageName = expression
-                case "icon-keep-upright":
-                    symbolLayer.keepsIconUpright = expression
-                case "icon-offset":
-                    symbolLayer.iconOffset = expression
-                case "icon-opacity":
-                    symbolLayer.iconOpacity = expression
-                case "icon-optional":
-                    symbolLayer.iconOptional = expression
-                case "icon-padding":
-                    symbolLayer.iconPadding = expression
-                case "icon-pitch-alignment":
-                    symbolLayer.iconPitchAlignment = expression
-                case "icon-rotate":
-                    symbolLayer.iconRotation = expression
-                case "icon-rotation-alignment":
-                    symbolLayer.iconRotationAlignment = expression
-                case "icon-size":
-                    symbolLayer.iconScale = expression
-                case "icon-text-fit":
-                    symbolLayer.iconTextFit = expression
-                case "icon-text-fit-padding":
-                    symbolLayer.iconTextFitPadding = expression
-                case "icon-translate":
-                    symbolLayer.iconTranslation = expression
-                case "icon-translate-anchor":
-                    symbolLayer.iconTranslationAnchor = expression
-                case "symbol-avoid-edges":
-                    symbolLayer.symbolAvoidsEdges = expression
-                case "symbol-placement":
-                    symbolLayer.symbolPlacement = expression
-                case "symbol-sort-key":
-                    symbolLayer.symbolSortKey = expression
-                case "symbol-spacing":
-                    symbolLayer.symbolSpacing = expression
-                case "symbol-z-order":
-                    symbolLayer.symbolZOrder = expression
-                case "text-allow-overlap":
-                    symbolLayer.textAllowsOverlap = expression
-                case "text-anchor":
-                    symbolLayer.textAnchor = expression
-                case "text-color":
-                    symbolLayer.textColor = expression
-                case "text-field":
-                    symbolLayer.text = expression
-                case "text-font":
-                    symbolLayer.textFontNames = expression
-                case "text-halo-blur":
-                    symbolLayer.textHaloBlur = expression
-                case "text-halo-color":
-                    symbolLayer.textHaloColor = expression
-                case "text-halo-width":
-                    symbolLayer.textHaloWidth = expression
-                case "text-ignore-placement":
-                    symbolLayer.textIgnoresPlacement = expression
-                case "text-justify":
-                    symbolLayer.textJustification = expression
-                case "text-keep-upright":
-                    symbolLayer.keepsTextUpright = expression
-                case "text-letter-spacing":
-                    symbolLayer.textLetterSpacing = expression
-                case "text-line-height":
-                    symbolLayer.textLineHeight = expression
-                case "text-max-angle":
-                    symbolLayer.maximumTextAngle = expression
-                case "text-max-width":
-                    symbolLayer.maximumTextWidth = expression
-                case "text-offset":
-                    symbolLayer.textOffset = expression
-                case "text-opacity":
-                    symbolLayer.textOpacity = expression
-                case "text-optional":
-                    symbolLayer.textOptional = expression
-                case "text-padding":
-                    symbolLayer.textPadding = expression
-                case "text-pitch-alignment":
-                    symbolLayer.textPitchAlignment = expression
-                case "text-radial-offset":
-                    symbolLayer.textRadialOffset = expression
-                case "text-rotate":
-                    symbolLayer.textRotation = expression
-                case "text-rotation-alignment":
-                    symbolLayer.textRotationAlignment = expression
-                case "text-size":
-                    symbolLayer.textFontSize = expression
-                case "text-transform":
-                    symbolLayer.textTransform = expression
-                case "text-translate":
-                    symbolLayer.textTranslation = expression
-                case "text-translate-anchor":
-                    symbolLayer.textTranslationAnchor = expression
-                case "text-variable-anchor":
-                    symbolLayer.textVariableAnchor = expression
-                case "text-writing-mode":
-                    symbolLayer.textWritingModes = expression
-                default:
-                    break
+    class func addSymbolProperties(symbolLayer: MGLSymbolStyleLayer, properties: [String: Any]) {
+        for (propertyTypeName, propertyTypeValue) in properties {
+            
+            for (propertyName, propertyValue) in propertyTypeValue as! [String: Any] {
+                switch propertyName {
+                    case "icon-allow-overlap":
+                        symbolLayer.iconAllowsOverlap = NSExpression(forConstantValue: propertyValue)
+                    case "icon-anchor":
+                        symbolLayer.iconAnchor = NSExpression(forConstantValue: propertyValue)
+                    case "icon-color":
+                        symbolLayer.iconColor = NSExpression(forConstantValue: propertyValue)
+                    case "icon-halo-blur":
+                        symbolLayer.iconHaloBlur = NSExpression(forConstantValue: propertyValue)
+                    case "icon-halo-color":
+                        if propertyValue is String {
+                            symbolLayer.iconHaloColor = NSExpression(forConstantValue: UIColor.init(hex:propertyValue as! String))
+                        }
+                    case "icon-halo-width":
+                        symbolLayer.iconHaloWidth = NSExpression(forConstantValue: propertyValue)
+                    case "icon-ignore-placement":
+                        symbolLayer.iconIgnoresPlacement = NSExpression(forConstantValue: propertyValue)
+                    case "icon-image":
+                        symbolLayer.iconImageName = NSExpression(forConstantValue: propertyValue)
+                    case "icon-keep-upright":
+                        symbolLayer.keepsIconUpright = NSExpression(forConstantValue: propertyValue)
+                    case "icon-offset":
+                        symbolLayer.iconOffset = NSExpression(forConstantValue: propertyValue)
+                    case "icon-opacity":
+                        symbolLayer.iconOpacity = NSExpression(forConstantValue: propertyValue)
+                    case "icon-optional":
+                        symbolLayer.iconOptional = NSExpression(forConstantValue: propertyValue)
+                    case "icon-padding":
+                        symbolLayer.iconPadding = NSExpression(forConstantValue: propertyValue)
+                    case "icon-pitch-alignment":
+                        symbolLayer.iconPitchAlignment = NSExpression(forConstantValue: propertyValue)
+                    case "icon-rotate":
+                        symbolLayer.iconRotation = NSExpression(forConstantValue: propertyValue)
+                    case "icon-rotation-alignment":
+                        symbolLayer.iconRotationAlignment = NSExpression(forConstantValue: propertyValue)
+                    case "icon-size":
+                        symbolLayer.iconScale = NSExpression(forConstantValue: propertyValue)
+                    case "icon-text-fit":
+                        symbolLayer.iconTextFit = NSExpression(forConstantValue: propertyValue)
+                    case "icon-text-fit-padding":
+                        symbolLayer.iconTextFitPadding = NSExpression(forConstantValue: propertyValue)
+                    case "icon-translate":
+                        symbolLayer.iconTranslation = NSExpression(forConstantValue: propertyValue)
+                    case "icon-translate-anchor":
+                        symbolLayer.iconTranslationAnchor = NSExpression(forConstantValue: propertyValue)
+                    case "symbol-avoid-edges":
+                        symbolLayer.symbolAvoidsEdges = NSExpression(forConstantValue: propertyValue)
+                    case "symbol-placement":
+                        symbolLayer.symbolPlacement = NSExpression(forConstantValue: propertyValue)
+                    case "symbol-sort-key":
+                        symbolLayer.symbolSortKey = NSExpression(forConstantValue: propertyValue)
+                    case "symbol-spacing":
+                        symbolLayer.symbolSpacing = NSExpression(forConstantValue: propertyValue)
+                    case "symbol-z-order":
+                        symbolLayer.symbolZOrder = NSExpression(forConstantValue: propertyValue)
+                    case "text-allow-overlap":
+                        symbolLayer.textAllowsOverlap = NSExpression(forConstantValue: propertyValue)
+                    case "text-anchor":
+                        symbolLayer.textAnchor = NSExpression(forConstantValue: propertyValue)
+                    case "text-color":
+                        if propertyValue is String {
+                            symbolLayer.textColor = NSExpression(forConstantValue: UIColor.init(hex:propertyValue as! String))
+                        }
+                    case "text-field":
+                        symbolLayer.text = NSExpression(forConstantValue: propertyValue)
+                    case "text-font":
+                        symbolLayer.textFontNames = NSExpression(forConstantValue: propertyValue)
+                    case "text-halo-blur":
+                        symbolLayer.textHaloBlur = NSExpression(forConstantValue: propertyValue)
+                    case "text-halo-color":
+                        if propertyValue is String {
+                            symbolLayer.textHaloColor = NSExpression(forConstantValue: UIColor.init(hex:propertyValue as! String))
+                        }
+                    case "text-halo-width":
+                        symbolLayer.textHaloWidth = NSExpression(forConstantValue: propertyValue)
+                    case "text-ignore-placement":
+                        symbolLayer.textIgnoresPlacement = NSExpression(forConstantValue: propertyValue)
+                    case "text-justify":
+                        symbolLayer.textJustification = NSExpression(forConstantValue: propertyValue)
+                    case "text-keep-upright":
+                        symbolLayer.keepsTextUpright = NSExpression(forConstantValue: propertyValue)
+                    case "text-letter-spacing":
+                        symbolLayer.textLetterSpacing = NSExpression(forConstantValue: propertyValue)
+                    case "text-line-height":
+                        symbolLayer.textLineHeight = NSExpression(forConstantValue: propertyValue)
+                    case "text-max-angle":
+                        symbolLayer.maximumTextAngle = NSExpression(forConstantValue: propertyValue)
+                    case "text-max-width":
+                        symbolLayer.maximumTextWidth = NSExpression(forConstantValue: propertyValue)
+                    case "text-offset":
+                        symbolLayer.textOffset = NSExpression(forConstantValue: propertyValue)
+                    case "text-opacity":
+                        symbolLayer.textOpacity = NSExpression(forConstantValue: propertyValue)
+                    case "text-optional":
+                        symbolLayer.textOptional = NSExpression(forConstantValue: propertyValue)
+                    case "text-padding":
+                        symbolLayer.textPadding = NSExpression(forConstantValue: propertyValue)
+                    case "text-pitch-alignment":
+                        symbolLayer.textPitchAlignment = NSExpression(forConstantValue: propertyValue)
+                    case "text-radial-offset":
+                        symbolLayer.textRadialOffset = NSExpression(forConstantValue: propertyValue)
+                    case "text-rotate":
+                        symbolLayer.textRotation = NSExpression(forConstantValue: propertyValue)
+                    case "text-rotation-alignment":
+                        symbolLayer.textRotationAlignment = NSExpression(forConstantValue: propertyValue)
+                    case "text-size":
+                        symbolLayer.textFontSize = NSExpression(forConstantValue: propertyValue)
+                    case "text-transform":
+                        symbolLayer.textTransform = NSExpression(forConstantValue: propertyValue)
+                    case "text-translate":
+                        symbolLayer.textTranslation = NSExpression(forConstantValue: propertyValue)
+                    case "text-translate-anchor":
+                        symbolLayer.textTranslationAnchor = NSExpression(forConstantValue: propertyValue)
+                    case "text-variable-anchor":
+                        symbolLayer.textVariableAnchor = NSExpression(forConstantValue: propertyValue)
+                    case "text-writing-mode":
+                        symbolLayer.textWritingModes = NSExpression(forConstantValue: propertyValue)
+                    default:
+                        break
+                }
             }
         }
     }
 
     class func addLineProperties(lineLayer: MGLLineStyleLayer, properties: [String: Any]) {
 
-        for (propertyTypeName, propertyTypeValue) in properties {
+        for (_, propertyTypeValue) in properties {
             
             for (propertyName, propertyValue) in propertyTypeValue as! [String: Any] {
                 switch propertyName {
                     case "line-blur":
                         lineLayer.lineBlur = NSExpression(forConstantValue: propertyValue)
                     case "line-cap":
-                        lineLayer.lineCap = NSExpression(forConstantValue: "round")
+                        lineLayer.lineCap = NSExpression(forConstantValue: propertyValue)
                     case "line-color":
-                    if let color = propertyValue as? String {
-                        lineLayer.lineColor = NSExpression(forConstantValue: UIColor.red)
+                    if propertyValue is String {
+                        lineLayer.lineColor = NSExpression(forConstantValue: UIColor.init(hex:propertyValue as! String))
                     }
                     case "line-dasharray":
                         lineLayer.lineDashPattern = NSExpression(forConstantValue: propertyValue)
@@ -497,7 +505,7 @@ class Convert {
                     case "line-gradient":
                         lineLayer.lineGradient = NSExpression(forConstantValue: propertyValue)
                     case "line-join":
-                        lineLayer.lineJoin = NSExpression(forConstantValue: "round")
+                        lineLayer.lineJoin = NSExpression(forConstantValue: propertyValue)
                     case "line-miter-limit":
                         lineLayer.lineMiterLimit = NSExpression(forConstantValue: propertyValue)
                     case "line-offset":
@@ -528,10 +536,8 @@ class Convert {
                 let uriList = propertyValue as? [String] // decodeUriList(json: propertyValue);
                 if uriList != nil {
                     for uri in uriList! {
-                        let nextUri = uri.removingPercentEncoding!;
                         urls.append(uri.removingPercentEncoding!);
                     }
-                    //urls.append(contentsOf: uriList!)
                 }
                     
                 default:

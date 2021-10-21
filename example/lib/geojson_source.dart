@@ -37,20 +37,28 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
         )
 
       ]),{});
-    } catch(e) {
-      int a = 1;
-    }
 
-    await _mapController.addLineLayer(LineLayer(
-      id: 'terrain-data',
-      source: 'test',
-      options: LineLayerOptions(
-        lineJoin: ConstantLayerProperty(LineJoin.Round),
-        lineCap: ConstantLayerProperty(LineCap.Round),
-        lineColor: ConstantLayerProperty(Color(0x00ff69b4)),
-        lineWidth: ConstantLayerProperty(1),
-      )
-    ));
+      await _mapController.addLineLayer(LineLayer(
+        id: 'terrain-data-lines',
+        source: 'test',
+        options: LineLayerOptions(
+          lineJoin: ConstantLayerProperty(LineJoin.Round),
+          lineCap: ConstantLayerProperty(LineCap.Round),
+          lineColor: ConstantLayerProperty(Color(0x00ff69b4)),
+          lineWidth: ConstantLayerProperty(1),
+        )
+      ));
+
+      await _mapController.addSymbolLayer(SymbolLayer(
+        id: 'terrain-data-symbols',
+        source: 'test',
+          options: SymbolLayerOptions(
+            textSize: const ConstantLayerProperty(30.0),
+            textField: 'X',
+          ),
+      ));
+
+    } catch(_) {}
 
   }
 
