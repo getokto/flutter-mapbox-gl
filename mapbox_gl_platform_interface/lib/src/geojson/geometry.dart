@@ -31,7 +31,7 @@ class _GeometryType implements EnumLike {
   }
 }
 
-class PointGeometry extends Geometry {
+class PointGeometry extends Geometry<LatLng> {
   const PointGeometry({
     required LatLng coordinates,
   }) :
@@ -39,9 +39,13 @@ class PointGeometry extends Geometry {
       coordinates: coordinates,
       type: _GeometryType.Point,
     );
+
+  dynamic serializeCoordinates(coordinates) {
+    return [coordinates.longitude, coordinates.latitude];
+  }
 }
 
-class LineStringGeometry extends Geometry {
+class LineStringGeometry extends Geometry<List<LatLng>> {
   const LineStringGeometry({
     required List<LatLng> coordinates,
   }):
@@ -49,6 +53,10 @@ class LineStringGeometry extends Geometry {
       coordinates: coordinates,
       type: _GeometryType.LineString,
     );
+
+  dynamic serializeCoordinates(coordinates) {
+    return coordinates.map(((e) => [e.longitude, e.latitude])).toList();
+  }
 }
 
 class PolygonGeometry extends Geometry<List<List<LatLng>>> {
@@ -60,10 +68,9 @@ class PolygonGeometry extends Geometry<List<List<LatLng>>> {
       type: _GeometryType.Polygon,
     );
 
-  Map<String, dynamic> toMap() => {
-    'type': type.toString(),
-    'coordinates': coordinates.map((e) => e.map((e) => e.toJson().reversed.toList()).toList()).toList(),
-  };
+  dynamic serializeCoordinates(coordinates) {
+    return coordinates.map((e) => e.map((e) => [e.longitude, e.latitude]).toList()).toList();
+  }
 }
 
 class MultiPointGeometry extends Geometry<List<LatLng>> {
@@ -75,13 +82,13 @@ class MultiPointGeometry extends Geometry<List<LatLng>> {
       type: _GeometryType.MultiPoint,
     );
 
-  Map<String, dynamic> toMap() => {
-    'type': type.toString(),
-    'coordinates': coordinates.map((e) => e.toJson().reversed.toList()).toList(),
-  };
+
+  dynamic serializeCoordinates(coordinates) {
+    return coordinates.map(((e) => [e.longitude, e.latitude])).toList();
+  }
 }
 
-class MultiLineStringGeometry extends Geometry {
+class MultiLineStringGeometry extends Geometry<List<List<LatLng>>> {
   const MultiLineStringGeometry({
     required List<List<LatLng>> coordinates,
   }) :
@@ -89,9 +96,13 @@ class MultiLineStringGeometry extends Geometry {
       coordinates: coordinates,
       type: _GeometryType.MultiLineString,
     );
+
+  dynamic serializeCoordinates(coordinates) {
+    return coordinates.map((e) => e.map((e) => [e.longitude, e.latitude]).toList()).toList();
+  }
 }
 
-class MultiPolygonGeometry extends Geometry {
+class MultiPolygonGeometry extends Geometry<List<List<List<LatLng>>>> {
   const MultiPolygonGeometry({
     required List<List<List<LatLng>>> coordinates,
   }) :
@@ -100,7 +111,9 @@ class MultiPolygonGeometry extends Geometry {
       type: _GeometryType.MultiPolygon,
     );
 
-
+  dynamic serializeCoordinates(coordinates) {
+    return coordinates.map((e) => e.map((e) => e.map((e) => [e.longitude, e.latitude]).toList()).toList()).toList();
+  }
 }
 
 abstract class Geometry<T> {
@@ -111,9 +124,11 @@ abstract class Geometry<T> {
     required this.coordinates,
   });
 
+  dynamic serializeCoordinates(T coordinates);
+
   Map<String, dynamic> toMap() => {
     'type': type.toString(),
-    'coordinates': coordinates,
+    'coordinates': serializeCoordinates(coordinates),
   };
 }
 
