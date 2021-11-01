@@ -33,6 +33,7 @@ class MapboxMap extends StatefulWidget {
     this.compassViewMargins,
     this.attributionButtonMargins,
     this.onMapClick,
+    this.onLayerTap,
     this.onUserLocationUpdated,
     this.onMapLongClick,
     this.onAttributionClick,
@@ -170,6 +171,8 @@ class MapboxMap extends StatefulWidget {
   /// were not claimed by any other gesture recognizer.
   final Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers;
 
+  final OnLayerTapCallback? onLayerTap;
+
   final OnMapClickCallback? onMapClick;
   final OnMapClickCallback? onMapLongClick;
 
@@ -269,6 +272,7 @@ class _MapboxMapState extends State<MapboxMap> {
         }
       },
       onMapClick: widget.onMapClick,
+      onLayerTap: widget.onLayerTap,
       onUserLocationUpdated: widget.onUserLocationUpdated,
       onMapLongClick: widget.onMapLongClick,
       onAttributionClick: widget.onAttributionClick,

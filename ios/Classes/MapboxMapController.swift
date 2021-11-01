@@ -521,20 +521,34 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["source"] as? String else { return }
             guard let layerId = arguments["id"] as? String else { return }
+            guard let tapable = arguments["tapable"] as? Bool else { return }
             guard let properties = arguments["properties"] as? [String: Any] else { return }
             let sourceLayerId = arguments["source-layer"] as? String
             
             addSymbolLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties)
+            
+            if tapable {
+                tappableLayers.insert(layerId)
+            } else {
+                tappableLayers.remove(layerId)
+            }
            
             result(nil)
         case "lineLayer#add":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["source"] as? String else { return }
             guard let layerId = arguments["id"] as? String else { return }
+            guard let tapable = arguments["tapable"] as? Bool else { return }
             guard let properties = arguments["properties"] as? [String: Any] else { return }
             let sourceLayerId = arguments["source-layer"] as? String
             
             addLineLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties)
+
+            if tapable {
+                tappableLayers.insert(layerId)
+            } else {
+                tappableLayers.remove(layerId)
+            }
             
             result(nil)
         case "line#getGeometry":
@@ -785,6 +799,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         
     }
     
+    private var tappableLayers: Set<String> = Set<String>()
+    
     /*
     *  UITapGestureRecognizer
     *  On tap invoke the map#onMapClick callback.
@@ -794,11 +810,57 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         let point = sender.location(in: mapView)
         let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
         channel?.invokeMethod("map#onMapClick", arguments: [
-                      "x": point.x,
-                      "y": point.y,
-                      "lng": coordinate.longitude,
-                      "lat": coordinate.latitude,
-                  ])
+            "x": point.x,
+            "y": point.y,
+            "lng": coordinate.longitude,
+            "lat": coordinate.latitude,
+        ])
+        
+        if sender.state == .ended && tappableLayers.count > 0 {
+            
+            // We loop the list so we can figure out the layerid of the matching feature
+            for tapableLayer in tappableLayers {
+            
+                for feature in mapView.visibleFeatures(at: point, styleLayerIdentifiers: [tapableLayer]) {
+                    channel?.invokeMethod("map#onLayerTap", arguments: [
+                        "layerId": tapableLayer,
+                        "x": point.x,
+                        "y": point.y,
+                        "lng": feature.coordinate.longitude,
+                        "lat": feature.coordinate.latitude,
+                        "data": feature.attributes
+                    ])
+                    return
+                }
+                
+                let touchCoordinate = mapView.convert(point, toCoordinateFrom: sender.view!)
+                let touchLocation = CLLocation(latitude: touchCoordinate.latitude, longitude: touchCoordinate.longitude)
+                 
+                // Otherwise, get all features within a rect the size of a touch (44x44).
+                let touchRect = CGRect(origin: point, size: .zero).insetBy(dx: -22.0, dy: -22.0)
+                let possibleFeatures = mapView.visibleFeatures(in: touchRect, styleLayerIdentifiers: [tapableLayer]).filter { $0 is MGLPointFeature }
+                 
+                // Select the closest feature to the touch center.
+                let closestFeatures = possibleFeatures.sorted(by: {
+                    return CLLocation(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude).distance(from: touchLocation) < CLLocation(latitude: $1.coordinate.latitude, longitude: $1.coordinate.longitude).distance(from: touchLocation)
+                    })
+                if let feature = closestFeatures.first {
+                    channel?.invokeMethod("map#onLayerTap", arguments: [
+                        "id": tapableLayer,
+                        "x": point.x,
+                        "y": point.y,
+                        "lng": feature.coordinate.longitude,
+                        "lat": feature.coordinate.latitude,
+                        "data": feature.attributes
+                    ])
+                    return
+                }
+            }
+            // If no features were found, deselect the selected annotation, if any.
+            mapView.deselectAnnotation(mapView.selectedAnnotations.first, animated: true)
+        }
+        
+        
     }
     
     /*

@@ -4,6 +4,7 @@
 
 part of mapbox_gl;
 
+typedef void OnLayerTapCallback(String layerId, Point<double> point, LatLng coordinates, Map<String, dynamic> data);
 typedef void OnMapClickCallback(Point<double> point, LatLng coordinates);
 typedef void OnMapLongClickCallback(Point<double> point, LatLng coordinates);
 
@@ -38,6 +39,7 @@ typedef void OnMapIdleCallback();
 class MapboxMapController extends ChangeNotifier {
   MapboxMapController._(this._id, CameraPosition initialCameraPosition,
       {this.onStyleLoadedCallback,
+      this.onLayerTap,
       this.onMapClick,
       this.onMapLongClick,
       this.onAttributionClick,
@@ -122,6 +124,14 @@ class MapboxMapController extends ChangeNotifier {
       }
     });
 
+
+
+    MapboxGlPlatform.getInstance(_id).onLayerTapPlatform.add((dict) {
+      if (onLayerTap != null) {
+        onLayerTap!(dict['layerId'], dict['point'], dict['latLng'], dict['data']);
+      }
+    });
+
     MapboxGlPlatform.getInstance(_id).onMapLongClickPlatform.add((dict) {
       if (onMapLongClick != null) {
         onMapLongClick!(dict['point'], dict['latLng']);
@@ -165,6 +175,7 @@ class MapboxMapController extends ChangeNotifier {
   static MapboxMapController init(int id, CameraPosition initialCameraPosition,
       {OnStyleLoadedCallback? onStyleLoadedCallback,
       OnMapClickCallback? onMapClick,
+      OnLayerTapCallback? onLayerTap,
       OnUserLocationUpdated? onUserLocationUpdated,
       OnMapLongClickCallback? onMapLongClick,
       OnAttributionClickCallback? onAttributionClick,
@@ -174,6 +185,7 @@ class MapboxMapController extends ChangeNotifier {
       OnMapIdleCallback? onMapIdle}) {
     return MapboxMapController._(id, initialCameraPosition,
         onStyleLoadedCallback: onStyleLoadedCallback,
+        onLayerTap: onLayerTap,
         onMapClick: onMapClick,
         onUserLocationUpdated: onUserLocationUpdated,
         onMapLongClick: onMapLongClick,
@@ -189,6 +201,8 @@ class MapboxMapController extends ChangeNotifier {
   }
 
   final OnStyleLoadedCallback? onStyleLoadedCallback;
+
+  final OnLayerTapCallback? onLayerTap;
 
   final OnMapClickCallback? onMapClick;
   final OnMapLongClickCallback? onMapLongClick;
@@ -324,16 +338,12 @@ class MapboxMapController extends ChangeNotifier {
   ///
   /// The returned [Future] completes after the change has been made on the
   /// platform side.
-  Future<void> addSymbolLayer(SymbolLayer layer) async {
+  Future<void> addSymbolLayer(SymbolLayer layer, { bool tapable = false }) async {
     await MapboxGlPlatform.getInstance(_id).addSymbolLayer(
       layer.id,
       layer.source,
-      // sourceLayer: layer.sourceLayer,
+      tapable: tapable,
       properties: layer.options.toMap(),
-      // properties: layer.options.toMap().entries.fold(<String, String>{}, (initialValue, element) {
-      //   initialValue[element.key] = json.encode(element.value);
-      //   return initialValue;
-      // }),
     );
   }
 
@@ -341,16 +351,13 @@ class MapboxMapController extends ChangeNotifier {
   ///
   /// The returned [Future] completes after the change has been made on the
   /// platform side.
-  Future<void> addLineLayer(LineLayer layer) async {
+  Future<void> addLineLayer(LineLayer layer, { bool tapable = false }) async {
     await MapboxGlPlatform.getInstance(_id).addLineLayer(
       layer.id,
       layer.source,
       sourceLayer: layer.sourceLayer,
+      tapable: tapable,
       properties: layer.options.toMap(),
-      // properties: layer.options.toMap().entries.fold(<String, String>{}, (initialValue, element) {
-      //   initialValue[element.key] = json.encode(element.value);
-      //   return initialValue;
-      // }),
     );
   }
 

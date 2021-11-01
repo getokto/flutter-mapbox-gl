@@ -44,6 +44,8 @@ abstract class MapboxGlPlatform {
 
   final onMapClickPlatform = ArgumentCallbacks<Map<String, dynamic>>();
 
+  final onLayerTapPlatform = ArgumentCallbacks<Map<String, dynamic>>();
+
   final onMapLongClickPlatform = ArgumentCallbacks<Map<String, dynamic>>();
 
   final ArgumentCallbacks<void> onAttributionClickPlatform =
@@ -301,6 +303,7 @@ abstract class MapboxGlPlatform {
 
   Future<void> addSymbolLayer(String layerId, String sourceId,  {
     String? sourceLayer,
+    bool tapable = false,
     required Map<String, dynamic> properties,
   }) async {
     throw UnimplementedError(
@@ -309,6 +312,7 @@ abstract class MapboxGlPlatform {
 
   Future<void> addLineLayer(String layerId, String sourceId,  {
     String? sourceLayer,
+    bool tapable = false,
     required Map<String, dynamic> properties,
   }) async {
     throw UnimplementedError(

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
@@ -47,7 +49,7 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
           lineColor: ConstantLayerProperty(Color(0x00ff69b4)),
           lineWidth: ConstantLayerProperty(1),
         )
-      ));
+      ), tapable: false);
 
       await _mapController.addSymbolLayer(SymbolLayer(
         id: 'terrain-data-symbols',
@@ -56,7 +58,7 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
             textSize: const ConstantLayerProperty(30.0),
             textField: 'X',
           ),
-      ));
+      ), tapable: true);
 
     } catch(_) {}
 
@@ -66,6 +68,9 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
     print('onStyleLoadedCallback');
   }
 
+  void _onLayerTap(String layerId, Point<double> point, LatLng coordinates, Map<String, dynamic> data) {
+        int a =1;
+      }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +82,7 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
               styleString: "mapbox://styles/mapbox/light-v10",
               trackCameraPosition: true,
               onMapCreated: _onMapCreated,
+              onLayerTap: _onLayerTap,
               onStyleLoadedCallback: _onStyleLoadedCallback,
               initialCameraPosition: const CameraPosition(
                 target: LatLng(37.753574, -122.447303),
@@ -87,6 +93,7 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
       ),
     );
   }
+
 
 }
 

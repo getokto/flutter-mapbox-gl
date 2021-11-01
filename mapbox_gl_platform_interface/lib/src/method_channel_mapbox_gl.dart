@@ -59,6 +59,20 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
         onMapClickPlatform(
             {'point': Point<double>(x, y), 'latLng': LatLng(lat, lng)});
         break;
+      case 'map#onLayerTap':
+        final String layerId = call.arguments['layerId'];
+        final double x = call.arguments['x'];
+        final double y = call.arguments['y'];
+        final double lng = call.arguments['lng'];
+        final double lat = call.arguments['lat'];
+        final data = Map<String, dynamic>.from(call.arguments['data']);
+        onLayerTapPlatform({
+          'layerId': layerId,
+          'point': Point<double>(x, y),
+          'latLng': LatLng(lat, lng),
+          'data': data,
+        });
+        break;
       case 'map#onMapLongClick':
         final double x = call.arguments['x'];
         final double y = call.arguments['y'];
@@ -740,11 +754,13 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   @override
   Future<void> addSymbolLayer(String id, String source,  {
     String? sourceLayer,
+    bool tapable = false,
     required Map<String, dynamic> properties,
   }) async {
     await _channel.invokeMethod('symbolLayer#add', <String, dynamic>{
       'id': id,
       'source': source,
+      'tapable': tapable,
       'properties': properties,
       if (sourceLayer != null) 'source-layer': sourceLayer,
     });
@@ -753,11 +769,13 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   @override
   Future<void> addLineLayer(String id, String source,  {
     String? sourceLayer,
+    bool tapable = false,
     required Map<String, dynamic> properties,
   }) async {
     await _channel.invokeMethod('lineLayer#add', <String, dynamic>{
       'id': id,
       'source': source,
+      'tapable': tapable,
       'properties': properties,
       if (sourceLayer != null) 'source-layer': sourceLayer,
     });

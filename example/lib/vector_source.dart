@@ -28,15 +28,12 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
 
   Future<void> _onMapCreated(MapboxMapController controller) async {
     _mapController = controller;
-    try {
-      await _mapController.addVectorSource('mapbox-terrain', VectorSource(
+
+    await _mapController.addVectorSource('mapbox-terrain', VectorSource(
         minZoom: 6,
         maxZoom: 14,
         url: Uri.parse('mapbox://mapbox.mapbox-terrain-v2'),
       ).toMap());
-    } catch(e) {
-      int a = 1;
-    }
 
     await _mapController.addLineLayer(LineLayer(
       id: 'terrain-data',
@@ -48,7 +45,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
         lineColor: ConstantLayerProperty(Color(0x00ff69b4)),
         lineWidth: ConstantLayerProperty(1),
       )
-    ));
+    ), tapable: true);
 
   }
 
