@@ -33,11 +33,21 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
     try {
       await _mapController.addGeoJsonSource('test', FeatureCollection(features: [
         Feature(
-          geometry: MultiPointGeometry(
-            coordinates: [LatLng(37.75787368720645, -122.45176792144774),  LatLng(37.75186799197793, -122.44288444519043)],
-          )
-        )
-
+          geometry: PointGeometry(
+            coordinates: LatLng(37.75787368720645, -122.45176792144774),
+          ),
+          properties: {
+            'id': '9760fb9f-53f9-4de2-b301-377d3259198b',
+          }
+        ),
+        Feature(
+          geometry: PointGeometry(
+            coordinates: LatLng(37.75186799197793, -122.44288444519043),
+          ),
+          properties: {
+            'id': 'a7a22035-7257-4a4d-98d8-a398441ffacd',
+          },
+        ),
       ]),{});
 
       await _mapController.addLineLayer(LineLayer(

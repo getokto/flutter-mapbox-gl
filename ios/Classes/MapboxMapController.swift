@@ -846,7 +846,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                     })
                 if let feature = closestFeatures.first {
                     channel?.invokeMethod("map#onLayerTap", arguments: [
-                        "id": tapableLayer,
+                        "layerId": tapableLayer,
                         "x": point.x,
                         "y": point.y,
                         "lng": feature.coordinate.longitude,
