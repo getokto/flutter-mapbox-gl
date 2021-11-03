@@ -42,7 +42,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
       options: LineLayerOptions(
         lineJoin: ConstantLayerProperty(LineJoin.Round),
         lineCap: ConstantLayerProperty(LineCap.Round),
-        lineColor: ConstantLayerProperty(Color(0x00ff69b4)),
+        lineColor: ConstantLayerProperty(Color(0xFFff0000).withOpacity(0.5)),
         lineWidth: ConstantLayerProperty(1),
       )
     ), tapable: true);

@@ -1066,29 +1066,23 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     }
     
     func addVectorSource(sourceId: String, properties: [String: Any]) {
-        do {
+        if let style = mapView.style {
+            let options = Convert.getVectorSourceOptions(properties: properties)
+            let tileUrls = Convert.getVectorURLTemplated(properties: properties)
             
-            if let style = mapView.style {
-                let options = Convert.getVectorSourceOptions(properties: properties)
-                let tileUrls = Convert.getVectorURLTemplated(properties: properties)
-                
-                if let url = properties["url"] as? String {
-                    if let url = URL(string: url) {
-                        let source = MGLVectorTileSource(identifier: sourceId, configurationURL: url)
-                        style.addSource(source)
-                    }
-                } else if tileUrls.count > 1 {
-                    let source = MGLVectorTileSource(
-                        identifier: sourceId,
-                        tileURLTemplates:tileUrls,
-                        options: options
-                    )
+            if let url = properties["url"] as? String {
+                if let url = URL(string: url) {
+                    let source = MGLVectorTileSource(identifier: sourceId, configurationURL: url)
                     style.addSource(source)
                 }
-
+            } else if tileUrls.count > 0 {
+                let source = MGLVectorTileSource(
+                    identifier: sourceId,
+                    tileURLTemplates:tileUrls,
+                    options: options
+                )
+                style.addSource(source)
             }
-
-        } catch {
         }
     }
 

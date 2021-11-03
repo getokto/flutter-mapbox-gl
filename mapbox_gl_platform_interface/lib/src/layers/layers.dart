@@ -114,7 +114,7 @@ abstract class LayerProperty<T> {
 
   const LayerProperty(this.value);
 
-  final T value;
+  final T? value;
 
   dynamic serialize() {
     final _value = value;
@@ -157,9 +157,11 @@ class ConstantLayerProperty<T> extends LayerProperty<T> {
 ///
 /// This is especially useful when building expressions
 class RawLayerProperty<T> extends LayerProperty<T> {
-  const RawLayerProperty(dynamic value): super(value);
+  const RawLayerProperty(dynamic value): _value = value, super(null);
 
-  dynamic serialize() => value;
+  final dynamic _value;
+
+  dynamic serialize() => _value;
 }
 
 abstract class StyleLayer<T extends StyleLayerOptions> {
@@ -204,10 +206,15 @@ extension HexColor on Color {
   }
 
   String toHex({
-    bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
-  '${red.toRadixString(16).padLeft(2, '0')}'
-  '${green.toRadixString(16).padLeft(2, '0')}'
-  '${blue.toRadixString(16).padLeft(2, '0')}';
+    bool leadingHashSign = true}) => [
+      '${leadingHashSign ? '#' : ''}',
+      if (alpha < 255) '${alpha.toRadixString(16).padLeft(2, '0')}',
+      '${red.toRadixString(16).padLeft(2, '0')}',
+      '${green.toRadixString(16).padLeft(2, '0')}',
+      '${blue.toRadixString(16).padLeft(2, '0')}',
+    ].join();
+
+  String toRGBA() => 'rgba($red,$green,$blue,$opacity)';
 }
 
 class SymbolPlacement implements EnumLike {
