@@ -766,6 +766,17 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
     });
   }
 
+
+  @override
+  Future<void> setSymbolLayerOptions(String layerId, {
+    required Map<String, dynamic> properties,
+  }) async {
+    await _channel.invokeMethod('symbolLayer#update', <String, dynamic>{
+      'id': layerId,
+      'properties': properties,
+    });
+  }
+
   @override
   Future<void> addLineLayer(String id, String source,  {
     String? sourceLayer,
@@ -778,6 +789,16 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
       'tapable': tapable,
       'properties': properties,
       if (sourceLayer != null) 'source-layer': sourceLayer,
+    });
+  }
+
+  @override
+  Future<void> setLineLayerOptions(String layerId, {
+    required Map<String, dynamic> properties,
+  }) async {
+    await _channel.invokeMethod('lineLayer#update', <String, dynamic>{
+      'id': layerId,
+      'properties': properties,
     });
   }
 

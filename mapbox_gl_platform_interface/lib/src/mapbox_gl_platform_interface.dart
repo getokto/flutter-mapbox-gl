@@ -310,6 +310,13 @@ abstract class MapboxGlPlatform {
         'addSymbolLayer() has not been implemented.');
   }
 
+  Future<void> setSymbolLayerOptions(String layerId, {
+    required Map<String, dynamic> properties,
+  }) async {
+    throw UnimplementedError(
+        'setSymbolLayerOptions() has not been implemented.');
+  }
+
   Future<void> addLineLayer(String layerId, String sourceId,  {
     String? sourceLayer,
     bool tapable = false,
@@ -318,4 +325,12 @@ abstract class MapboxGlPlatform {
     throw UnimplementedError(
         'addLineLayer() has not been implemented.');
   }
+
+  Future<void> setLineLayerOptions(String layerId, {
+    required Map<String, dynamic> properties,
+  }) async {
+    throw UnimplementedError(
+        'setLineLayerOptions() has not been implemented.');
+  }
+
 }

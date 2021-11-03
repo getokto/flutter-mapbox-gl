@@ -319,7 +319,7 @@ class MapboxMapController extends ChangeNotifier {
   }
 
 
-  /// Adds a mapbox gl geojson source
+  /// Adds a mapbox gl vector source
   ///
   /// The returned [Future] completes after the change has been made on the
   /// platform side.
@@ -327,10 +327,6 @@ class MapboxMapController extends ChangeNotifier {
     await MapboxGlPlatform.getInstance(_id).addVectorSource(
       sourceId,
       properties,
-      // properties.entries.fold(<String, String>{}, (initialValue, element) {
-      //   initialValue[element.key] = json.encode(element.value);
-      //   return initialValue;
-      // }),
     );
   }
 
@@ -347,17 +343,41 @@ class MapboxMapController extends ChangeNotifier {
     );
   }
 
+
+  /// Updates a mapbox gl symbol layer
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> setSymbolLayerProperties(String layerId, SymbolLayerOptions layerOptions) async {
+    await MapboxGlPlatform.getInstance(_id).setSymbolLayerOptions(
+      layerId,
+      properties: layerOptions.toMap(),
+    );
+  }
+
   /// Adds a mapbox gl line layer
   ///
   /// The returned [Future] completes after the change has been made on the
   /// platform side.
   Future<void> addLineLayer(LineLayer layer, { bool tapable = false }) async {
+    assert(layer.source != null);
     await MapboxGlPlatform.getInstance(_id).addLineLayer(
       layer.id,
-      layer.source,
+      layer.source!,
       sourceLayer: layer.sourceLayer,
       tapable: tapable,
       properties: layer.options.toMap(),
+    );
+  }
+
+  /// Updates a mapbox gl line layer
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> setLineLayerProperties(String layerId, LineLayerOptions layerOptions) async {
+    await MapboxGlPlatform.getInstance(_id).setLineLayerOptions(
+      layerId,
+      properties: layerOptions.toMap(),
     );
   }
 

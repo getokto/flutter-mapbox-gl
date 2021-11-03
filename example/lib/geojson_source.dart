@@ -30,52 +30,37 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
 
   Future<void> _onMapCreated(MapboxMapController controller) async {
     _mapController = controller;
-    try {
-      await _mapController.addGeoJsonSource('test', FeatureCollection(features: [
-        Feature(
-          geometry: PointGeometry(
-            coordinates: LatLng(37.75787368720645, -122.45176792144774),
-          ),
-          properties: {
-            'id': '9760fb9f-53f9-4de2-b301-377d3259198b',
-            'color': '#00FF00',
-          }
+
+    await _mapController.addGeoJsonSource('test', FeatureCollection(features: [
+      Feature(
+        geometry: PointGeometry(
+          coordinates: LatLng(37.75787368720645, -122.45176792144774),
         ),
-        Feature(
-          geometry: PointGeometry(
-            coordinates: LatLng(37.75186799197793, -122.44288444519043),
-          ),
-          properties: {
-            'id': 'a7a22035-7257-4a4d-98d8-a398441ffacd',
-            'color': '#FF0000',
-          },
+        properties: {
+          'id': '9760fb9f-53f9-4de2-b301-377d3259198b',
+          'color': '#00FF00',
+        }
+      ),
+      Feature(
+        geometry: PointGeometry(
+          coordinates: LatLng(37.75186799197793, -122.44288444519043),
         ),
-      ]),{});
+        properties: {
+          'id': 'a7a22035-7257-4a4d-98d8-a398441ffacd',
+          'color': '#FF0000',
+        },
+      ),
+    ]),{});
 
-      // await _mapController.addLineLayer(LineLayer(
-      //   id: 'terrain-data-lines',
-      //   source: 'test',
-      //   options: LineLayerOptions(
-      //     lineJoin: ConstantLayerProperty(LineJoin.Round),
-      //     lineCap: ConstantLayerProperty(LineCap.Round),
-      //     lineColor: ConstantLayerProperty(Color(0x00ff69b4)),
-      //     lineWidth: ConstantLayerProperty(1),
-      //   )
-      // ), tapable: false);
-
-      await _mapController.addSymbolLayer(SymbolLayer(
-        id: 'terrain-data-symbols',
-        source: 'test',
-          options: SymbolLayerOptions(
-            textSize: const ConstantLayerProperty(30.0),
-            textField: 'X',
-            textColor: RawLayerProperty<Color>(['get', 'color'])
-          ),
-      ), tapable: true);
-
-    } catch(_) {
-      int a= 1;
-    }
+    await _mapController.addSymbolLayer(SymbolLayer(
+      id: 'terrain-data-symbols',
+      source: 'test',
+        options: SymbolLayerOptions(
+          textSize: const ConstantLayerProperty(30.0),
+          textField: 'X',
+          textColor: RawLayerProperty(["get", "color"])
+        ),
+    ), tapable: true);
 
   }
 
@@ -84,8 +69,16 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
   }
 
   void _onLayerTap(String layerId, Point<double> point, LatLng coordinates, Map<String, dynamic> data) {
-        int a =1;
-      }
+
+    _mapController.setSymbolLayerProperties('terrain-data-symbols', SymbolLayerOptions(
+      textColor: RawLayerProperty([
+        "case",
+          ['==', ['get', 'id'], data['id']],
+          'green',
+          ["get", "color"],
+      ])
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -4,7 +4,7 @@ part of mapbox_gl_platform_interface;
 class LineLayer extends StyleLayer<StyleLayerOptions> {
   LineLayer({
       required this.id,
-      required this.source,
+      this.source,
       this.sourceLayer,
       LineLayerOptions? options,
     }
@@ -18,7 +18,7 @@ class LineLayer extends StyleLayer<StyleLayerOptions> {
   /// The source from which to obtain the data to style.
   ///
   /// If the source has not yet been added to the current style, the behavior is undefined.
-  final String source;
+  final String? source;
 
   final String? sourceLayer;
 
@@ -185,36 +185,6 @@ class LineLayerOptions extends StyleLayerOptions {
     );
   }
 
-  // static T? _deserializeJson<T>(Map<String, dynamic> map, String type, String key) {
-  //   final value = map.containsKey(type) && map[type] is Map
-  //     ? map[type][key]
-  //     : null;
-  //   if (value == null) {
-  //     return null;
-  //   }
-
-  //   // Simple values
-  //   if ([String, double, bool, int].contains(T)) {
-  //     return value as T;
-  //   }
-
-  //   if (T == Color) {
-  //     return HexColor.fromHex(value) as T;
-  //   }
-
-  //   // Enum values
-  //   if (T == LineJoin) {
-  //     return LineJoin.fromString(value as String) as T;
-  //   } if (T == LineCap) {
-  //     return LineCap.fromString(value as String) as T;
-  //   } if (T == AnchorAligment) {
-  //     return AnchorAligment.fromString(value as String) as T;
-  //   } if (T == Visibility) {
-  //     return Visibility.fromString(value as String) as T;
-  //   }
-
-  //   throw UnimplementedError();
-  // }
 
   @override
   bool operator ==(Object other) {

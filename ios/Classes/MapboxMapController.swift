@@ -534,6 +534,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             }
            
             result(nil)
+        case "symbolLayer#update":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let layerId = arguments["id"] as? String else { return }
+            guard let properties = arguments["properties"] as? [String: Any] else { return }
+            
+            updateSymbolLayer(layerId: layerId, properties: properties)
+                       
+            result(nil)
         case "lineLayer#add":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["source"] as? String else { return }
@@ -550,6 +558,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 tappableLayers.remove(layerId)
             }
             
+            result(nil)
+        case "lineLayer#update":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let layerId = arguments["id"] as? String else { return }
+            guard let properties = arguments["properties"] as? [String: Any] else { return }
+            
+            updateLineLayer(layerId: layerId, properties: properties)
+                       
             result(nil)
         case "line#getGeometry":
             guard let lineAnnotationController = lineAnnotationController else { return }
@@ -1097,6 +1113,15 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
     }
 
+    
+    func updateSymbolLayer(layerId: String, properties: [String: Any]) {
+        if let style = mapView.style {
+            if let layer = style.layer(withIdentifier: layerId) as? MGLSymbolStyleLayer {
+                Convert.addSymbolProperties(symbolLayer: layer, properties: properties)
+            }
+        }
+    }
+    
     func addLineLayer(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: Any]) {
         if let style = mapView.style {
             if let source = style.source(withIdentifier: sourceId) {
@@ -1105,6 +1130,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 Convert.addLineProperties(lineLayer: layer, properties: properties)
                 style.addLayer(layer)
                 layer.isVisible = true
+            }
+        }
+    }
+    
+    func updateLineLayer(layerId: String, properties: [String: Any]) {
+        if let style = mapView.style {
+            if let layer = style.layer(withIdentifier: layerId) as? MGLLineStyleLayer {
+                Convert.addLineProperties(lineLayer: layer, properties: properties)
             }
         }
     }
