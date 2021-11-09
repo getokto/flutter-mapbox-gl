@@ -445,107 +445,10 @@ class SymbolLayerOptions extends StyleLayerOptions {
     if (value is EnumLike) {
       return value.toString();
     } if (value is Color) {
-      return value.toHex();
+      return ["rgba", value.red, value.green, value.blue, value.opacity];
     }
     return value;
   }
-
-
-  // static T? _deserializeJson<T>(Map<String, dynamic> map, String type, String key) {
-  //   final value = map.containsKey(type) && map[type] is Map
-  //     ? map[type][key]
-  //     : null;
-  //   if (value == null) {
-  //     return null;
-  //   }
-
-
-  //   if (typesEqualOrNull<T, LayerProperty<bool>>()) {
-  //       return ConstantLayerProperty<bool>(_deserialzeValue<bool>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<double>>()) {
-  //       return ConstantLayerProperty<double>(_deserialzeValue<double>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<int>>()) {
-  //       return ConstantLayerProperty<int>(_deserialzeValue<int>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<Color>>()) {
-  //       return ConstantLayerProperty<Color>(_deserialzeValue<Color>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<SymbolPlacement>>()) {
-  //       return ConstantLayerProperty<SymbolPlacement>(_deserialzeValue<SymbolPlacement>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<Anchor>>()) {
-  //       return ConstantLayerProperty<Anchor>(_deserialzeValue<Anchor>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<MapAligment>>()) {
-  //       return ConstantLayerProperty<MapAligment>(_deserialzeValue<MapAligment>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<AnchorAligment>>()) {
-  //       return ConstantLayerProperty<AnchorAligment>(_deserialzeValue<AnchorAligment>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<MapFit>>()) {
-  //       return ConstantLayerProperty<MapFit>(_deserialzeValue<MapFit>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<ZOrder>>()) {
-  //       return ConstantLayerProperty<ZOrder>(_deserialzeValue<ZOrder>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<Justify>>()) {
-  //       return ConstantLayerProperty<Justify>(_deserialzeValue<Justify>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<TextWritingMode>>()) {
-  //       return ConstantLayerProperty<TextWritingMode>(_deserialzeValue<TextWritingMode>(value!)) as T;
-  //   } if (typesEqualOrNull<T, LayerProperty<Visibility>>()) {
-  //       return ConstantLayerProperty<Visibility>(_deserialzeValue<Visibility>(value!)) as T;
-  //   }  if (typesEqualOrNull<T, LayerProperty<Offset>>()) {
-  //       return ConstantLayerProperty<Offset>(_deserialzeValue<Offset>(value!)) as T;
-  //   }  if (typesEqualOrNull<T, LayerProperty<EdgeInsets>>()) {
-  //       return ConstantLayerProperty<EdgeInsets>(_deserialzeValue<EdgeInsets>(value!)) as T;
-  //   }
-
-  //   return _deserialzeValue(value!);
-  // }
-
-  // // static bool typesEqual<T1, T2>() => T1 == T2;
-
-  // // static bool typesEqualOrNull<T1, T2>() => typesEqual<T1, T2>() || typesEqual<T1, T2?>();
-
-  // static T _deserialzeValue<T>(dynamic value) {
-
-  //   if (typesEqualOrNull<T, String>() ) {
-  //      return value as T;
-  //   } if (typesEqualOrNull<T, double>() ) {
-  //      return value * 1.0 as T;
-  //   } if (typesEqualOrNull<T, bool>() ) {
-  //      return value as T;
-  //   } if (typesEqualOrNull<T, int>() ) {
-  //      return value as T;
-  //   }  if (typesEqualOrNull<T, List<String>>() ) {
-  //      return value as T;
-  //   }
-
-  //   if (typesEqualOrNull<T, Color>() ) {
-  //     return HexColor.fromHex(value) as T;
-  //   } if (typesEqualOrNull<T, Offset>() ) {
-  //     return Offset(value[0] * 1.0, value[1] * 1.0) as T;
-  //   } if (typesEqualOrNull<T, EdgeInsets>() ) {
-  //     return EdgeInsets.fromLTRB(value[3] * 1.0, value[0] * 1.0, value[1] * 1.0, value[2] * 1.0) as T;
-  //   }
-
-  //   // Enum values
-  //   if (typesEqualOrNull<T, SymbolPlacement>()) {
-  //     return SymbolPlacement.fromString(value as String) as T;
-  //   } if (typesEqualOrNull<T, Anchor>()) {
-  //     return Anchor.fromString(value as String) as T;
-  //   } if (typesEqualOrNull<T, MapAligment>() ) {
-  //     return MapAligment.fromString(value as String) as T;
-  //   } if (typesEqualOrNull<T, AnchorAligment>() ) {
-  //     return AnchorAligment.fromString(value as String) as T;
-  //   } if (typesEqualOrNull<T, MapFit>() ) {
-  //     return MapFit.fromString(value as String) as T;
-  //   } if (typesEqualOrNull<T, ZOrder>() ) {
-  //     return ZOrder.fromString(value as String) as T;
-  //   } if (typesEqualOrNull<T, Justify>() ) {
-  //     return Justify.fromString(value as String) as T;
-  //   } if (typesEqualOrNull<T, TextTransform>() ) {
-  //     return TextTransform.fromString(value as String) as T;
-  //   } if (typesEqualOrNull<T, TextWritingMode>() ) {
-  //     return TextWritingMode.fromString(value as String) as T;
-  //   } if (typesEqualOrNull<T, Visibility>() ) {
-  //     return Visibility.fromString(value as String) as T;
-  //   }
-
-  //   throw UnimplementedError();
-  // }
 
   @override
   bool operator ==(Object other) {
