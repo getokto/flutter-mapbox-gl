@@ -360,9 +360,7 @@ class Convert {
         for (_, propertyTypeValue) in properties {
             for (propertyName, propertyValue) in propertyTypeValue as! [String: Any] {
                 
-                let expr = propertyValue is NSArray
-                    ? NSExpression(mglJSONObject: propertyValue)
-                    : NSExpression(forConstantValue: propertyValue)
+                let expr = NSExpression(mglJSONObject: propertyValue)
                 
                 switch propertyName {
                     case "icon-allow-overlap":
@@ -374,12 +372,7 @@ class Convert {
                     case "icon-halo-blur":
                         symbolLayer.iconHaloBlur = expr
                     case "icon-halo-color":
-                        if propertyValue is String {
-                            symbolLayer.iconHaloColor = NSExpression(forConstantValue: UIColor.init(hex:propertyValue as! String))
-                        } else {
-                            symbolLayer.iconHaloColor = expr
-                        }
-                        
+                        symbolLayer.iconHaloColor = expr
                     case "icon-halo-width":
                         symbolLayer.iconHaloWidth = expr
                     case "icon-ignore-placement":
@@ -427,12 +420,7 @@ class Convert {
                     case "text-anchor":
                         symbolLayer.textAnchor = expr
                     case "text-color":
-                        if propertyValue is String {
-                            symbolLayer.textColor = NSExpression(forConstantValue: UIColor.init(hex:propertyValue as! String))
-                        } else {
-                            symbolLayer.textColor = expr
-                        }
-                        
+                        symbolLayer.textColor = expr
                     case "text-field":
                         symbolLayer.text = expr
                     case "text-font":
@@ -440,11 +428,7 @@ class Convert {
                     case "text-halo-blur":
                         symbolLayer.textHaloBlur = expr
                     case "text-halo-color":
-                        if propertyValue is String {
-                            symbolLayer.textHaloColor = NSExpression(forConstantValue: UIColor.init(hex:propertyValue as! String))
-                        } else {
-                            symbolLayer.textHaloColor = expr
-                        }
+                        symbolLayer.textHaloColor = expr
                     case "text-halo-width":
                         symbolLayer.textHaloWidth = expr
                     case "text-ignore-placement":
@@ -501,20 +485,14 @@ class Convert {
         for (_, propertyTypeValue) in properties {
             
             for (propertyName, propertyValue) in propertyTypeValue as! [String: Any] {
-                let expr = propertyValue is NSArray
-                    ? NSExpression(mglJSONObject: propertyValue)
-                    : NSExpression(forConstantValue: propertyValue)
+                let expr = NSExpression(mglJSONObject: propertyValue)
                 switch propertyName {
                     case "line-blur":
                         lineLayer.lineBlur = expr
                     case "line-cap":
-                        lineLayer.lineCap = NSExpression(forConstantValue: propertyValue)
+                        lineLayer.lineCap = expr
                     case "line-color":
-                    if propertyValue is String {
-                        lineLayer.lineColor = NSExpression(forConstantValue: UIColor.init(hex:propertyValue as! String))
-                    } else {
                         lineLayer.lineColor = expr
-                    }
                     case "line-dasharray":
                         lineLayer.lineDashPattern = expr
                     case "line-gap-width":
@@ -603,41 +581,5 @@ class Convert {
             }
         }
         return options
-    }
-}
-
-
-extension UIColor {
-    convenience init?(hex: String) {
-        var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
-
-        var rgb: UInt32 = 0
-
-        var r: CGFloat = 0.0
-        var g: CGFloat = 0.0
-        var b: CGFloat = 0.0
-        var a: CGFloat = 1.0
-
-        let length = hexSanitized.count
-
-        guard Scanner(string: hexSanitized).scanHexInt32(&rgb) else { return nil }
-
-        if length == 6 {
-            r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
-            g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
-            b = CGFloat(rgb & 0x0000FF) / 255.0
-
-        } else if length == 8 {
-            a = CGFloat((rgb & 0xFF000000) >> 24) / 255.0
-            r = CGFloat((rgb & 0x00FF0000) >> 16) / 255.0
-            g = CGFloat((rgb & 0x0000FF00) >> 8) / 255.0
-            b = CGFloat(rgb & 0x000000FF) / 255.0
-
-        } else {
-            return nil
-        }
-
-        self.init(red: r, green: g, blue: b, alpha: a)
     }
 }

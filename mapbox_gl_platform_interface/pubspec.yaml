@@ -7,6 +7,7 @@ dependencies:
   flutter:
     sdk: flutter
   meta: ^1.0.5
+  from_css_color: ^2.0.0
 
 dev_dependencies:
   flutter_test:

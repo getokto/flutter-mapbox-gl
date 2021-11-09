@@ -303,7 +303,7 @@ abstract class MapboxGlPlatform {
 
   Future<void> addSymbolLayer(String layerId, String sourceId,  {
     String? sourceLayer,
-    bool tapable = false,
+    bool tappable = false,
     required Map<String, dynamic> properties,
   }) async {
     throw UnimplementedError(
@@ -319,7 +319,7 @@ abstract class MapboxGlPlatform {
 
   Future<void> addLineLayer(String layerId, String sourceId,  {
     String? sourceLayer,
-    bool tapable = false,
+    bool tappable = false,
     required Map<String, dynamic> properties,
   }) async {
     throw UnimplementedError(

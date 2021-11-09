@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show visibleForTesting;
+import 'package:from_css_color/from_css_color.dart';
 
 part 'src/callbacks.dart';
 part 'src/camera.dart';

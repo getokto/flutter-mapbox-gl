@@ -30,7 +30,9 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
 
   Future<void> _onMapCreated(MapboxMapController controller) async {
     _mapController = controller;
+  }
 
+  Future<void> _onStyleLoadedCallback() async {
     await _mapController.addGeoJsonSource('test', FeatureCollection(features: [
       Feature(
         geometry: PointGeometry(
@@ -60,12 +62,7 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
           textField: 'X',
           textColor: RawLayerProperty(["get", "color"])
         ),
-    ), tapable: true);
-
-  }
-
-  void _onStyleLoadedCallback() {
-    print('onStyleLoadedCallback');
+    ), tappable: true);
   }
 
   void _onLayerTap(String layerId, Point<double> point, LatLng coordinates, Map<String, dynamic> data) {

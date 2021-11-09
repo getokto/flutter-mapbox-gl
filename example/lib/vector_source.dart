@@ -28,8 +28,11 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
 
   Future<void> _onMapCreated(MapboxMapController controller) async {
     _mapController = controller;
+  }
 
-    await _mapController.addVectorSource('mapbox-terrain', VectorSource(
+  Future<void> _onStyleLoadedCallback() async {
+
+        await _mapController.addVectorSource('mapbox-terrain', VectorSource(
         minZoom: 6,
         maxZoom: 14,
         url: Uri.parse('mapbox://mapbox.mapbox-terrain-v2'),
@@ -45,14 +48,8 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
         lineColor: ConstantLayerProperty(Color(0xFFff0000).withOpacity(0.5)),
         lineWidth: ConstantLayerProperty(1),
       )
-    ), tapable: true);
-
+    ), tappable: true);
   }
-
-  void _onStyleLoadedCallback() {
-    print('onStyleLoadedCallback');
-  }
-
 
   @override
   Widget build(BuildContext context) {

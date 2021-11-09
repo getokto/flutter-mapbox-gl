@@ -83,6 +83,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -143,6 +144,8 @@ final class MapboxMapController
   private Style style;
   private List<String> annotationOrder;
   private List<String> annotationConsumeTapEvents;
+  private HashSet<String> tappableLayers = new HashSet<String>();
+
 
   MapboxMapController(
     int id,
@@ -303,10 +306,11 @@ final class MapboxMapController
     }
   }
 
+  
   Style.OnStyleLoaded onStyleLoadedCallback = new Style.OnStyleLoaded() {
     @Override
-    public void onStyleLoaded(@NonNull Style style) {
-      MapboxMapController.this.style = style;
+    public void onStyleLoaded(@NonNull Style nextStyle) {
+      style = nextStyle;
       for(String annotationType : annotationOrder) {
         switch (annotationType) {
           case "AnnotationType.fill":
@@ -325,7 +329,7 @@ final class MapboxMapController
             throw new IllegalArgumentException("Unknown annotation type: " + annotationType + ", must be either 'fill', 'line', 'circle' or 'symbol'");
         }
       }
-      
+
       if (myLocationEnabled) {
         enableLocationComponent(style);
       }
@@ -391,6 +395,7 @@ final class MapboxMapController
 
   private void addVectorSource(String sourceName, HashMap<String, ?> properties) {
 
+    Log.d("MapBoxController_" + id, "addVectorSource, idx: 4");
     if (properties.containsKey("url")) {
       VectorSource vectorSource = new VectorSource(sourceName, (String)properties.get("url"));
       style.addSource(vectorSource);
@@ -439,6 +444,14 @@ final class MapboxMapController
     style.addLayer(symbolLayer);
   }
 
+  private void updateSymbolLayer(String layerName,
+                               PropertyValue[] properties) {
+
+    LineLayer lineLayer = style.getLayerAs(layerName);
+
+    lineLayer.setProperties(properties);
+  }
+
   private void addLineLayer(String layerName,
                             String sourceName,
                             String sourceLayer,
@@ -452,6 +465,14 @@ final class MapboxMapController
     lineLayer.setProperties(properties);
 
     style.addLayer(lineLayer);
+  }
+
+  private void updateLineLayer(String layerName,
+                            PropertyValue[] properties) {
+
+    LineLayer lineLayer = style.getLayerAs(layerName);
+
+    lineLayer.setProperties(properties);
   }
 
   private void enableSymbolManager(@NonNull Style style) {
@@ -1004,8 +1025,23 @@ final class MapboxMapController
         final String sourceId = call.argument("source");
         final String layerId = call.argument("id");
         final String sourceLayerId = call.argument("source-layer");
+        final Boolean tappable = call.argument("tappable");
         final PropertyValue[] properties = Convert.interpretSymbolLayerProperties(call.argument("properties"));
         addSymbolLayer(layerId, sourceId, sourceLayerId, properties);
+
+        if (tappable) {
+          tappableLayers.add(layerId);
+        } else {
+          tappableLayers.remove(layerId);
+        }
+
+        result.success(null);
+        break;
+      }
+      case "symbolLayer#update": {
+        final String layerId = call.argument("id");
+        final PropertyValue[] properties = Convert.interpretSymbolLayerProperties(call.argument("properties"));
+        updateSymbolLayer(layerId, properties);
         result.success(null);
         break;
       }
@@ -1013,8 +1049,23 @@ final class MapboxMapController
         final String sourceId = call.argument("source");
         final String layerId = call.argument("id");
         final String sourceLayerId = call.argument("source-layer");
+        final Boolean tappable = call.argument("tappable");
         final PropertyValue[] properties = Convert.interpretLineLayerProperties(call.argument("properties"));
         addLineLayer(layerId, sourceId, sourceLayerId,  properties);
+
+        if (tappable) {
+          tappableLayers.add(layerId);
+        } else {
+          tappableLayers.remove(layerId);
+        }
+
+        result.success(null);
+        break;
+      }
+      case "lineLayer#update": {
+        final String layerId = call.argument("id");
+        final PropertyValue[] properties = Convert.interpretLineLayerProperties(call.argument("properties"));
+        updateLineLayer(layerId, properties);
         result.success(null);
         break;
       }

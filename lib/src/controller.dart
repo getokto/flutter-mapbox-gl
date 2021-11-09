@@ -334,11 +334,11 @@ class MapboxMapController extends ChangeNotifier {
   ///
   /// The returned [Future] completes after the change has been made on the
   /// platform side.
-  Future<void> addSymbolLayer(SymbolLayer layer, { bool tapable = false }) async {
+  Future<void> addSymbolLayer(SymbolLayer layer, { bool tappable = false }) async {
     await MapboxGlPlatform.getInstance(_id).addSymbolLayer(
       layer.id,
       layer.source,
-      tapable: tapable,
+      tappable: tappable,
       properties: layer.options.toMap(),
     );
   }
@@ -359,13 +359,13 @@ class MapboxMapController extends ChangeNotifier {
   ///
   /// The returned [Future] completes after the change has been made on the
   /// platform side.
-  Future<void> addLineLayer(LineLayer layer, { bool tapable = false }) async {
+  Future<void> addLineLayer(LineLayer layer, { bool tappable = false }) async {
     assert(layer.source != null);
     await MapboxGlPlatform.getInstance(_id).addLineLayer(
       layer.id,
       layer.source!,
       sourceLayer: layer.sourceLayer,
-      tapable: tapable,
+      tappable: tappable,
       properties: layer.options.toMap(),
     );
   }

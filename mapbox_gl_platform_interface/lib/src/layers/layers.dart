@@ -54,9 +54,6 @@ T? deserializeJson<T>(Map<String, dynamic> map, String type, String key) {
   return deserialzeValue(value!);
 }
 
-// static bool typesEqual<T1, T2>() => T1 == T2;
-
-// static bool typesEqualOrNull<T1, T2>() => typesEqual<T1, T2>() || typesEqual<T1, T2?>();
 
 T deserialzeValue<T>(dynamic value) {
 
@@ -73,7 +70,7 @@ T deserialzeValue<T>(dynamic value) {
   }
 
   if (typesEqualOrNull<T, Color>() ) {
-    return HexColor.fromHex(value) as T;
+    return fromCssColor(value) as T;
   } if (typesEqualOrNull<T, Offset>() ) {
     return Offset(value[0] * 1.0, value[1] * 1.0) as T;
   } if (typesEqualOrNull<T, EdgeInsets>() ) {
@@ -121,7 +118,7 @@ abstract class LayerProperty<T> {
     if (_value is EnumLike) {
       return _value.toString();
     } if (_value is Color) {
-      return _value.toHex();
+      return ["rgba", _value.red, _value.green, _value.blue, _value.opacity];
     } if (_value  is Offset) {
       return [_value.dx, _value.dy];
     } if (_value is EdgeInsets) {
@@ -196,26 +193,6 @@ abstract class EnumLike {
   int get value;
 }
 
-extension HexColor on Color {
-  /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
-  static Color fromHex(String hexString) {
-    final buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
-  }
-
-  String toHex({
-    bool leadingHashSign = true}) => [
-      '${leadingHashSign ? '#' : ''}',
-      if (alpha < 255) '${alpha.toRadixString(16).padLeft(2, '0')}',
-      '${red.toRadixString(16).padLeft(2, '0')}',
-      '${green.toRadixString(16).padLeft(2, '0')}',
-      '${blue.toRadixString(16).padLeft(2, '0')}',
-    ].join();
-
-  String toRGBA() => 'rgba($red,$green,$blue,$opacity)';
-}
 
 class SymbolPlacement implements EnumLike {
   const SymbolPlacement._(this.value);

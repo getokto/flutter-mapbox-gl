@@ -521,13 +521,13 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["source"] as? String else { return }
             guard let layerId = arguments["id"] as? String else { return }
-            guard let tapable = arguments["tapable"] as? Bool else { return }
+            guard let tappable = arguments["tappable"] as? Bool else { return }
             guard let properties = arguments["properties"] as? [String: Any] else { return }
             let sourceLayerId = arguments["source-layer"] as? String
             
             addSymbolLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties)
             
-            if tapable {
+            if tappable {
                 tappableLayers.insert(layerId)
             } else {
                 tappableLayers.remove(layerId)
@@ -546,13 +546,13 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["source"] as? String else { return }
             guard let layerId = arguments["id"] as? String else { return }
-            guard let tapable = arguments["tapable"] as? Bool else { return }
+            guard let tappable = arguments["tappable"] as? Bool else { return }
             guard let properties = arguments["properties"] as? [String: Any] else { return }
             let sourceLayerId = arguments["source-layer"] as? String
             
             addLineLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties)
 
-            if tapable {
+            if tappable {
                 tappableLayers.insert(layerId)
             } else {
                 tappableLayers.remove(layerId)
@@ -835,11 +835,11 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         if sender.state == .ended && tappableLayers.count > 0 {
             
             // We loop the list so we can figure out the layerid of the matching feature
-            for tapableLayer in tappableLayers {
+            for tappableLayer in tappableLayers {
             
-                for feature in mapView.visibleFeatures(at: point, styleLayerIdentifiers: [tapableLayer]) {
+                for feature in mapView.visibleFeatures(at: point, styleLayerIdentifiers: [tappableLayer]) {
                     channel?.invokeMethod("map#onLayerTap", arguments: [
-                        "layerId": tapableLayer,
+                        "layerId": tappableLayer,
                         "x": point.x,
                         "y": point.y,
                         "lng": feature.coordinate.longitude,
@@ -854,7 +854,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                  
                 // Otherwise, get all features within a rect the size of a touch (44x44).
                 let touchRect = CGRect(origin: point, size: .zero).insetBy(dx: -22.0, dy: -22.0)
-                let possibleFeatures = mapView.visibleFeatures(in: touchRect, styleLayerIdentifiers: [tapableLayer]).filter { $0 is MGLPointFeature }
+                let possibleFeatures = mapView.visibleFeatures(in: touchRect, styleLayerIdentifiers: [tappableLayer]).filter { $0 is MGLPointFeature }
                  
                 // Select the closest feature to the touch center.
                 let closestFeatures = possibleFeatures.sorted(by: {
@@ -862,7 +862,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                     })
                 if let feature = closestFeatures.first {
                     channel?.invokeMethod("map#onLayerTap", arguments: [
-                        "layerId": tapableLayer,
+                        "layerId": tappableLayer,
                         "x": point.x,
                         "y": point.y,
                         "lng": feature.coordinate.longitude,
