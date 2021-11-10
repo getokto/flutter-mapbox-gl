@@ -35,6 +35,7 @@ import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.telemetry.TelemetryEnabler;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
@@ -437,7 +438,6 @@ final class MapboxMapController
     if (sourceLayer != null) {
       symbolLayer.setSourceLayer(sourceLayer);
     }
-
 
     symbolLayer.setProperties(properties);
 
@@ -1251,12 +1251,30 @@ final class MapboxMapController
   @Override
   public boolean onMapClick(@NonNull LatLng point) {
     PointF pointf = mapboxMap.getProjection().toScreenLocation(point);
+
+    for (String tappableLayer : tappableLayers ) {
+      List<Feature> features = mapboxMap.queryRenderedFeatures(pointf, tappableLayer);
+
+      for (Feature feature : features) {
+        final Map<String, Object> fArguments = new HashMap<>(5);
+        fArguments.put("layerId", tappableLayer);
+        fArguments.put("x", pointf.x);
+        fArguments.put("y", pointf.y);
+        fArguments.put("lng", ((Point)feature.geometry()).longitude());
+        fArguments.put("lat", ((Point)feature.geometry()).latitude());
+        methodChannel.invokeMethod("map#onLayerTap", fArguments);
+        return true;
+      }
+    }
+
+
     final Map<String, Object> arguments = new HashMap<>(5);
     arguments.put("x", pointf.x);
     arguments.put("y", pointf.y);
     arguments.put("lng", point.getLongitude());
     arguments.put("lat", point.getLatitude());
     methodChannel.invokeMethod("map#onMapClick", arguments);
+
     return true;
   }
 

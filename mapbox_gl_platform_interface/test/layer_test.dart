@@ -30,7 +30,7 @@ void main() {
         "line-join": "round"
       },
       "paint": {
-        "line-color": "#ff69b4",
+        "line-color": ["rgba", 255, 105, 180, 0.0 ],
         "line-width": 1
       }
     }));
@@ -49,7 +49,7 @@ void main() {
         "line-join": "round"
       },
       "paint": {
-        "line-color": "#ff69b4",
+        "line-color":["rgba", 255, 105, 180, 0.0],
         "line-width": 1
       }
     };
@@ -75,7 +75,7 @@ void main() {
       id: 'points',
       source: 'point',
       options: SymbolLayerOptions(
-        iconImage: 'cat',
+        iconImage: ImageLayerProperty('cat'),
         iconSize: ConstantLayerProperty(0.25),
       )
     );
@@ -101,7 +101,7 @@ void main() {
       'type': 'symbol',
       'source': 'point', // reference the data source
       'layout': {
-        'icon-image': 'cat', // reference the image
+        'icon-image': ['image', 'cat'], // reference the image
         'icon-size': 0.25
       }
     };
@@ -113,7 +113,7 @@ void main() {
       id: 'points',
       source: 'point',
       options: SymbolLayerOptions(
-        iconImage: 'cat',
+        iconImage: ImageLayerProperty('cat'),
         iconSize: ConstantLayerProperty(0.25),
       )
     )));
@@ -132,7 +132,7 @@ void main() {
         iconHaloColor: ConstantLayerProperty(Colors.blue),
         iconHaloWidth: ConstantLayerProperty(1),
         iconIgnorePlacement: true,
-        iconImage: "cat",
+        iconImage: ImageLayerProperty('cat'),
         iconKeepUpright: true,
         iconOffset: ConstantLayerProperty(Offset(-12, -12)),
         iconOpacity: ConstantLayerProperty(1),
@@ -194,7 +194,7 @@ void main() {
         "icon-allow-overlap": true,
         "icon-anchor": "bottom",
         "icon-ignore-placement": true,
-        "icon-image": "cat",
+        "icon-image": ["image", "cat"],
         "icon-keep-upright": true,
         "icon-offset": [
           -12,
@@ -248,9 +248,9 @@ void main() {
         "visibility": "none"
       },
       "paint": {
-        "icon-color": "#f44336",
+        "icon-color": ["rgba", 244, 67, 54, 0.0 ],
         "icon-halo-blur": 0.5,
-        "icon-halo-color": "#2196f3",
+        "icon-halo-color": ["rgba", 33, 150, 243, 0.0],
         "icon-halo-width": 1,
         "icon-opacity": 1,
         "icon-translate": [
@@ -258,9 +258,9 @@ void main() {
           12,
         ],
         "icon-translate-anchor": "map",
-        "text-color": "#4caf50",
+        "text-color": ["rgba", 76, 175, 80, 0.0],
         "text-halo-blur": 0.2,
-        "text-halo-color": "#2196f3",
+        "text-halo-color": ["rgba", 33, 150, 243, 0.0],
         "text-halo-width": 1,
         "text-opacity": 1,
         "text-translate": [0, 0],
@@ -283,7 +283,7 @@ void main() {
         "icon-allow-overlap": true,
         "icon-anchor": "bottom",
         "icon-ignore-placement": true,
-        "icon-image": "cat",
+        "icon-image": ["image","cat"],
         "icon-keep-upright": true,
         "icon-offset": [
           -12,
@@ -370,7 +370,7 @@ void main() {
         iconHaloColor: ConstantLayerProperty(Colors.blue.shade500),
         iconHaloWidth: ConstantLayerProperty(1),
         iconIgnorePlacement: true,
-        iconImage: "cat",
+        iconImage: ImageLayerProperty("cat"),
         iconKeepUpright: true,
         iconOffset: ConstantLayerProperty(Offset(-12, -12)),
         iconOpacity: ConstantLayerProperty(1),

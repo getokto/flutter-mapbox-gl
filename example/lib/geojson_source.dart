@@ -1,6 +1,10 @@
 import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
 import 'main.dart';
@@ -33,6 +37,9 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
   }
 
   Future<void> _onStyleLoadedCallback() async {
+
+    await addImageFromAsset("assett-image", "assets/symbols/custom-icon.png");
+
     await _mapController.addGeoJsonSource('test', FeatureCollection(features: [
       Feature(
         geometry: PointGeometry(
@@ -58,11 +65,21 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
       id: 'terrain-data-symbols',
       source: 'test',
         options: SymbolLayerOptions(
-          textSize: const ConstantLayerProperty(30.0),
-          textField: 'X',
-          textColor: RawLayerProperty(["get", "color"])
+          iconImage: ImageLayerProperty('assett-image'),
+          iconColor: RawLayerProperty(["get", "color"]),
         ),
     ), tappable: true);
+
+
+    // await _mapController.addSymbolLayer(SymbolLayer(
+    //   id: 'terrain-data-symbols2',
+    //   source: 'test',
+    //     options: SymbolLayerOptions(
+    //       textSize: const ConstantLayerProperty(30.0),
+    //       textField: 'X',
+    //       textColor: RawLayerProperty(["get", "color"])
+    //     ),
+    // ), tappable: true);
   }
 
   void _onLayerTap(String layerId, Point<double> point, LatLng coordinates, Map<String, dynamic> data) {
@@ -77,8 +94,28 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
     ));
   }
 
+  Future<void> addImageFromAsset(String name, String assetName) async {
+
+
+    ImageConfiguration configuration = ImageConfiguration(
+      devicePixelRatio: window.devicePixelRatio,
+      platform: defaultTargetPlatform,
+    );
+    AssetImage assetImage = AssetImage(assetName);
+
+    final imageKey = await assetImage.obtainKey(configuration);
+
+
+    final ByteData bytes = await rootBundle.load(imageKey.name);
+    final Uint8List list = bytes.buffer.asUint8List();
+
+    await _mapController.addImage(name, list, true);
+  }
+
+
   @override
   Widget build(BuildContext context) {
+
     return new Scaffold(
       body: Stack(
           children: [
@@ -98,7 +135,5 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
       ),
     );
   }
-
-
 }
 

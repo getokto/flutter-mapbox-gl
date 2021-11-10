@@ -32,7 +32,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
 
   Future<void> _onStyleLoadedCallback() async {
 
-        await _mapController.addVectorSource('mapbox-terrain', VectorSource(
+      await _mapController.addVectorSource('mapbox-terrain', VectorSource(
         minZoom: 6,
         maxZoom: 14,
         url: Uri.parse('mapbox://mapbox.mapbox-terrain-v2'),

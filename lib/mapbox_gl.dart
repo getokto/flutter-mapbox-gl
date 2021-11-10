@@ -41,6 +41,7 @@ export 'package:mapbox_gl_platform_interface/mapbox_gl_platform_interface.dart'
         FillOptions,
         VectorSource,
         ConstantLayerProperty,
+        ImageLayerProperty,
         RawLayerProperty,
         SymbolLayer,
         SymbolLayerOptions,

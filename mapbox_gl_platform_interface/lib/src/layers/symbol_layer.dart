@@ -169,7 +169,7 @@ class SymbolLayerOptions extends StyleLayerOptions {
   final LayerProperty<Color>? iconHaloColor;
   final LayerProperty<double>? iconHaloWidth;
   final bool? iconIgnorePlacement;
-  final String? iconImage;
+  final ImageLayerProperty? iconImage;
   final bool? iconKeepUpright;
   final LayerProperty<Offset>? iconOffset;
   final LayerProperty<double>? iconOpacity;

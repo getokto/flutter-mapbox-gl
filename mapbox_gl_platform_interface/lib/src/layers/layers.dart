@@ -123,6 +123,8 @@ abstract class LayerProperty<T> {
       return [_value.dx, _value.dy];
     } if (_value is EdgeInsets) {
       return [_value.top, _value.right, _value.bottom, _value.left];
+    } if (_value is List<String>) {
+      return ['literal', _value];
     }
     return _value;
   }
@@ -145,6 +147,14 @@ abstract class LayerProperty<T> {
 
 class ConstantLayerProperty<T> extends LayerProperty<T> {
   const ConstantLayerProperty(T value): super(value);
+}
+
+class ImageLayerProperty extends LayerProperty<String> {
+  const ImageLayerProperty(String value): _value = value, super(null);
+
+  final String _value;
+
+  dynamic serialize() => ["image", _value];
 }
 
 /// This will accept any raw value to this propery
