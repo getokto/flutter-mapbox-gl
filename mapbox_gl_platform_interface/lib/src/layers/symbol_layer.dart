@@ -5,7 +5,7 @@ class SymbolLayer extends StyleLayer<SymbolLayerOptions> {
   SymbolLayer({
     required this.id,
     required this.source,
-    // this.sourceLayerID,
+      this.sourceLayer,
     // this.aboveLayerID,
     // this.belowLayerID,
     // this.layerIndex,
@@ -24,7 +24,7 @@ class SymbolLayer extends StyleLayer<SymbolLayerOptions> {
   final String source;
 
   /// Identifier of the layer within the source identified by the sourceID property from which the receiver obtains the data to style.
-  // final String? sourceLayerID;
+  final String? sourceLayer;
 
   /// Inserts a layer above aboveLayerID.
   // final String? aboveLayerID;
@@ -59,6 +59,7 @@ class SymbolLayer extends StyleLayer<SymbolLayerOptions> {
     'id': id,
     'type': 'symbol',
     'source': source,
+    'source-layer': sourceLayer,
     ...cleanMap(options.toMap()),
   };
 
@@ -66,6 +67,7 @@ class SymbolLayer extends StyleLayer<SymbolLayerOptions> {
     return SymbolLayer(
       id: map['id'],
       source: map['source'],
+      sourceLayer: map['source-layer'],
       options: SymbolLayerOptions.fromMap(<String, dynamic>{
         'layout': map['layout'],
         'paint': map['paint'],
@@ -79,21 +81,19 @@ class SymbolLayer extends StyleLayer<SymbolLayerOptions> {
     return other is SymbolLayer && (
       other.id == id
       && other.source == source
+      && other.sourceLayer == sourceLayer
       && other.options == options
     );
   }
 
   @override
   int get hashCode {
-    try {
-      return  hashValues(
-        id,
-        source,
-        options,
-      );
-    } catch(e) {
-      rethrow;
-    }
+    return  hashValues(
+      id,
+      source,
+      options,
+      sourceLayer,
+    );
   }
 
 }

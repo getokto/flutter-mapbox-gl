@@ -394,7 +394,7 @@ final class MapboxMapController
     style.addSource(geoJsonSource);
   }
 
-  private void addVectorSource(String sourceName, HashMap<String, ?> properties) {
+private void addVectorSource(String sourceName, HashMap<String, ?> properties) {
 
     Log.d("MapBoxController_" + id, "addVectorSource, idx: 4");
     if (properties.containsKey("url")) {
@@ -407,28 +407,38 @@ final class MapboxMapController
         tileVersion = "2.2.0";
       }
 
-      String[] tileUrls = (String[])properties.get("tiles");
+      Object[] tilesObjectArray = ((ArrayList)properties.get("tiles")).toArray();
 
-      TileSet tileSet = new TileSet(
-              tileVersion,
-              tileUrls
-      );
 
-      Number minZoom = (Number)properties.get("minZoom");
-      if(minZoom != null) {
-        tileSet.setMinZoom(minZoom.floatValue());
+      String[] tileUrls = Arrays.copyOf(tilesObjectArray, tilesObjectArray.length, String[].class);
+
+      for (int i = 0; i < tileUrls.length; i=i+1) {
+        try {
+          tileUrls[i] = URLDecoder.decode(tileUrls[i], "UTF-8");
+
+
+          TileSet tileSet = new TileSet(
+                  tileVersion,
+                  tileUrls
+          );
+
+          Number minZoom = (Number)properties.get("minZoom");
+          if(minZoom != null) {
+            tileSet.setMinZoom(minZoom.floatValue());
+          }
+          Number maxZoom = (Number)properties.get("maxZoom");
+          if(maxZoom != null) {
+            tileSet.setMaxZoom(maxZoom.floatValue());
+          }
+
+          VectorSource vectorSource = new VectorSource(sourceName, tileSet);
+          style.addSource(vectorSource);
+        } catch (UnsupportedEncodingException e) {}
       }
-      Number maxZoom = (Number)properties.get("maxZoom");
-      if(maxZoom != null) {
-        tileSet.setMaxZoom(maxZoom.floatValue());
-      }
-
-      VectorSource vectorSource = new VectorSource(sourceName, tileSet);
-      style.addSource(vectorSource);
       Number a = 1;
     }
   }
-
+  
   private void addSymbolLayer(String layerName,
                               String sourceName,
                               String sourceLayer,
