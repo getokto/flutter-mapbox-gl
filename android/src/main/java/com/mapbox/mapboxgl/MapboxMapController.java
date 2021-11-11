@@ -82,6 +82,8 @@ import com.mapbox.mapboxsdk.style.sources.VectorSource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -438,7 +440,7 @@ private void addVectorSource(String sourceName, HashMap<String, ?> properties) {
       Number a = 1;
     }
   }
-  
+
   private void addSymbolLayer(String layerName,
                               String sourceName,
                               String sourceLayer,
