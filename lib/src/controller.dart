@@ -338,6 +338,7 @@ class MapboxMapController extends ChangeNotifier {
     await MapboxGlPlatform.getInstance(_id).addSymbolLayer(
       layer.id,
       layer.source,
+      sourceLayer: layer.sourceLayer,
       tappable: tappable,
       properties: layer.options.toMap(),
     );
