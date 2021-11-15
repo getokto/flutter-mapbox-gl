@@ -49,6 +49,15 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
         lineWidth: ConstantLayerProperty(1),
       )
     ), tappable: true);
+
+
+
+    _mapController.featureDataStream('terrain-data').listen(_handleDataStream);
+  }
+
+  void _handleDataStream (event) {
+    print(event.length);
+    int a = 1;
   }
 
   @override

@@ -2,11 +2,13 @@ import Flutter
 import UIKit
 import Mapbox
 import MapboxAnnotationExtension
+import streams_channel2
 
 class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, MapboxMapOptionsSink, MGLAnnotationControllerDelegate {
-    
+
     private var registrar: FlutterPluginRegistrar
     private var channel: FlutterMethodChannel?
+    private var streamChannel: FlutterStreamsChannel?
     
     private var mapView: MGLMapView
     private var isMapReady = false
@@ -36,6 +38,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             }
         }
         mapView = MGLMapView(frame: frame)
+
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.registrar = registrar
         
@@ -43,6 +46,34 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         
         channel = FlutterMethodChannel(name: "plugins.flutter.io/mapbox_maps_\(viewId)", binaryMessenger: registrar.messenger())
         channel!.setMethodCallHandler{ [weak self] in self?.onMethodCall(methodCall: $0, result: $1) }
+        
+        
+        streamChannel = FlutterStreamsChannel(name: "streams_channel_test", binaryMessenger: registrar.messenger())
+        
+        streamChannel?.setStreamHandlerFactory { arguments in
+            if (!(arguments is Dictionary<String, Any>)){
+                return nil
+            }
+
+            //self.mapView.subscribe(for: self.obs!, event: MGLEventType("styleDataLoaded"))
+            
+            //mapView.addObserver(NSObject, forKeyPath: <#T##String#>, options: <#T##NSKeyValueObservingOptions#>, context: <#T##UnsafeMutableRawPointer?#>)
+            
+            if let args = arguments as? Dictionary<String, Any> {
+                if let handlerName = args["handler"] as? String{
+                    switch(handlerName){
+                    case "dataChanged":
+                        return FeaturesStreamHandler(client: self.mapView);
+                    
+                    default:
+                        return nil
+                    }
+                }
+            }
+            
+            
+            return nil;
+        }
         
         mapView.delegate = self
         
