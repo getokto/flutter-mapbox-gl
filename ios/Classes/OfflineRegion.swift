@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Mapbox
+import MapboxMaps
 
 class OfflineRegion {
     let id: Int
@@ -37,21 +37,21 @@ class OfflineRegion {
         ]
     }
 
-    static func fromOfflinePack(_ pack: MGLOfflinePack) -> OfflineRegion? {
-        guard let region = pack.region as? MGLTilePyramidOfflineRegion,
-            let dataObject = try? JSONSerialization.jsonObject(with: pack.context, options: []),
-            let dict = dataObject as? [String: Any],
-            let id = dict["id"] as? Int,
-            let metadata = dict["metadata"] as? [String: Any] else { return nil }
-        return OfflineRegion(
-            id: id,
-            metadata: metadata,
-            definition: OfflineRegionDefinition(
-                bounds: [region.bounds.sw, region.bounds.ne].map { [$0.latitude, $0.longitude] },
-                mapStyleUrl: region.styleURL,
-                minZoom: region.minimumZoomLevel,
-                maxZoom: region.maximumZoomLevel
-            )
-        )
-    }
+//    static func fromOfflinePack(_ pack: MGLOfflinePack) -> OfflineRegion? {
+//        guard let region = pack.region as? MGLTilePyramidOfflineRegion,
+//            let dataObject = try? JSONSerialization.jsonObject(with: pack.context, options: []),
+//            let dict = dataObject as? [String: Any],
+//            let id = dict["id"] as? Int,
+//            let metadata = dict["metadata"] as? [String: Any] else { return nil }
+//        return OfflineRegion(
+//            id: id,
+//            metadata: metadata,
+//            definition: OfflineRegionDefinition(
+//                bounds: [region.bounds.sw, region.bounds.ne].map { [$0.latitude, $0.longitude] },
+//                mapStyleUrl: region.styleURL,
+//                minZoom: region.minimumZoomLevel,
+//                maxZoom: region.maximumZoomLevel
+//            )
+//        )
+//    }
 }

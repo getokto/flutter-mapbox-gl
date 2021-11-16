@@ -1,5 +1,5 @@
 import Foundation
-import Mapbox
+import MapboxMaps
 
 class OfflineRegionDefinition {
     let bounds: [[Double]]
@@ -14,10 +14,10 @@ class OfflineRegionDefinition {
         self.maxZoom = maxZoom
     }
 
-    func getBounds() -> MGLCoordinateBounds {
-        return MGLCoordinateBounds(
-            sw: CLLocationCoordinate2D(latitude: bounds[0][0], longitude: bounds[0][1]),
-            ne: CLLocationCoordinate2D(latitude: bounds[1][0], longitude: bounds[1][1])
+    func getBounds() -> CoordinateBounds {
+        return CoordinateBounds(
+            southwest: CLLocationCoordinate2D(latitude: bounds[0][0], longitude: bounds[0][1]),
+            northeast: CLLocationCoordinate2D(latitude: bounds[1][0], longitude: bounds[1][1])
         )
     }
 
@@ -45,12 +45,12 @@ class OfflineRegionDefinition {
         ];
     }
 
-    func toMGLTilePyramidOfflineRegion() -> MGLTilePyramidOfflineRegion {
-        return MGLTilePyramidOfflineRegion(
-            styleURL: mapStyleUrl,
-            bounds: getBounds(),
-            fromZoomLevel: minZoom,
-            toZoomLevel: maxZoom
-        )
-    }
+//    func toMGLTilePyramidOfflineRegion() -> MGLTilePyramidOfflineRegion {
+//        return MGLTilePyramidOfflineRegion(
+//            styleURL: mapStyleUrl,
+//            bounds: getBounds(),
+//            fromZoomLevel: minZoom,
+//            toZoomLevel: maxZoom
+//        )
+//    }
 }

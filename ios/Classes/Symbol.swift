@@ -1,6 +1,8 @@
-import Mapbox
+import MapboxMaps
 
-class Symbol : MGLPointAnnotation, SymbolOptionsSink {
+//S0gymbol = PointAnnotation;
+/*
+class Symbol : NSObject, PointAnnotation, SymbolOptionsSink {
 
     private var _id = UUID().uuidString
     var id: String {
@@ -126,3 +128,4 @@ class Symbol : MGLPointAnnotation, SymbolOptionsSink {
         
     }
 }
+*/

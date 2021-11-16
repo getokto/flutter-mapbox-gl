@@ -109,7 +109,7 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
     final ByteData bytes = await rootBundle.load(imageKey.name);
     final Uint8List list = bytes.buffer.asUint8List();
 
-    await _mapController.addImage(name, list, true);
+    await _mapController.addImage(name, list, false);
   }
 
 

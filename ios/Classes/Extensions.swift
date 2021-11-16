@@ -1,21 +1,26 @@
-import Mapbox
+import MapboxMaps
 
-extension MGLMapCamera {
-    func toDict(mapView: MGLMapView) -> [String: Any] {
-        let zoom = MGLZoomLevelForAltitude(self.altitude, self.pitch, self.centerCoordinate.latitude, mapView.frame.size)
-        return ["bearing": self.heading,
-                "target": self.centerCoordinate.toArray(),
-                "tilt": self.pitch,
-                "zoom": zoom]
+extension CameraOptions {
+    func toDict() -> [String: Any] {
+        return [
+            "bearing": bearing,
+            "target": center?.toArray(),
+            "tilt": pitch,
+            "zoom": zoom
+        ]
     }
-    static func fromDict(_ dict: [String: Any], mapView: MGLMapView) -> MGLMapCamera? {
+    static func fromDict(_ dict: [String: Any]) -> CameraOptions? {
         guard let target = dict["target"] as? [Double],
             let zoom = dict["zoom"] as? Double,
             let tilt = dict["tilt"] as? CGFloat,
             let bearing = dict["bearing"] as? Double else { return nil }
         let location = CLLocationCoordinate2D.fromArray(target)
-        let altitude = MGLAltitudeForZoomLevel(zoom, tilt, location.latitude, mapView.frame.size)
-        return MGLMapCamera(lookingAtCenter: location, altitude: altitude, pitch: tilt, heading: bearing)
+        return CameraOptions(
+            center: location,
+            zoom: zoom,
+            bearing: bearing,
+            pitch: tilt
+        )
     }
 }
 
@@ -54,14 +59,14 @@ extension CLLocationCoordinate2D {
     }
 }
 
-extension MGLCoordinateBounds {
+extension CoordinateBounds {
     func toArray()  -> [[Double]] {
-        return [self.sw.toArray(), self.ne.toArray()]
+        return [self.southwest.toArray(), self.northeast.toArray()]
     }
-    static func fromArray(_ array: [[Double]]) -> MGLCoordinateBounds {
+    static func fromArray(_ array: [[Double]]) -> CoordinateBounds {
         let southwest = CLLocationCoordinate2D.fromArray(array[0])
         let northeast = CLLocationCoordinate2D.fromArray(array[1])
-        return MGLCoordinateBounds(sw: southwest, ne: northeast)
+        return CoordinateBounds(southwest: southwest, northeast: northeast)
     }
 }
 
