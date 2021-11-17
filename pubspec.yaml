@@ -18,8 +18,6 @@ dependencies:
       url: https://github.com/getokto/flutter-mapbox-gl.git
       path: mapbox_gl_web
       ref: layers
-  streams_channel2: #^1.0.0+1
-    path: ../../bjarte/streams_channel
 
 dependency_overrides:
   mapbox_gl_platform_interface:

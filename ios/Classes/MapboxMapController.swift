@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 import Mapbox
 import MapboxAnnotationExtension
-import streams_channel2
+import streams_channel3
 
 class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, MapboxMapOptionsSink, MGLAnnotationControllerDelegate {
 

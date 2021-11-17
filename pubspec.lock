@@ -107,12 +107,12 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
-  streams_channel2:
-    dependency: "direct main"
+  streams_channel3:
+    dependency: transitive
     description:
-      path: "../../bjarte/streams_channel"
-      relative: true
-    source: path
+      name: streams_channel3
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "1.0.0+1"
   typed_data:
     dependency: transitive
