@@ -52,7 +52,9 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
 
 
 
-    _mapController.featureDataStream('terrain-data').listen(_handleDataStream);
+    _mapController.featureDataStream('mapbox-terrain',
+      sourceLayers: ["contour"],
+    ).listen(_handleDataStream);
   }
 
   void _handleDataStream (event) {

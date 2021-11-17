@@ -996,9 +996,14 @@ class MapboxMapController extends ChangeNotifier {
         .getMetersPerPixelAtLatitude(latitude);
   }
 
-  Stream<dynamic> featureDataStream(String layerId) {
+  Stream<dynamic> featureDataStream(String source, {
+    List<String>? sourceLayers,
+    List<dynamic>? filter,
+  }) {
     return MapboxGlPlatform.getInstance(_id).featureDataStream(
-      layerId,
+      source,
+      sourceLayers: sourceLayers,
+      filter: filter,
     );
   }
 }

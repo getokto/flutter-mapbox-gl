@@ -150,7 +150,7 @@ class VectorSource implements Source {
     if(minZoom != null) 'minZoom': minZoom,
     if(promoteId != null) 'promoteId': promoteId,
     if(scheme != null) 'scheme': scheme?.toString(),
-    if(tiles != null) 'tiles': tiles?.map((e) => e.toString()).toList(),
+    if(tiles != null) 'tiles': tiles?.map((e) => Uri.decodeFull(e.toString())).toList(),
     if(url != null) 'url': url?.toString(),
   };
 

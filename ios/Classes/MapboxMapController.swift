@@ -21,6 +21,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
 
     private var annotationOrder = [String]()
     private var annotationConsumeTapEvents = [String]()
+    
+    
+
 
     func view() -> UIView {
         return mapView
@@ -28,6 +31,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
     
     init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?, registrar: FlutterPluginRegistrar) {
         var cameraOptions: CameraOptions?
+        var styleUri: String?
         
         if let args = args as? [String: Any] {
             if let token = args["accessToken"] as? String {
@@ -37,11 +41,19 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
             if let initialCameraPosition = args["initialCameraPosition"] as? [String: Any] {
                 cameraOptions = CameraOptions.fromDict(initialCameraPosition)
             }
+            
+            if let options = args["options"] as? [String: Any] {
+                if let styleString = options["styleString"] as? String {
+                    styleUri = styleString
+                }
+
+            }
         }
         
                 
         let initOptions = MapInitOptions(
-            cameraOptions: cameraOptions
+            cameraOptions: cameraOptions,
+            styleURI: styleUri != nil ? StyleURI(rawValue: styleUri!) : nil
         )
         
         
@@ -60,22 +72,25 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
         channel!.setMethodCallHandler{ [weak self] in self?.onMethodCall(methodCall: $0, result: $1) }
         
         
-        streamChannel = FlutterStreamsChannel(name: "streams_channel_test", binaryMessenger: registrar.messenger())
+        streamChannel = FlutterStreamsChannel(name: "plugins.flutter.io/mapbox_maps_event_stream", binaryMessenger: registrar.messenger())
         
         streamChannel?.setStreamHandlerFactory { arguments in
             if (!(arguments is Dictionary<String, Any>)){
                 return nil
             }
 
-            //self.mapView.subscribe(for: self.obs!, event: MGLEventType("styleDataLoaded"))
-            
-            //mapView.addObserver(NSObject, forKeyPath: <#T##String#>, options: <#T##NSKeyValueObservingOptions#>, context: <#T##UnsafeMutableRawPointer?#>)
-            
+           
             if let args = arguments as? Dictionary<String, Any> {
-                if let handlerName = args["handler"] as? String{
+                if let handlerName = args["handler"] as? String {
+                    let source = args["source"] as? String
                     switch(handlerName){
                     case "dataChanged":
-                        return FeaturesStreamHandler(client: self.mapView);
+                        return FeaturesStreamHandler(
+                            client: self.mapView,
+                            source: source!,
+                            sourceLayers: args["source-layers"] as? [String],
+                            filter: args["filter"] as? [Any]
+                        );
                     
                     default:
                         return nil
@@ -122,6 +137,10 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
 
         mapReadyResult?(nil)
         channel?.invokeMethod("map#onStyleLoaded", arguments: nil)
+        
+    }
+    
+    func onMapDataLoaded(event: Event) {
         
     }
 
@@ -1135,16 +1154,33 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
     
     func addVectorSource(sourceId: String, properties: [String: Any]) {
         if let style = mapView.mapboxMap.style as? Style {
-            let tileUrls = Convert.getVectorURLTemplated(properties: properties)
-            var source = VectorSource()
-            if let url = properties["url"] as? String {
-                source.url = url
-            } else if tileUrls.count > 0 {
-                source.tiles = tileUrls
-                source.maxzoom = properties["maxZoom"] as? Double
-                source.minzoom = properties["minZoom"] as? Double            
+            
+            let jsonString = Convert.serializeJSON(from: properties)
+            
+            if let source = try? JSONDecoder().decode(VectorSource.self, from: jsonString!.data(using: .utf8)!) {
+                do {
+                    try style.addSource(source, id: sourceId)
+                } catch {
+                    var a = 1;
+                }
             }
-            try? style.addSource(source, id: sourceId)
+        
+            
+//            let tileUrls = Convert.getVectorURLTemplated(properties: properties)
+//            var source = VectorSource()
+//            if let url = properties["url"] as? String {
+//                source.url = url
+//            } else if tileUrls.count > 0 {
+//                source.tiles = tileUrls
+//                source.maxzoom = properties["maxZoom"] as? Double
+//                source.minzoom = properties["minZoom"] as? Double
+//            }
+//            do {
+//                try style.addSource(source, id: sourceId)
+//            } catch {
+//                var a = 1;
+//            }
+
         }
     }
 

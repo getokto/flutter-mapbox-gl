@@ -333,7 +333,10 @@ abstract class MapboxGlPlatform {
         'setLineLayerOptions() has not been implemented.');
   }
 
-  Stream<dynamic> featureDataStream(String layerId) async* {
+  Stream<dynamic> featureDataStream(String source, {
+    List<String>? sourceLayers,
+    List<dynamic>? filter,
+  }) async* {
     throw UnimplementedError(
         'featureDataStream() has not been implemented.');
   }

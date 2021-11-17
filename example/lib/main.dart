@@ -10,6 +10,7 @@ import 'package:mapbox_gl_example/full_map.dart';
 import 'package:mapbox_gl_example/geojson_source.dart';
 import 'package:mapbox_gl_example/offline_regions.dart';
 import 'package:mapbox_gl_example/place_batch.dart';
+import 'package:mapbox_gl_example/vector_source_mvt.dart';
 
 import 'animate_camera.dart';
 import 'annotation_order_maps.dart';
@@ -44,6 +45,7 @@ final List<ExamplePage> _allPages = <ExamplePage>[
   BatchAddPage(),
   VectorSourceExamplePage(),
   GeoJsonExamplePage(),
+  VectorSourceMvtExamplePage(),
 ];
 
 class MapsDemo extends StatelessWidget {

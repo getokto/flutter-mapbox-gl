@@ -133,7 +133,7 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   Future<void> initPlatform(int id) async {
     _channel = MethodChannel('plugins.flutter.io/mapbox_maps_$id');
 
-    _streamsChannel = StreamsChannel('streams_channel_test');
+    _streamsChannel = StreamsChannel('plugins.flutter.io/mapbox_maps_event_stream');
     /// The methodhandler must be set before waitForMap, to ensure that we pickup on the
     /// [map#onStyleLoaded]
     _channel.setMethodCallHandler(_handleMethodCall);
@@ -808,10 +808,15 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   }
 
   @override
-  Stream<dynamic> featureDataStream(String layerId) {
+  Stream<dynamic> featureDataStream(String source, {
+    List<String>? sourceLayers,
+    List<dynamic>? filter,
+  }) {
     return _streamsChannel.receiveBroadcastStream({
       'handler': 'dataChanged',
-      'layerId': layerId,
+      'source': source,
+      'source-layers': sourceLayers,
+      'filter': filter,
     });
   }
 
