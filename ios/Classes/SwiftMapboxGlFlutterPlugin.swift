@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import streams_channel2
 
 public class SwiftMapboxGlFlutterPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {

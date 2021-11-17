@@ -1,4 +1,10 @@
+
+import 'dart:typed_data';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
 import 'main.dart';
@@ -31,24 +37,76 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
   }
 
   Future<void> _onStyleLoadedCallback() async {
+    await addImageFromAsset("assett-image", "assets/symbols/custom-icon.png");
 
-      await _mapController.addVectorSource('mapbox-terrain', VectorSource(
+      await _mapController.addVectorSource('test', VectorSource(
         minZoom: 6,
         maxZoom: 14,
-        url: Uri.parse('mapbox://mapbox.mapbox-terrain-v2'),
+        // url: Uri.parse('https://gist.githubusercontent.com/bjartebore/1475e190114df1479ffdcba073892ce4/raw/25d88f9cafd888d1861735bcf5895bff2f81d245/tile.json'),
+        tiles: [
+          Uri.parse('https://oktoservices.azurewebsites.net/v1/GeneratePoints/mapbox/helleu/{z}/{x}/{y}.mvt'),
+        ]
       ).toMap());
 
-    await _mapController.addLineLayer(LineLayer(
-      id: 'terrain-data',
-      source: 'mapbox-terrain',
-      sourceLayer: 'contour',
-      options: LineLayerOptions(
-        lineJoin: ConstantLayerProperty(LineJoin.Round),
-        lineCap: ConstantLayerProperty(LineCap.Round),
-        lineColor: ConstantLayerProperty(Color(0xFFff0000).withOpacity(0.5)),
-        lineWidth: ConstantLayerProperty(1),
-      )
+
+    await _mapController.addSymbolLayer(SymbolLayer(
+      id: 'agp',
+      // sourceLayer: "pointsOfInterest",
+      sourceLayer: "agp",
+      source: 'test',
+        options: SymbolLayerOptions(
+          iconImage: ImageLayerProperty('assett-image'),
+          iconColor: ConstantLayerProperty(Colors.blue),
+        ),
     ), tappable: true);
+
+
+    //   await _mapController.addVectorSource('test2', VectorSource(
+    //     minZoom: 6,
+    //     maxZoom: 14,
+    //     // url: Uri.parse('https://gist.githubusercontent.com/bjartebore/1475e190114df1479ffdcba073892ce4/raw/25d88f9cafd888d1861735bcf5895bff2f81d245/tile.json'),
+    //     tiles: [
+    //       Uri.parse('https://oktoservices.azurewebsites.net/v1/VectorTiles/{z}/{x}/{y}.mvt'),
+    //     ]
+    //   ).toMap());
+
+
+    // await _mapController.addSymbolLayer(SymbolLayer(
+    //   id: 'terrain-data-symbols2',
+    //   sourceLayer: "pointsOfInterest",
+    //   // sourceLayer: "agp",
+    //   source: 'test2',
+    //     options: SymbolLayerOptions(
+    //       iconImage: ImageLayerProperty('assett-image'),
+    //       iconColor: ConstantLayerProperty(Colors.red),
+    //     ),
+    // ), tappable: true);
+
+
+
+    _mapController.featureDataStream('agp').listen(_handleDataStream);
+  }
+
+  void _handleDataStream (event) {
+    print(event.length);
+    int a = 1;
+  }
+  Future<void> addImageFromAsset(String name, String assetName) async {
+
+
+    ImageConfiguration configuration = ImageConfiguration(
+      devicePixelRatio: window.devicePixelRatio,
+      platform: defaultTargetPlatform,
+    );
+    AssetImage assetImage = AssetImage(assetName);
+
+    final imageKey = await assetImage.obtainKey(configuration);
+
+
+    final ByteData bytes = await rootBundle.load(assetName);
+    final Uint8List list = bytes.buffer.asUint8List();
+
+    await _mapController.addImage(name, list, true);
   }
 
   @override
@@ -63,8 +121,8 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
               onMapCreated: _onMapCreated,
               onStyleLoadedCallback: _onStyleLoadedCallback,
               initialCameraPosition: const CameraPosition(
-                target: LatLng(37.753574, -122.447303),
-                zoom: 13,
+                target: LatLng(58.9361559, 5.8019575),
+                zoom: 11,
               ),
             ),
           ]

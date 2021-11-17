@@ -8,6 +8,8 @@ dependencies:
     sdk: flutter
   meta: ^1.0.5
   from_css_color: ^2.0.0
+  streams_channel2: #^1.0.0+1
+    path: ../../../bjarte/streams_channel
 
 dev_dependencies:
   flutter_test:

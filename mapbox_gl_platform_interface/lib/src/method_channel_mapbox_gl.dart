@@ -2,6 +2,7 @@ part of mapbox_gl_platform_interface;
 
 class MethodChannelMapboxGl extends MapboxGlPlatform {
   late MethodChannel _channel;
+  late StreamsChannel _streamsChannel;
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
@@ -131,6 +132,8 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   @override
   Future<void> initPlatform(int id) async {
     _channel = MethodChannel('plugins.flutter.io/mapbox_maps_$id');
+
+    _streamsChannel = StreamsChannel('streams_channel_test');
     /// The methodhandler must be set before waitForMap, to ensure that we pickup on the
     /// [map#onStyleLoaded]
     _channel.setMethodCallHandler(_handleMethodCall);
@@ -801,6 +804,14 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
     await _channel.invokeMethod('lineLayer#update', <String, dynamic>{
       'id': layerId,
       'properties': properties,
+    });
+  }
+
+  @override
+  Stream<dynamic> featureDataStream(String layerId) {
+    return _streamsChannel.receiveBroadcastStream({
+      'handler': 'dataChanged',
+      'layerId': layerId,
     });
   }
 
