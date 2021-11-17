@@ -1193,13 +1193,19 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
                 "source-layer": sourceLayerId
             ].merging(properties) { (_, new) in new };
             
-            let jsonString = Convert.serializeJSON(from: map)
             
-            if var layer = try? JSONDecoder().decode(SymbolLayer.self, from: jsonString!.data(using: .utf8)!) {
-                layer.visibility = .constant(Visibility.visible)
+            if let source = try? style.source(withId: sourceId) {
+                let jsonString = Convert.serializeJSON(from: map)
                 
-                try? style.addLayer(layer)
+                if var layer = try? JSONDecoder().decode(SymbolLayer.self, from: jsonString!.data(using: .utf8)!) {
+                    layer.visibility = .constant(Visibility.visible)
+                    
+                    try? style.addLayer(layer)
+                }
             }
+            
+            
+
         }
     }
 
