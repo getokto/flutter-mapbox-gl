@@ -11,7 +11,7 @@ import Mapbox
 
 
 
-class FeaturesStreamHandler : MGLObserver, FlutterStreamHandler {
+class FeaturesStreamHandler : MGLObserver, FlutterStreamHandler, Throttable {
     // private var observer: MGLObserver?
     var client: MGLMapView
     var events: FlutterEventSink?
@@ -38,8 +38,18 @@ class FeaturesStreamHandler : MGLObserver, FlutterStreamHandler {
 
     }
     
+    lazy var dispatchFeatures = perform(with: 0.0016) {
+        let features = self.client.visibleFeatures(in: UIScreen.main.bounds, styleLayerIdentifiers: [self.layerId!])
+        
+        
+        let geojson = features.map { feature in
+            return feature.geoJSONDictionary()
+        }
+        
+        self.events!(geojson)
+    }
     
-    func dispatchFeatures() {
+    func dispatchFeatures2() {
         let l = layerId
         let r = UIScreen.main.bounds
         let features = client.visibleFeatures(in: UIScreen.main.bounds, styleLayerIdentifiers: [layerId!])
@@ -76,5 +86,26 @@ class FeaturesStreamHandler : MGLObserver, FlutterStreamHandler {
         self.events = nil
         
         return nil;
+    }
+}
+
+protocol Throttable {
+    func perform(with delay: TimeInterval,
+                 in queue: DispatchQueue,
+                 block completion: @escaping () -> Void) -> () -> Void
+}
+
+extension Throttable {
+    func perform(with delay: TimeInterval,
+                 in queue: DispatchQueue = DispatchQueue.main,
+                 block completion: @escaping () -> Void) -> () -> Void {
+        
+        var workItem: DispatchWorkItem?
+        
+        return {
+            workItem?.cancel()
+            workItem = DispatchWorkItem(block: completion)
+            queue.asyncAfter(deadline: .now() + delay, execute: workItem!)
+        }
     }
 }
