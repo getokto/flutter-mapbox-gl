@@ -73,6 +73,19 @@ class PointGeometry extends Geometry<LatLng> {
   dynamic serializeCoordinates(coordinates) {
     return [coordinates.longitude, coordinates.latitude];
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PointGeometry &&
+        (other.type == type &&
+          other.coordinates == coordinates);
+  }
+
+  @override
+  int get hashCode => hashValues(
+        type,
+        coordinates,
+      );
 }
 
 class LineStringGeometry extends Geometry<List<LatLng>> {
@@ -98,6 +111,19 @@ class LineStringGeometry extends Geometry<List<LatLng>> {
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map(((e) => [e.longitude, e.latitude])).toList();
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LineStringGeometry &&
+        (other.type == type &&
+          listEquals(other.coordinates, coordinates));
+  }
+
+  @override
+  int get hashCode => hashValues(
+        type,
+        hashList(coordinates),
+      );
 }
 
 class PolygonGeometry extends Geometry<List<List<LatLng>>> {
@@ -122,6 +148,19 @@ class PolygonGeometry extends Geometry<List<List<LatLng>>> {
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map((e) => e.map((e) => [e.longitude, e.latitude]).toList()).toList();
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PolygonGeometry &&
+        (other.type == type &&
+          listEquals(other.coordinates, coordinates));
+  }
+
+  @override
+  int get hashCode => hashValues(
+        type,
+        hashList(coordinates),
+      );
 }
 
 class MultiPointGeometry extends Geometry<List<LatLng>> {
@@ -146,6 +185,20 @@ class MultiPointGeometry extends Geometry<List<LatLng>> {
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map(((e) => [e.longitude, e.latitude])).toList();
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MultiPointGeometry &&
+        (other.type == type &&
+          listEquals(other.coordinates, coordinates));
+  }
+
+  @override
+  int get hashCode => hashValues(
+        type,
+        hashList(coordinates),
+      );
+
 }
 
 class MultiLineStringGeometry extends Geometry<List<List<LatLng>>> {
@@ -171,6 +224,19 @@ class MultiLineStringGeometry extends Geometry<List<List<LatLng>>> {
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map((e) => e.map((e) => [e.longitude, e.latitude]).toList()).toList();
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MultiLineStringGeometry &&
+        (other.type == type &&
+          listEquals(other.coordinates, coordinates));
+  }
+
+  @override
+  int get hashCode => hashValues(
+        type,
+        hashList(coordinates),
+      );
 }
 
 class MultiPolygonGeometry extends Geometry<List<List<List<LatLng>>>> {
@@ -199,6 +265,21 @@ class MultiPolygonGeometry extends Geometry<List<List<List<LatLng>>>> {
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map((e) => e.map((e) => e.map((e) => [e.longitude, e.latitude]).toList()).toList()).toList();
   }
+
+
+  @override
+  bool operator ==(Object other) {
+    return other is MultiPolygonGeometry &&
+        (other.type == type &&
+          listEquals(other.coordinates, coordinates));
+  }
+
+  @override
+  int get hashCode => hashValues(
+        type,
+        hashList(coordinates),
+      );
+
 }
 
 abstract class Geometry<T> {
@@ -287,7 +368,7 @@ class Feature implements FeatureBase {
 
     return Feature(
       geometry: Geometry.fromMap(Map.from(map['geometry'])),
-      properties: Map.from(map['properties'] ?? {}),
+      properties: Map.castFrom(map['properties']),
     );
   }
 
@@ -298,6 +379,25 @@ class Feature implements FeatureBase {
     'geometry': geometry.toMap(),
     if (properties != null) 'properties': properties,
   };
+
+
+  @override
+  bool operator ==(Object other) {
+    return other is Feature &&
+        (other.bbox == bbox &&
+          other.geometry == geometry &&
+          mapEquals(other.properties, properties)
+        );
+  }
+
+  @override
+  int get hashCode => hashValues(
+        bbox,
+        geometry,
+        properties,
+      );
+
+
 }
 
 class FeatureCollection implements FeatureBase {
@@ -331,4 +431,18 @@ class FeatureCollection implements FeatureBase {
       'features': features.map((e) => e.toMap()).toList(),
     };
   }
+
+
+  @override
+  bool operator ==(Object other) {
+    return other is FeatureCollection &&
+        (other.bbox == bbox &&
+            listEquals(other.features, features));
+  }
+
+  @override
+  int get hashCode => hashValues(
+        bbox,
+        hashList(features),
+      );
 }

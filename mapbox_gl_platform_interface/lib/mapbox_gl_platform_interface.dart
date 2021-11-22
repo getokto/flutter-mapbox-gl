@@ -1,6 +1,7 @@
 library mapbox_gl_platform_interface;
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';

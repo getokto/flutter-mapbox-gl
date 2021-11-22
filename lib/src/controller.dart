@@ -997,7 +997,11 @@ class MapboxMapController extends ChangeNotifier {
   }
 
   // returns a stream of visible features filtered by layerId
-  Stream<List<FeatureBase>> streamVisibleFeatures(String layerId) async* {
+  Stream<List<FeatureBase>> streamVisibleFeatures(String layerId) {
+    return _streamVisibleFeatures(layerId).distinct(listEquals);
+  }
+
+  Stream<List<FeatureBase>> _streamVisibleFeatures(String layerId) async* {
     await for(final _result in MapboxGlPlatform.getInstance(_id).featureDataStream(
       layerId,
     )) {
@@ -1005,4 +1009,5 @@ class MapboxMapController extends ChangeNotifier {
       yield result.map((x) => FeatureBase.fromMap(Map.from(x))).toList();
     }
   }
+
 }
