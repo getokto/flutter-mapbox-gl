@@ -11,6 +11,26 @@ class _GeometryType implements EnumLike {
   static const MultiLineString = _GeometryType._(4);
   static const MultiPolygon = _GeometryType._(5);
 
+  static List<String> get all => [Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon].map((e) => e.toString()).toList();
+
+  static _GeometryType? fromString(String? str) {
+    switch (str) {
+      case 'Point':
+        return Point;
+      case 'LineString':
+        return LineString;
+      case 'Polygon':
+        return Polygon;
+      case 'MultiPoint':
+        return MultiPoint;
+      case 'MultiLineString':
+        return MultiLineString;
+      case 'MultiPolygon':
+        return MultiPolygon;
+    }
+    return null;
+  }
+
   @override
   String toString() {
     switch (this) {
@@ -40,6 +60,16 @@ class PointGeometry extends Geometry<LatLng> {
       type: _GeometryType.Point,
     );
 
+  static PointGeometry fromMap(Map<String, dynamic> map) {
+    if (map.containsKey("type") && map["type"] != "Point") {
+      throw Exception('map is not a PointGeometry');
+    }
+
+    List<double> coordinates = List.castFrom(map['coordinates']);
+
+    return PointGeometry(coordinates: LatLng(coordinates[1], coordinates[0]));
+  }
+
   dynamic serializeCoordinates(coordinates) {
     return [coordinates.longitude, coordinates.latitude];
   }
@@ -53,6 +83,17 @@ class LineStringGeometry extends Geometry<List<LatLng>> {
       coordinates: coordinates,
       type: _GeometryType.LineString,
     );
+
+  static LineStringGeometry fromMap(Map<String, dynamic> map) {
+    if (map.containsKey("type") && map["type"] != "LineString") {
+      throw Exception('map is not a LineStringGeometry');
+    }
+
+    List<List<double>> coordinates = List.castFrom(map['coordinates']);
+
+    return LineStringGeometry(coordinates: coordinates.map((x) =>  LatLng(x[1], x[0])).toList());
+  }
+
 
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map(((e) => [e.longitude, e.latitude])).toList();
@@ -68,6 +109,16 @@ class PolygonGeometry extends Geometry<List<List<LatLng>>> {
       type: _GeometryType.Polygon,
     );
 
+  static PolygonGeometry fromMap(Map<String, dynamic> map) {
+    if (map.containsKey("type") && map["type"] != "Polygon") {
+      throw Exception('map is not a PolygonGeometry');
+    }
+
+    List<List<List<double>>> coordinates = List.castFrom(map['coordinates']);
+
+    return PolygonGeometry(coordinates: coordinates.map((x) => x.map((x) => LatLng(x[1], x[0])).toList()).toList());
+  }
+
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map((e) => e.map((e) => [e.longitude, e.latitude]).toList()).toList();
   }
@@ -82,6 +133,15 @@ class MultiPointGeometry extends Geometry<List<LatLng>> {
       type: _GeometryType.MultiPoint,
     );
 
+  static MultiPointGeometry fromMap(Map<String, dynamic> map) {
+    if (map.containsKey("type") && map["type"] != "MultiPoint") {
+      throw Exception('map is not a MultiPointGeometry');
+    }
+
+    List<List<double>> coordinates = List.castFrom(map['coordinates']);
+
+    return MultiPointGeometry(coordinates: coordinates.map((x) =>  LatLng(x[1], x[0])).toList());
+  }
 
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map(((e) => [e.longitude, e.latitude])).toList();
@@ -97,6 +157,17 @@ class MultiLineStringGeometry extends Geometry<List<List<LatLng>>> {
       type: _GeometryType.MultiLineString,
     );
 
+
+  static MultiLineStringGeometry fromMap(Map<String, dynamic> map) {
+    if (map.containsKey("type") && map["type"] != "MultiLineString") {
+      throw Exception('map is not a MultiLineStringGeometry');
+    }
+
+    List<List<List<double>>> coordinates = List.castFrom(map['coordinates']);
+
+    return MultiLineStringGeometry(coordinates: coordinates.map((x) => x.map((x) => LatLng(x[1], x[0])).toList()).toList());
+  }
+
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map((e) => e.map((e) => [e.longitude, e.latitude]).toList()).toList();
   }
@@ -110,6 +181,20 @@ class MultiPolygonGeometry extends Geometry<List<List<List<LatLng>>>> {
       coordinates: coordinates,
       type: _GeometryType.MultiPolygon,
     );
+
+  static MultiPolygonGeometry fromMap(Map<String, dynamic> map) {
+    if (map.containsKey("type") && map["type"] != "MultiPolygon") {
+      throw Exception('map is not a MultiPolygonGeometry');
+    }
+
+    List<List<List<List<double>>>> coordinates = List.castFrom(map['coordinates']);
+
+    return MultiPolygonGeometry(coordinates: coordinates.map((x) =>
+      x.map((x) =>
+        x.map((x) => LatLng(x[1], x[0])).toList()
+      ).toList(),
+    ).toList());
+  }
 
   dynamic serializeCoordinates(coordinates) {
     return coordinates.map((e) => e.map((e) => e.map((e) => [e.longitude, e.latitude]).toList()).toList()).toList();
@@ -130,12 +215,54 @@ abstract class Geometry<T> {
     'type': type.toString(),
     'coordinates': serializeCoordinates(coordinates),
   };
+
+
+  static Geometry fromMap(Map<String, dynamic> map) {
+    final type = _GeometryType.fromString(map['type']);
+
+    if (type == null) {
+      throw Exception('map is not a geometry');
+    }
+
+    switch (type) {
+      case _GeometryType.Point:
+        return PointGeometry.fromMap(map);
+      case _GeometryType.LineString:
+        return LineStringGeometry.fromMap(map);
+      case _GeometryType.Polygon:
+        return PolygonGeometry.fromMap(map);
+      case _GeometryType.MultiPoint:
+        return MultiPointGeometry.fromMap(map);
+      case _GeometryType.MultiLineString:
+        return MultiLineStringGeometry.fromMap(map);
+      case _GeometryType.MultiPolygon:
+        return MultiPolygonGeometry.fromMap(map);
+    }
+
+    throw UnsupportedError('Unsupported geometry type');
+  }
 }
 
 
 abstract class FeatureBase {
   BBox? get bbox;
   Map<String, dynamic> toMap();
+
+
+  static FeatureBase fromMap(Map<String, dynamic> map) {
+    final type = map["type"] as String?;
+
+    switch(type) {
+      case "Feature":
+        return Feature.fromMap(map);
+      case "FeatureCollection":
+        return FeatureCollection.fromMap(map);
+      default:
+        throw UnsupportedError('type: $type is unsupported');
+    }
+
+  }
+
 }
 
 class Feature implements FeatureBase {
@@ -148,6 +275,22 @@ class Feature implements FeatureBase {
   final BBox? bbox;
   final Geometry geometry;
   final Map<String, dynamic>? properties;
+
+  static Feature fromMap(Map<String, dynamic> map) {
+    if (!map.containsKey("type") || map["type"] != "Feature") {
+      throw Exception('map is not a Feature');
+    }
+
+    if (!map.containsKey("geometry")) {
+      throw Exception('geometry map is required');
+    }
+
+    return Feature(
+      geometry: Geometry.fromMap(Map.from(map['geometry'])),
+      properties: Map.from(map['properties'] ?? {}),
+    );
+  }
+
 
   Map<String, dynamic> toMap() => {
     'type': 'Feature',
@@ -165,6 +308,21 @@ class FeatureCollection implements FeatureBase {
 
   final BBox? bbox;
   final List<Feature> features;
+
+  static FeatureCollection fromMap(Map<String, dynamic> map) {
+    if (map.containsKey("type") && map["type"] != "FeatureCollection") {
+      throw Exception('map is not a FeatureCollection');
+    }
+
+
+    if (!map.containsKey("features")) {
+      throw Exception('features list is required');
+    }
+
+    return FeatureCollection(
+      features: List.from(map['features'] ?? []).map((e) => Feature.fromMap(e)).toList(),
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {

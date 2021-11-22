@@ -84,7 +84,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
 
 
 
-    _mapController.featureDataStream('agp').listen(_handleDataStream);
+    _mapController.streamVisibleFeatures('agp').listen(_handleDataStream);
   }
 
   void _handleDataStream (event) {
