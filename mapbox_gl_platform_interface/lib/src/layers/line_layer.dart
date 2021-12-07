@@ -4,7 +4,7 @@ part of mapbox_gl_platform_interface;
 class LineLayer extends StyleLayer<StyleLayerOptions> {
   LineLayer({
       required this.id,
-      this.source,
+      required this.source,
       this.sourceLayer,
       LineLayerOptions? options,
     }
@@ -18,7 +18,7 @@ class LineLayer extends StyleLayer<StyleLayerOptions> {
   /// The source from which to obtain the data to style.
   ///
   /// If the source has not yet been added to the current style, the behavior is undefined.
-  final String? source;
+  final String source;
 
   final String? sourceLayer;
 
@@ -84,7 +84,7 @@ class LineLayerOptions extends StyleLayerOptions {
     this.lineTranslate,
     this.lineTranslateAnchor,
     this.lineWidth,
-    this.visibility,
+    this.visibility = Visibility.Visible,
   });
 
 
@@ -137,29 +137,29 @@ class LineLayerOptions extends StyleLayerOptions {
   final LayerProperty<double>? lineWidth;
 
   /// Optional enum. One of "visible", "none". Defaults to "visible".
-  final LayerProperty<Visibility>? visibility;
+  final Visibility visibility;
 
   Map<String, dynamic> toMap() => {
     'layout': {
-      if (lineCap != null) 'line-cap': lineCap!.serialize(),
-      if (lineJoin != null) 'line-join': lineJoin!.serialize(),
-      if (lineMiterLimit != null) 'line-miter-limit': lineMiterLimit!.serialize(),
-      if (lineRoundLimit != null) 'line-round-limit': lineRoundLimit!.serialize(),
-      if (lineSortKey != null) 'line-sort-key': lineSortKey!.serialize(),
-      if (visibility != null) 'visibility': visibility!.serialize(),
+      if (lineCap != null) 'line-cap': serializeValue(lineCap),
+      if (lineJoin != null) 'line-join': serializeValue(lineJoin),
+      if (lineMiterLimit != null) 'line-miter-limit': serializeValue(lineMiterLimit),
+      if (lineRoundLimit != null) 'line-round-limit': serializeValue(lineRoundLimit),
+      if (lineSortKey != null) 'line-sort-key': serializeValue(lineSortKey),
+      'visibility': serializeValue(visibility),
     },
     'paint': {
-      if (lineBlur != null) 'line-blur': lineBlur!.serialize(),
-      if (lineColor != null) 'line-color': lineColor!.serialize(),
-      if (lineDasharray != null) 'line-dasharray': lineDasharray!.serialize(),
-      if (lineGapWidth != null) 'line-gap-width': lineGapWidth!.serialize(),
-      if (lineGradient != null) 'line-gradient': lineGradient!.serialize(),
-      if (lineOffset != null) 'line-offset': lineOffset!.serialize(),
-      if (lineOpacity != null) 'line-opacity': lineOpacity!.serialize(),
-      if (linePattern != null) 'line-pattern': linePattern!.serialize(),
-      if (lineTranslate != null) 'line-translate': lineTranslate!.serialize(),
-      if (lineTranslateAnchor != null) 'line-translate-anchor': lineTranslateAnchor!.serialize(),
-      if (lineWidth != null) 'line-width': lineWidth!.serialize(),
+      if (lineBlur != null) 'line-blur': serializeValue(lineBlur),
+      if (lineColor != null) 'line-color': serializeValue(lineColor),
+      if (lineDasharray != null) 'line-dasharray': serializeValue(lineDasharray),
+      if (lineGapWidth != null) 'line-gap-width': serializeValue(lineGapWidth),
+      if (lineGradient != null) 'line-gradient': serializeValue(lineGradient),
+      if (lineOffset != null) 'line-offset': serializeValue(lineOffset),
+      if (lineOpacity != null) 'line-opacity': serializeValue(lineOpacity),
+      if (linePattern != null) 'line-pattern': serializeValue(linePattern),
+      if (lineTranslate != null) 'line-translate': serializeValue(lineTranslate),
+      if (lineTranslateAnchor != null) 'line-translate-anchor': serializeValue(lineTranslateAnchor),
+      if (lineWidth != null) 'line-width': serializeValue(lineWidth),
     },
   };
 

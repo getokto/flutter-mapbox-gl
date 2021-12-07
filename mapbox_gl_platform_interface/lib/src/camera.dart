@@ -6,12 +6,12 @@ part of mapbox_gl_platform_interface;
 
 /// The position of the map "camera", the view point from which the world is
 /// shown in the map view. Aggregates the camera's [target] geographical
-/// location, its [zoom] level, [tilt] angle, and [bearing].
+/// location, its [zoom] level, [pitch] angle, and [bearing].
 class CameraPosition {
   const CameraPosition({
     this.bearing = 0.0,
     required this.target,
-    this.tilt = 0.0,
+    this.pitch = 0.0,
     this.zoom = 0.0,
   });
 
@@ -32,7 +32,7 @@ class CameraPosition {
   /// The maximum tilt value depends on the current zoom level. Values beyond
   /// the supported range are allowed, but on applying them to a map they will
   /// be silently clamped to the supported range.
-  final double tilt;
+  final double pitch;
 
   /// The zoom level of the camera.
   ///
@@ -51,7 +51,7 @@ class CameraPosition {
   dynamic toMap() => <String, dynamic>{
         'bearing': bearing,
         'target': target.toJson(),
-        'tilt': tilt,
+        'pitch': pitch,
         'zoom': zoom,
       };
 
@@ -63,7 +63,7 @@ class CameraPosition {
     return CameraPosition(
       bearing: json['bearing'],
       target: LatLng._fromJson(json['target']),
-      tilt: json['tilt'],
+      pitch: json['pitch'],
       zoom: json['zoom'],
     );
   }
@@ -75,16 +75,16 @@ class CameraPosition {
     final CameraPosition typedOther = other;
     return bearing == typedOther.bearing &&
         target == typedOther.target &&
-        tilt == typedOther.tilt &&
+        pitch == typedOther.pitch &&
         zoom == typedOther.zoom;
   }
 
   @override
-  int get hashCode => hashValues(bearing, target, tilt, zoom);
+  int get hashCode => hashValues(bearing, target, pitch, zoom);
 
   @override
   String toString() =>
-      'CameraPosition(bearing: $bearing, target: $target, tilt: $tilt, zoom: $zoom)';
+      'CameraPosition(bearing: $bearing, target: $target, tilt: $pitch, zoom: $zoom)';
 }
 
 /// Defines a camera move, supporting absolute moves as well as moves relative

@@ -317,6 +317,11 @@ abstract class MapboxGlPlatform {
         'setSymbolLayerOptions() has not been implemented.');
   }
 
+  Future<void> removeSymbolLayer(String layerId) async {
+    throw UnimplementedError(
+        'removeSymbolLayer() has not been implemented.');
+  }
+
   Future<void> addLineLayer(String layerId, String sourceId,  {
     String? sourceLayer,
     bool tappable = false,
@@ -331,6 +336,54 @@ abstract class MapboxGlPlatform {
   }) async {
     throw UnimplementedError(
         'setLineLayerOptions() has not been implemented.');
+  }
+
+  Future<void> removeLineLayer(String layerId) async {
+    throw UnimplementedError(
+        'removeLineLayer() has not been implemented.');
+  }
+
+
+  Future<void> addCircleLayer(String layerId, String sourceId,  {
+    String? sourceLayer,
+    bool tappable = false,
+    required Map<String, dynamic> properties,
+  }) async {
+    throw UnimplementedError(
+        'addCircleLayer() has not been implemented.');
+  }
+
+  Future<void> setCircleLayerOptions(String layerId, {
+    required Map<String, dynamic> properties,
+  }) async {
+    throw UnimplementedError(
+        'setCircleLayerOptions() has not been implemented.');
+  }
+
+  Future<void> removeCircleLayer(String layerId) async {
+    throw UnimplementedError(
+        'removeCircleLayer() has not been implemented.');
+  }
+
+  Future<void> addFillLayer(String layerId, String sourceId,  {
+    String? sourceLayer,
+    bool tappable = false,
+    required Map<String, dynamic> properties,
+  }) async {
+    throw UnimplementedError(
+        'addFillLayer() has not been implemented.');
+  }
+
+  Future<void> setFillLayerOptions(String layerId, {
+    required Map<String, dynamic> properties,
+  }) async {
+    throw UnimplementedError(
+        'setFillLayerOptions() has not been implemented.');
+  }
+
+  Future<void> removeFillLayer(String layerId) async {
+    throw UnimplementedError(
+        'removeFillLayer() has not been implemented.');
   }
 
   Stream<dynamic> featureDataStream(String source, {

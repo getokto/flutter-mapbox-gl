@@ -78,7 +78,7 @@ class Convert {
         return CameraOptions(
           center: LngLat(camera['target'][1], camera['target'][0]),
           zoom: camera['zoom'],
-          pitch: camera['tilt'],
+          pitch: camera['pitch'],
           bearing: camera['bearing'],
         );
       case 'newLatLng':

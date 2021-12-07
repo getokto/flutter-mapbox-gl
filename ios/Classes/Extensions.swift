@@ -5,14 +5,14 @@ extension CameraOptions {
         return [
             "bearing": bearing,
             "target": center?.toArray(),
-            "tilt": pitch,
+            "pitch": pitch,
             "zoom": zoom
         ]
     }
     static func fromDict(_ dict: [String: Any]) -> CameraOptions? {
         guard let target = dict["target"] as? [Double],
             let zoom = dict["zoom"] as? Double,
-            let tilt = dict["tilt"] as? CGFloat,
+            let tilt = dict["pitch"] as? CGFloat,
             let bearing = dict["bearing"] as? Double else { return nil }
         let location = CLLocationCoordinate2D.fromArray(target)
         return CameraOptions(

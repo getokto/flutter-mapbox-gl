@@ -19,11 +19,12 @@ class MapboxMap extends StatefulWidget {
     this.compassEnabled = true,
     this.cameraTargetBounds = CameraTargetBounds.unbounded,
     this.styleString,
-    this.minMaxZoomPreference = MinMaxZoomPreference.unbounded,
+    this.minMaxZoomPreference = MinMaxPreference.unbounded,
+    this.minMaxPitchPreference = MinMaxPreference.unbounded,
     this.rotateGesturesEnabled = true,
     this.scrollGesturesEnabled = true,
     this.zoomGesturesEnabled = true,
-    this.tiltGesturesEnabled = true,
+    this.pitchGesturesEnabled = true,
     this.trackCameraPosition = false,
     this.myLocationEnabled = false,
     this.myLocationTrackingMode = MyLocationTrackingMode.None,
@@ -96,7 +97,12 @@ class MapboxMap extends StatefulWidget {
   /// Preferred bounds for the camera zoom level.
   ///
   /// Actual bounds depend on map data and device.
-  final MinMaxZoomPreference minMaxZoomPreference;
+  final MinMaxPreference minMaxZoomPreference;
+
+  /// Preferred bounds for the camera pitch.
+  ///
+  /// Actual bounds depend on map data and device.
+  final MinMaxPreference minMaxPitchPreference;
 
   /// True if the map view should respond to rotate gestures.
   final bool rotateGesturesEnabled;
@@ -108,7 +114,7 @@ class MapboxMap extends StatefulWidget {
   final bool zoomGesturesEnabled;
 
   /// True if the map view should respond to tilt gestures.
-  final bool tiltGesturesEnabled;
+  final bool pitchGesturesEnabled;
 
   /// True if you want to be notified of map camera movements by the MapboxMapController. Default is false.
   ///
@@ -224,6 +230,10 @@ class _MapboxMapState extends State<MapboxMap> {
       'annotationOrder': annotationOrder,
       'annotationConsumeTapEvents': annotationConsumeTapEvents,
       'onAttributionClickOverride': widget.onAttributionClick != null,
+      'myLocationEnabled': widget.myLocationEnabled,
+      'myLocationTrackingMode': widget.myLocationTrackingMode.index,
+      'minMaxZoomPreferences': widget.minMaxZoomPreference.toJson(),
+      'minMaxPitchPreferences': widget.minMaxPitchPreference.toJson(),
     };
     return _mapboxGlPlatform.buildView(
         creationParams, onPlatformViewCreated, widget.gestureRecognizers);
@@ -299,9 +309,10 @@ class _MapboxMapOptions {
     this.cameraTargetBounds,
     this.styleString,
     this.minMaxZoomPreference,
+    this.minMaxPitchPreference,
     this.rotateGesturesEnabled,
     this.scrollGesturesEnabled,
-    this.tiltGesturesEnabled,
+    this.pitchGesturesEnabled,
     this.trackCameraPosition,
     this.zoomGesturesEnabled,
     this.myLocationEnabled,
@@ -319,9 +330,10 @@ class _MapboxMapOptions {
       cameraTargetBounds: map.cameraTargetBounds,
       styleString: map.styleString,
       minMaxZoomPreference: map.minMaxZoomPreference,
+      minMaxPitchPreference: map.minMaxPitchPreference,
       rotateGesturesEnabled: map.rotateGesturesEnabled,
       scrollGesturesEnabled: map.scrollGesturesEnabled,
-      tiltGesturesEnabled: map.tiltGesturesEnabled,
+      pitchGesturesEnabled: map.pitchGesturesEnabled,
       trackCameraPosition: map.trackCameraPosition,
       zoomGesturesEnabled: map.zoomGesturesEnabled,
       myLocationEnabled: map.myLocationEnabled,
@@ -340,13 +352,15 @@ class _MapboxMapOptions {
 
   final String? styleString;
 
-  final MinMaxZoomPreference? minMaxZoomPreference;
+  final MinMaxPreference? minMaxZoomPreference;
+
+  final MinMaxPreference? minMaxPitchPreference;
 
   final bool? rotateGesturesEnabled;
 
   final bool? scrollGesturesEnabled;
 
-  final bool? tiltGesturesEnabled;
+  final bool? pitchGesturesEnabled;
 
   final bool? trackCameraPosition;
 
@@ -389,7 +403,7 @@ class _MapboxMapOptions {
     addIfNonNull('minMaxZoomPreference', minMaxZoomPreference?.toJson());
     addIfNonNull('rotateGesturesEnabled', rotateGesturesEnabled);
     addIfNonNull('scrollGesturesEnabled', scrollGesturesEnabled);
-    addIfNonNull('tiltGesturesEnabled', tiltGesturesEnabled);
+    addIfNonNull('tiltGesturesEnabled', pitchGesturesEnabled);
     addIfNonNull('zoomGesturesEnabled', zoomGesturesEnabled);
     addIfNonNull('trackCameraPosition', trackCameraPosition);
     addIfNonNull('myLocationEnabled', myLocationEnabled);

@@ -120,6 +120,26 @@ abstract class Source {
   }
 }
 
+extension _UriExtension on Uri {
+  Uri withEncodedQuery () {
+    return Uri(
+      scheme: scheme,
+      userInfo: userInfo,
+      host: host,
+      port: port,
+      // path: path,
+      pathSegments: pathSegments,
+      // query: query,
+      queryParameters: queryParameters.entries.fold<Map<String, String>>({}, (previousValue, element) {
+        previousValue[element.key] = Uri.encodeQueryComponent(element.value);
+        return previousValue;
+      }),
+      fragment: [null, ''].contains(fragment) ? null : fragment
+    );
+  }
+}
+
+
 class VectorSource implements Source {
   VectorSource({
     this.attribution,
@@ -150,7 +170,11 @@ class VectorSource implements Source {
     if(minZoom != null) 'minZoom': minZoom,
     if(promoteId != null) 'promoteId': promoteId,
     if(scheme != null) 'scheme': scheme?.toString(),
-    if(tiles != null) 'tiles': tiles?.map((e) => Uri.decodeFull(e.toString())).toList(),
+    if(tiles != null) 'tiles': tiles?.map((e) {
+      final encoded = e.withEncodedQuery().toString();
+      return Uri.decodeFull(encoded);
+
+    }).toList(),
     if(url != null) 'url': url?.toString(),
   };
 

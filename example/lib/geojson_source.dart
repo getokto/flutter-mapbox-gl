@@ -82,7 +82,7 @@ class GeoJsonSourceExampleState extends State<GeoJsonSourceExample> {
     // ), tappable: true);
   }
 
-  void _onLayerTap(String layerId, Point<double> point, LatLng coordinates, Map<String, dynamic> data) {
+  void _onLayerTap(String sourceId, String sourceLayerId, Point<double> point, LatLng coordinates, Map<String, dynamic> data) {
 
     _mapController.setSymbolLayerProperties('terrain-data-symbols', SymbolLayerOptions(
       textColor: RawLayerProperty([

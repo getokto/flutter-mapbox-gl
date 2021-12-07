@@ -59,7 +59,7 @@ class MapboxMapController extends MapboxGlPlatform
           center: LngLat(camera['target'][1], camera['target'][0]),
           zoom: camera['zoom'],
           bearing: camera['bearing'],
-          pitch: camera['tilt'],
+          pitch: camera['pitch'],
         ),
       );
       _map.on('load', _onStyleLoaded);
@@ -382,7 +382,7 @@ class MapboxMapController extends MapboxGlPlatform
       return CameraPosition(
         bearing: _map.getBearing() as double,
         target: LatLng(center.lat as double, center.lng as double),
-        tilt: _map.getPitch() as double,
+        pitch: _map.getPitch() as double,
         zoom: _map.getZoom() as double,
       );
     }
@@ -457,7 +457,7 @@ class MapboxMapController extends MapboxGlPlatform
     var camera = CameraPosition(
       bearing: _map.getBearing() as double,
       target: LatLng(center.lat as double, center.lng as double),
-      tilt: _map.getPitch() as double,
+      pitch: _map.getPitch() as double,
       zoom: _map.getZoom() as double,
     );
     onCameraMovePlatform(camera);
@@ -468,7 +468,7 @@ class MapboxMapController extends MapboxGlPlatform
     var camera = CameraPosition(
       bearing: _map.getBearing() as double,
       target: LatLng(center.lat as double, center.lng as double),
-      tilt: _map.getPitch() as double,
+      pitch: _map.getPitch() as double,
       zoom: _map.getZoom() as double,
     );
     onCameraIdlePlatform(camera);

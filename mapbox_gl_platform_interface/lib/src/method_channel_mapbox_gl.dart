@@ -61,14 +61,16 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
             {'point': Point<double>(x, y), 'latLng': LatLng(lat, lng)});
         break;
       case 'map#onLayerTap':
-        final String layerId = call.arguments['layerId'];
+        final String sourceId = call.arguments['source'];
+        final String? sourceLayer = call.arguments['sourceLayer'];
         final double x = call.arguments['x'];
         final double y = call.arguments['y'];
         final double lng = call.arguments['lng'];
         final double lat = call.arguments['lat'];
-        final data = Map<String, dynamic>.from(call.arguments['data']);
+        final data = Map<String, dynamic>.from(call.arguments['data'] ?? {});
         onLayerTapPlatform({
-          'layerId': layerId,
+          'sourceId': sourceId,
+          'sourceLayerId': sourceLayer,
           'point': Point<double>(x, y),
           'latLng': LatLng(lat, lng),
           'data': data,
@@ -741,7 +743,7 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
 
   @override
   Future<void> addGeoJsonSource(String sourceId, Map<String, dynamic> geojson, Map<String, dynamic> properties) async {
-    await _channel.invokeMethod('geoJsonSource#add', <String, dynamic>{
+    await _channel.invokeMethod('style#geoJsonSourceAdd', <String, dynamic>{
       'sourceId': sourceId,
       'geojson': json.encode(geojson),
       'properties': properties,
@@ -750,7 +752,7 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
 
   @override
   Future<void> addVectorSource(String sourceId, Map<String, dynamic> properties) async {
-    await _channel.invokeMethod('vectorSource#add', <String, dynamic>{
+    await _channel.invokeMethod('style#vectorSourceAdd', <String, dynamic>{
       'sourceId': sourceId,
       'properties': properties,
     });
@@ -762,7 +764,7 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
     bool tappable = false,
     required Map<String, dynamic> properties,
   }) async {
-    await _channel.invokeMethod('symbolLayer#add', <String, dynamic>{
+    await _channel.invokeMethod('style#symbolLayerAdd', <String, dynamic>{
       'id': id,
       'source': source,
       'tappable': tappable,
@@ -776,9 +778,16 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   Future<void> setSymbolLayerOptions(String layerId, {
     required Map<String, dynamic> properties,
   }) async {
-    await _channel.invokeMethod('symbolLayer#update', <String, dynamic>{
+    await _channel.invokeMethod('style#symbolLayerUpdate', <String, dynamic>{
       'id': layerId,
       'properties': properties,
+    });
+  }
+
+  @override
+  Future<void> removeSymbolLayer(String layerId) async {
+    await _channel.invokeMethod('style#symbolLayerRemove', <String, dynamic>{
+      'id': layerId,
     });
   }
 
@@ -788,7 +797,7 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
     bool tappable = false,
     required Map<String, dynamic> properties,
   }) async {
-    await _channel.invokeMethod('lineLayer#add', <String, dynamic>{
+    await _channel.invokeMethod('style#lineLayerAdd', <String, dynamic>{
       'id': id,
       'source': source,
       'tappable': tappable,
@@ -801,9 +810,80 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   Future<void> setLineLayerOptions(String layerId, {
     required Map<String, dynamic> properties,
   }) async {
-    await _channel.invokeMethod('lineLayer#update', <String, dynamic>{
+    await _channel.invokeMethod('style#lineLayerUpdate', <String, dynamic>{
       'id': layerId,
       'properties': properties,
+    });
+  }
+
+  @override
+  Future<void> removeLineLayer(String layerId) async {
+    await _channel.invokeMethod('style#lineLayerRemove', <String, dynamic>{
+      'id': layerId,
+    });
+  }
+
+  @override
+  Future<void> addCircleLayer(String id, String source,  {
+    String? sourceLayer,
+    bool tappable = false,
+    required Map<String, dynamic> properties,
+  }) async {
+    await _channel.invokeMethod('style#circleLayerAdd', <String, dynamic>{
+      'id': id,
+      'source': source,
+      'tappable': tappable,
+      'properties': properties,
+      if (sourceLayer != null) 'source-layer': sourceLayer,
+    });
+  }
+
+  @override
+  Future<void> setCircleLayerOptions(String layerId, {
+    required Map<String, dynamic> properties,
+  }) async {
+    await _channel.invokeMethod('style#circleLayerUpdate', <String, dynamic>{
+      'id': layerId,
+      'properties': properties,
+    });
+  }
+
+  @override
+  Future<void> removeCircleLayer(String layerId) async {
+    await _channel.invokeMethod('style#circleLayerRemove', <String, dynamic>{
+      'id': layerId,
+    });
+  }
+
+  @override
+  Future<void> addFillLayer(String id, String source,  {
+    String? sourceLayer,
+    bool tappable = false,
+    required Map<String, dynamic> properties,
+  }) async {
+    await _channel.invokeMethod('style#fillLayerAdd', <String, dynamic>{
+      'id': id,
+      'source': source,
+      'tappable': tappable,
+      'properties': properties,
+      if (sourceLayer != null) 'source-layer': sourceLayer,
+    });
+  }
+
+  @override
+  Future<void> setFillLayerOptions(String layerId, {
+    required Map<String, dynamic> properties,
+  }) async {
+    await _channel.invokeMethod('style#fillLayerUpdate', <String, dynamic>{
+      'id': layerId,
+      'properties': properties,
+    });
+  }
+
+  @override
+  Future<void> removeFillLayer(String layerId) async {
+    await _channel.invokeMethod('style#fillLayerRemove', <String, dynamic>{
+      'id': layerId,
     });
   }
 

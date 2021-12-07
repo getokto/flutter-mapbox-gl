@@ -9,17 +9,15 @@ import Foundation
 import MapboxMaps
 
 
-
-
 class FeaturesStreamHandler : NSObject, FlutterStreamHandler {
     var client: MapView
     var events: FlutterEventSink?
     var source: String
     var sourceLayers: [String]?
-    var filter: [Any]?
+    var filter: Any
     var layerId: String?
     
-    init(client: MapView, source: String, sourceLayers: [String]?, filter: [Any]?) {
+    init(client: MapView, source: String, sourceLayers: [String]?, filter: Any) {
         self.client = client
         self.source = source
         self.sourceLayers = sourceLayers
@@ -31,35 +29,20 @@ class FeaturesStreamHandler : NSObject, FlutterStreamHandler {
         
         client.mapboxMap.querySourceFeatures(for: source, options: queryOptions) {
             result in
-            switch result {
-                case .success(let features):
-                    if features.count > 0 {
-                        let b = features.map { feature in
-                           
-                            return feature.feature;
-                        }
-                        var data = try? JSONEncoder().encode(b);
-                        var result = String(data: data!, encoding: String.Encoding.utf8);
-                        self.events?(result)
-                        //events(fea)
-                        //featureQueryExpectation.fulfill()
-                    }
-            case .failure:
-                let a = 1
-//                    XCTFail("Feature querying failed")
+            
+            if case .success(let features) = result,
+               features.count > 0 {
+                let rawFeatures = features.map { feature in
+                    return feature.feature;
+                }
+                if let data = try? JSONEncoder().encode(rawFeatures) {
+                    let result = String(data: data, encoding: String.Encoding.utf8);
+                    self.events?(result)
+                }
             }
        }
     }
         
-        
-       // let features = client.visibleFeatures(in: UIScreen.main.bounds, styleLayerIdentifiers: [layerId!])
-
-//        let geojson = features.map { feature in
-//            return feature.geoJSONDictionary()
-//        }
-
-       // events!(geojson)
-    
     
     func onMapDataLoaded(event: Event) {
         if let data = event.data as? [String: Any] {
@@ -74,8 +57,6 @@ class FeaturesStreamHandler : NSObject, FlutterStreamHandler {
     func onListen(withArguments arguments: Any?,
                   eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         
-        
-        
         let args = arguments as! Dictionary<String, Any>
 
         layerId = args["layerId"] as? String
@@ -83,9 +64,7 @@ class FeaturesStreamHandler : NSObject, FlutterStreamHandler {
         self.events = events;
         
         client.mapboxMap.onEvery(.sourceDataLoaded, handler: onMapDataLoaded)
-//
-//        client.subscribe(for: self, event: MGLEventType.resourceRequest)
-//
+
         dispatchFeatures()
         
         return nil
@@ -94,9 +73,6 @@ class FeaturesStreamHandler : NSObject, FlutterStreamHandler {
     
     
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        //self.watcher.close()
-        
-//        client.unsubscribe(for: self)
         self.events = nil
         
         return nil;

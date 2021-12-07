@@ -153,7 +153,7 @@ class Convert {
     final Map<String, Object> data = new HashMap<>();
     data.put("bearing", position.bearing);
     data.put("target", toJson(position.target));
-    data.put("tilt", position.tilt);
+    data.put("pitch", position.tilt);
     data.put("zoom", position.zoom);
     return data;
   }

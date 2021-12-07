@@ -27,6 +27,7 @@ class VectorSourceExample extends StatefulWidget {
   State createState() => VectorSourceExampleState();
 }
 
+
 class VectorSourceExampleState extends State<VectorSourceExample> {
 
   late MapboxMapController _mapController;
@@ -37,129 +38,68 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
 
   Future<void> _onStyleLoadedCallback() async {
 
-    //await addImageFromAsset("assett-image", "assets/symbols/custom-icon.png");
+    await addImageFromAsset("assett-image", "assets/symbols/custom-icon.png");
 
-      await _mapController.addVectorSource('test', VectorSource(
+      await _mapController.addVectorSource('mapillary', VectorSource(
         minZoom: 6,
         maxZoom: 14,
-        // url: Uri.parse('https://gist.githubusercontent.com/bjartebore/1475e190114df1479ffdcba073892ce4/raw/25d88f9cafd888d1861735bcf5895bff2f81d245/tile.json'),
         tiles: [
-          Uri.parse('https://oktoservices.azurewebsites.net/v1/GeneratePoints/mapbox/helleu/{z}/{x}/{y}.mvt'),
+          // access_token is double encoded to ensure that it is not decoded
+          Uri.parse('https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=MLY%7C4142433049200173%7C72206abe5035850d6743b23a49c41333'),
         ]
       ).toMap());
-
-
-    await _mapController.addSymbolLayer(SymbolLayer(
-      id: 'terrain-data-symbols',
-      // sourceLayer: "pointsOfInterest",
-      sourceLayer: "agp",
-      source: 'test',
-        options: SymbolLayerOptions(
-          iconImage: ImageLayerProperty('rocket-15'),
-          iconColor: ConstantLayerProperty(Colors.blue),
-        ),
-    ), tappable: true);
-
-
-      await _mapController.addVectorSource('test2', VectorSource(
-        minZoom: 6,
-        maxZoom: 14,
-        // url: Uri.parse('https://gist.githubusercontent.com/bjartebore/1475e190114df1479ffdcba073892ce4/raw/25d88f9cafd888d1861735bcf5895bff2f81d245/tile.json'),
-        tiles: [
-          Uri.parse('https://oktoservices.azurewebsites.net/v1/VectorTiles/{z}/{x}/{y}.mvt'),
-        ]
-      ).toMap());
-
-
-    await _mapController.addSymbolLayer(SymbolLayer(
-      id: 'terrain-data-symbols2',
-      sourceLayer: "pointsOfInterest",
-      // sourceLayer: "agp",
-      source: 'test2',
-        options: SymbolLayerOptions(
-          iconImage: ImageLayerProperty('rocket-15'),
-          iconColor: ConstantLayerProperty(Colors.red),
-        ),
-    ), tappable: true);
-
-
-
-    await _mapController.addVectorSource('mapillary', VectorSource(
-        minZoom: 6,
-        maxZoom: 14,
-        // url: Uri.parse('mapbox://mapbox.mapbox-terrain-v2'),
-        // url: Uri.parse('https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2.json?secure&access_token=pk.eyJ1IjoiYmphcnRlYm9yZSIsImEiOiJja3VnaTV2N3QwcWh5MnVva21tNWJhZHZ5In0.MCrnbGAC3tKA1piTeqqrkw'),
-        tiles: [
-          Uri.parse('https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=MLY|4142433049200173|72206abe5035850d6743b23a49c41333'),
-          // Uri.parse('https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v8,mapbox.mapbox-terrain-v2/{z}/{x}/{y}.vector.pbf?access_token=pk.eyJ1IjoiYmphcnRlYm9yZSIsImEiOiJja3VnaTV2N3QwcWh5MnVva21tNWJhZHZ5In0.MCrnbGAC3tKA1piTeqqrkw')
-        ]
-      ).toMap());
-
 
     await _mapController.addLineLayer(LineLayer(
       id: 'mapillary',
-      // sourceLayer: 'contour',
       sourceLayer: 'sequence',
       source: 'mapillary',
       options: LineLayerOptions(
         lineJoin: ConstantLayerProperty(LineJoin.Round),
         lineCap: ConstantLayerProperty(LineCap.Round),
-        lineColor: ConstantLayerProperty(Color(0xFFff0000).withOpacity(0.5)),
-        lineWidth: ConstantLayerProperty(1),
+        lineColor: ConstantLayerProperty(Colors.lightGreen),
+        lineWidth: ConstantLayerProperty(2.0),
       )
+    ), tappable: false);
+
+
+
+    await _mapController.addVectorSource('test', VectorSource(
+      minZoom: 6,
+      maxZoom: 14,
+      tiles: [
+        Uri.parse('https://oktoservices.azurewebsites.net/v1/GeneratePoints/mapbox/helleu/{z}/{x}/{y}.mvt'),
+      ]
+    ).toMap());
+
+    await _mapController.addCircleLayer(CircleLayer(
+      id: 'agp-circle',
+      sourceLayer: "agp",
+      source: 'test',
+        options: CircleLayerOptions(
+          circleColor: ConstantLayerProperty(Colors.red),
+          circleRadius: ConstantLayerProperty(5),
+        ),
     ), tappable: true);
 
 
-    // await _mapController.addVectorSource('okto-v1', VectorSource(
-    //   minZoom: 0,
-    //   maxZoom: 22,
-    //   // tiles: [
-    //   //   // Uri.parse("https://api.mapbox.com/v4/mapbox.mapbox-streets-v8,mapbox.mapbox-terrain-v2/{z}/{x}/{y}.mvt?sku=1015sf5zIC7Hi&access_token=pk.eyJ1IjoiYmphcnRlYm9yZSIsImEiOiJja3VnaTV2N3QwcWh5MnVva21tNWJhZHZ5In0.MCrnbGAC3tKA1piTeqqrkw"),
-    //   //   // Uri.parse('https://oktoservices.azurewebsites.net/v1/GeneratePoints/mapbox/helleu/{z}/{x}/{y}.mvt'),
-    //   //   Uri.parse("https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=MLY|4142433049200173|72206abe5035850d6743b23a49c41333")
-    //   // ],
-    //   url: Uri.parse('https://gist.githubusercontent.com/bjartebore/1475e190114df1479ffdcba073892ce4/raw/6fab1e4688192c59e94adcf4f34658b7aa089dd4/tile.json'),
-    // ).toMap());
-
-    // // await _mapController.addLineLayer(LineLayer(
-    // //   id: 'mapillary',
-    // //   sourceLayer: "Generated_Points",
-    // //   source: 'oktopoints',
-    // //     options: LineLayerOptions(
-    // //       // iconImage: ImageLayerProperty('assett-image'),
-    // //       // iconColor: RawLayerProperty(["get", "color"]),
-    // //       lineCap: ConstantLayerProperty(LineCap.Round),
-    // //       lineJoin: ConstantLayerProperty(LineJoin.Round),
-    // //       lineColor: ConstantLayerProperty(Colors.red),
-    // //       lineWidth: ConstantLayerProperty(2.0),
-    // //     ),
-    // // ), tappable: true);
-
-
     // await _mapController.addSymbolLayer(SymbolLayer(
-    //   id: 'oktopoints',
-    //   sourceLayer: "pointsOfInterest",
-    //   source: 'okto-v1',
+    //   id: 'agp',
+    //   sourceLayer: "agp",
+    //   source: 'test',
     //     options: SymbolLayerOptions(
-    //       textField: 'hola',
-    //       textColor: ConstantLayerProperty(Colors.red),
-    //       // iconImage: ImageLayerProperty('assett-image'),
-    //       // iconColor: RawLayerProperty(["get", "color"]),
-    //       // lineCap: ConstantLayerProperty(LineCap.Round),
-    //       // lineJoin: ConstantLayerProperty(LineJoin.Round),
-    //       // lineColor: ConstantLayerProperty(Colors.red),
-    //       // lineWidth: ConstantLayerProperty(2.0),
+    //       iconImage: ImageLayerProperty('rocket-15'),
+    //       iconColor: ConstantLayerProperty(Colors.blue),
     //     ),
     // ), tappable: true);
 
-    _mapController.featureDataStream('mapillary',
-      sourceLayers: ["sequence"],
+
+    _mapController.featureDataStream('test',
+      sourceLayers: ["agp"],
     ).listen(_handleDataStream);
   }
 
   void _handleDataStream (event) {
     print(event.length);
-    int a = 1;
   }
 
 
@@ -188,11 +128,18 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
               accessToken: MapsDemo.ACCESS_TOKEN,
               styleString: "mapbox://styles/mapbox/light-v10",
               trackCameraPosition: true,
+              myLocationEnabled: false,
+              myLocationTrackingMode: MyLocationTrackingMode.None,
               onMapCreated: _onMapCreated,
+              onLayerTap: (sourceId, sourceLayerId, point, coordinates, data) {
+                int a = 1;
+              },
+              minMaxZoomPreference: MinMaxPreference(14, 20),
+              minMaxPitchPreference: MinMaxPreference(0, 45),
               onStyleLoadedCallback: _onStyleLoadedCallback,
               initialCameraPosition: const CameraPosition(
-                target: LatLng(58.963186, 5.7468822),
-                // target: LatLng(41.878781, -87.622088),
+                target: LatLng(41.878781, -87.622088),
+                pitch: 0,
                 zoom: 14,
               ),
             ),

@@ -62,7 +62,7 @@ class AnimateCameraState extends State<AnimateCamera> {
                             const CameraPosition(
                               bearing: 270.0,
                               target: LatLng(51.5160895, -0.1294527),
-                              tilt: 30.0,
+                              pitch: 30.0,
                               zoom: 17.0,
                             ),
                           ),

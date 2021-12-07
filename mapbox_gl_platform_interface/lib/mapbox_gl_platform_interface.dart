@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:from_css_color/from_css_color.dart';
-import 'package:streams_channel2/streams_channel2.dart';
+import 'package:streams_channel3/streams_channel3.dart';
 
 part 'src/callbacks.dart';
 part 'src/camera.dart';
@@ -24,6 +24,8 @@ part 'src/ui.dart';
 part 'src/mapbox_gl_platform_interface.dart';
 part 'src/sources/source.dart';
 part 'src/layers/layers.dart';
+part 'src/layers/circle_layer.dart';
+part 'src/layers/fill_layer.dart';
 part 'src/layers/symbol_layer.dart';
 part 'src/layers/line_layer.dart';
 part 'src/geojson/geometry.dart';

@@ -197,6 +197,21 @@ abstract class StyleLayer<T extends StyleLayerOptions> {
 
 abstract class StyleLayerOptions {
   Map<String, dynamic> toMap();
+
+
+
+  dynamic serializeValue<T>(T value) {
+    if (value is LayerProperty) {
+      return value.serialize();
+    }
+    if (value is EnumLike) {
+      return value.toString();
+    } if (value is Color) {
+      return ["rgba", value.red, value.green, value.blue, value.opacity];
+    }
+    return value;
+  }
+
 }
 
 abstract class EnumLike {

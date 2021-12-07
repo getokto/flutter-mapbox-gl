@@ -24,7 +24,7 @@ class _OfflineRegionMapState extends State<OfflineRegionMap> {
           target: _center,
           zoom: widget.item.offlineRegionDefinition.minZoom,
         ),
-        minMaxZoomPreference: MinMaxZoomPreference(
+        minMaxZoomPreference: MinMaxPreference(
           widget.item.offlineRegionDefinition.minZoom,
           widget.item.offlineRegionDefinition.maxZoom,
         ),

@@ -4,7 +4,7 @@
 
 part of mapbox_gl;
 
-typedef void OnLayerTapCallback(String layerId, Point<double> point, LatLng coordinates, Map<String, dynamic> data);
+typedef void OnLayerTapCallback(String sourceId, String sourceLayer, Point<double> point, LatLng coordinates, Map<String, dynamic> data);
 typedef void OnMapClickCallback(Point<double> point, LatLng coordinates);
 typedef void OnMapLongClickCallback(Point<double> point, LatLng coordinates);
 
@@ -128,7 +128,7 @@ class MapboxMapController extends ChangeNotifier {
 
     MapboxGlPlatform.getInstance(_id).onLayerTapPlatform.add((dict) {
       if (onLayerTap != null) {
-        onLayerTap!(dict['layerId'], dict['point'], dict['latLng'], dict['data']);
+        onLayerTap!(dict['sourceId'], dict['sourceLayerId'], dict['point'], dict['latLng'], dict['data']);
       }
     });
 
@@ -345,6 +345,35 @@ class MapboxMapController extends ChangeNotifier {
   }
 
 
+  /// Adds a mapbox circle layer
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> addCircleLayer(CircleLayer layer, { bool tappable = false }) async {
+    await MapboxGlPlatform.getInstance(_id).addCircleLayer(
+      layer.id,
+      layer.source,
+      sourceLayer: layer.sourceLayer,
+      tappable: tappable,
+      properties: layer.options.toMap(),
+    );
+  }
+
+  /// Adds a mapbox circle layer
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> addFillLayer(CircleLayer layer, { bool tappable = false }) async {
+    await MapboxGlPlatform.getInstance(_id).addFillLayer(
+      layer.id,
+      layer.source,
+      sourceLayer: layer.sourceLayer,
+      tappable: tappable,
+      properties: layer.options.toMap(),
+    );
+  }
+
+
   /// Updates a mapbox gl symbol layer
   ///
   /// The returned [Future] completes after the change has been made on the
@@ -361,10 +390,9 @@ class MapboxMapController extends ChangeNotifier {
   /// The returned [Future] completes after the change has been made on the
   /// platform side.
   Future<void> addLineLayer(LineLayer layer, { bool tappable = false }) async {
-    assert(layer.source != null);
     await MapboxGlPlatform.getInstance(_id).addLineLayer(
       layer.id,
-      layer.source!,
+      layer.source,
       sourceLayer: layer.sourceLayer,
       tappable: tappable,
       properties: layer.options.toMap(),
@@ -381,6 +409,29 @@ class MapboxMapController extends ChangeNotifier {
       properties: layerOptions.toMap(),
     );
   }
+
+  /// Updates a mapbox gl line layer
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> setCircleLayerProperties(String layerId, CircleLayerOptions layerOptions) async {
+    await MapboxGlPlatform.getInstance(_id).setCircleLayerOptions(
+      layerId,
+      properties: layerOptions.toMap(),
+    );
+  }
+
+    /// Updates a mapbox gl line layer
+  ///
+  /// The returned [Future] completes after the change has been made on the
+  /// platform side.
+  Future<void> setFillLayerProperties(String layerId, FillLayerOptions layerOptions) async {
+    await MapboxGlPlatform.getInstance(_id).setFillLayerOptions(
+      layerId,
+      properties: layerOptions.toMap(),
+    );
+  }
+
 
   /// Updates user location tracking mode.
   ///
@@ -1004,6 +1055,6 @@ class MapboxMapController extends ChangeNotifier {
       source,
       sourceLayers: sourceLayers,
       filter: filter,
-    );
+    ).map((event) => json.decode(event));
   }
 }

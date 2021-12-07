@@ -1,9 +1,34 @@
 import Flutter
 import UIKit
 import MapboxMaps
-import streams_channel2
+import streams_channel3
 
-class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
+
+public class CameraLocationConsumer: LocationConsumer {
+    weak var mapView: MapView?
+    let duration: Double
+    
+    init(mapView: MapView, duration: Double) {
+        self.mapView = mapView
+        self.duration = duration
+    }
+
+    public func locationUpdate(newLocation: Location) {
+        mapView?.camera.ease(
+            to: CameraOptions(center: newLocation.coordinate),
+            duration: 1.3)
+    }
+}
+
+
+enum MyLocationTrackingMode: UInt, CaseIterable {
+  case None
+  case Tracking
+  case TrackingCompass
+  case TrackingGPS
+}
+
+class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, LocationPermissionsDelegate {
 
     private var registrar: FlutterPluginRegistrar
     private var channel: FlutterMethodChannel?
@@ -13,7 +38,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
     private var isMapReady = false
     private var mapReadyResult: FlutterResult?
     
-    private var initialTilt: CGFloat?
+    private var initialPitch: CGFloat?
     private var cameraTargetBounds: CoordinateBounds?
     private var trackCameraPosition = false
     private var myLocationEnabled = false
@@ -22,7 +47,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
     private var annotationOrder = [String]()
     private var annotationConsumeTapEvents = [String]()
     
-    
+    private var cameraLocationConsumer: CameraLocationConsumer
 
 
     func view() -> UIView {
@@ -32,7 +57,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
     init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?, registrar: FlutterPluginRegistrar) {
         var cameraOptions: CameraOptions?
         var styleUri: String?
-        
+        var cameraBoundsOptions = CameraBoundsOptions()
+        var myLocationEnabled = false
+        var myLocationTrackingMode = MyLocationTrackingMode.None
         if let args = args as? [String: Any] {
             if let token = args["accessToken"] as? String {
                 ResourceOptionsManager.default.resourceOptions.accessToken = token
@@ -48,23 +75,57 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
                 }
 
             }
+            
+            if let minMaxPitch = args["minMaxPitchPreferences"] as? [Double?], minMaxPitch.count == 2 {
+                if let min = minMaxPitch[0] as? Double {
+                    cameraBoundsOptions.minPitch = min
+                }
+                
+                if let max = minMaxPitch[1] as? Double {
+                    cameraBoundsOptions.maxPitch = max
+                }
+            }
+            
+            if let minMaxZoom = args["minMaxZoomPreferences"] as? [Double?], minMaxZoom.count == 2 {
+                if let min = minMaxZoom[0] as? Double {
+                    cameraBoundsOptions.minZoom = min
+                }
+                
+                if let max = minMaxZoom[1] as? Double {
+                    cameraBoundsOptions.maxZoom = max
+                }
+            }
+            if let _myLocationTrackingMode = args["myLocationTrackingMode"] as? UInt,
+               let trackingMode = MyLocationTrackingMode(rawValue: _myLocationTrackingMode) {
+                myLocationTrackingMode = trackingMode
+            }
+            
+            if let _myLocationEnabled = args["myLocationEnabled"] as? Bool {
+               myLocationEnabled = _myLocationEnabled
+            }
         }
-        
                 
         let initOptions = MapInitOptions(
             cameraOptions: cameraOptions,
             styleURI: styleUri != nil ? StyleURI(rawValue: styleUri!) : nil
         )
         
-        
         mapView = MapView(frame: frame, mapInitOptions: initOptions)
         
+        cameraLocationConsumer = CameraLocationConsumer(mapView: mapView, duration: 1.3)
         
-
+        try? mapView.mapboxMap.setCameraBounds(with: cameraBoundsOptions)
+       
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        
         self.registrar = registrar
         
         super.init()
+       
+        mapView.mapboxMap.onNext(.mapLoaded) { _ in
+            self.setMyLocationEnabled(enabled: myLocationEnabled)
+            self.setMyLocationTrackingMode(myLocationTrackingMode: myLocationTrackingMode)
+        }
         
         mapView.mapboxMap.onNext(.styleDataLoaded, handler: onMapStyleLoaded)
         
@@ -89,7 +150,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
                             client: self.mapView,
                             source: source!,
                             sourceLayers: args["source-layers"] as? [String],
-                            filter: args["filter"] as? [Any]
+                            filter: args["filter"] as Any
                         );
                     
                     default:
@@ -103,13 +164,10 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
         }
 
         
-        let singleTap = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(sender:)))
-        for recognizer in mapView.gestureRecognizers! where recognizer is UITapGestureRecognizer {
-            singleTap.require(toFail: recognizer)
-        }
-        mapView.addGestureRecognizer(singleTap)
         
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleMapLongPress(sender:)))
+        mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleMapTap)))
+        
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleMapLongPress))
         for recognizer in mapView.gestureRecognizers! where recognizer is UILongPressGestureRecognizer {
             longPress.require(toFail: recognizer)
         }
@@ -131,19 +189,20 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
         }
     }
     
+    
+    func locationManager(_ locationManager: LocationManager, didChangeAccuracyAuthorization accuracyAuthorization: CLAccuracyAuthorization) {
+        if accuracyAuthorization == .reducedAccuracy {
+             // Present a button on screen that asks for full accuracy
+             // This button can have a selector as defined above
+            }
+        }
+    
     func onMapStyleLoaded(event: Event) {
         isMapReady = true
-        //        updateMyLocationEnabled()
 
         mapReadyResult?(nil)
         channel?.invokeMethod("map#onStyleLoaded", arguments: nil)
-        
     }
-    
-    func onMapDataLoaded(event: Event) {
-        
-    }
-
 //    func removeAllForController(controller: MGLAnnotationController, ids: [String]){
 //        let idSet = Set(ids)
 //        let annotations = controller.styleAnnotations()
@@ -175,12 +234,12 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
 //                    result(nil)
 //                }
 //            }
-//        case "map#updateMyLocationTrackingMode":
-//            guard let arguments = methodCall.arguments as? [String: Any] else { return }
-//            if let myLocationTrackingMode = arguments["mode"] as? UInt, let trackingMode = MGLUserTrackingMode(rawValue: myLocationTrackingMode) {
-//                setMyLocationTrackingMode(myLocationTrackingMode: trackingMode)
-//            }
-//            result(nil)
+        case "map#updateMyLocationTrackingMode":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            if let myLocationTrackingMode = arguments["mode"] as? UInt, let trackingMode = MyLocationTrackingMode(rawValue: myLocationTrackingMode) {
+                setMyLocationTrackingMode(myLocationTrackingMode: trackingMode)
+            }
+            result(nil)
 //        case "map#matchMapLanguageWithDeviceDefault":
 //            if let style = mapView.style {
 //                style.localizeLabels(into: nil)
@@ -564,7 +623,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
         //     removeAllForController(controller:lineAnnotationController, ids:ids)
         //     result(nil)
 
-         case "geoJsonSource#add":
+         case "style#geoJsonSourceAdd":
              guard let arguments = methodCall.arguments as? [String: Any] else { return }
              guard let sourceId = arguments["sourceId"] as? String else { return }
              guard let geojson = arguments["geojson"] as? String else { return }
@@ -573,7 +632,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
              addGeoJsonSource(sourceId: sourceId, geojson: geojson, properties: properties)
 
              result(nil)
-         case "vectorSource#add":
+         case "style#vectorSourceAdd":
              guard let arguments = methodCall.arguments as? [String: Any] else { return }
              guard let sourceId = arguments["sourceId"] as? String else { return }
              guard let properties = arguments["properties"] as? [String: Any] else { return }
@@ -581,7 +640,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
              addVectorSource(sourceId: sourceId, properties: properties)
 
              result(nil)
-         case "symbolLayer#add":
+         case "style#symbolLayerAdd":
              guard let arguments = methodCall.arguments as? [String: Any] else { return }
              guard let sourceId = arguments["source"] as? String else { return }
              guard let layerId = arguments["id"] as? String else { return }
@@ -598,15 +657,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
              }
            
              result(nil)
-         case "symbolLayer#update":
-             guard let arguments = methodCall.arguments as? [String: Any] else { return }
-             guard let layerId = arguments["id"] as? String else { return }
-             guard let properties = arguments["properties"] as? [String: Any] else { return }
             
-             updateSymbolLayer(layerId: layerId, properties: properties)
-                       
-             result(nil)
-         case "lineLayer#add":
+         case "style#lineLayerAdd":
              guard let arguments = methodCall.arguments as? [String: Any] else { return }
              guard let sourceId = arguments["source"] as? String else { return }
              guard let layerId = arguments["id"] as? String else { return }
@@ -623,14 +675,64 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
              }
             
              result(nil)
-         case "lineLayer#update":
+        case "style#circleLayerAdd":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let sourceId = arguments["source"] as? String else { return }
+            guard let layerId = arguments["id"] as? String else { return }
+            guard let tappable = arguments["tappable"] as? Bool else { return }
+            guard let properties = arguments["properties"] as? [String: Any] else { return }
+            let sourceLayerId = arguments["source-layer"] as? String
+           
+            addCircleLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties)
+
+            if tappable {
+                tappableLayers.insert(layerId)
+            } else {
+                tappableLayers.remove(layerId)
+            }
+           
+            result(nil)
+        case "style#fillLayerAdd":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let sourceId = arguments["source"] as? String else { return }
+            guard let layerId = arguments["id"] as? String else { return }
+            guard let tappable = arguments["tappable"] as? Bool else { return }
+            guard let properties = arguments["properties"] as? [String: Any] else { return }
+            let sourceLayerId = arguments["source-layer"] as? String
+           
+            addFillLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties)
+
+            if tappable {
+                tappableLayers.insert(layerId)
+            } else {
+                tappableLayers.remove(layerId)
+            }
+           
+            result(nil)
+        case "style#lineLayerUpdate": fallthrough
+        case "style#symbolLayerUpdate": fallthrough
+        case "style#circleLayerUpdate": fallthrough
+        case "style#fillLayerUpdate": fallthrough
+        case "style#layerUpdate":
              guard let arguments = methodCall.arguments as? [String: Any] else { return }
              guard let layerId = arguments["id"] as? String else { return }
              guard let properties = arguments["properties"] as? [String: Any] else { return }
             
-             updateLineLayer(layerId: layerId, properties: properties)
+            updateLayer(layerId: layerId, properties: properties)
                        
              result(nil)
+        case "style#lineLayerRemove": fallthrough
+        case "style#symbolLayerRemove": fallthrough
+        case "style#circleLayerRemove": fallthrough
+        case "style#fillLayerRemove": fallthrough
+        case "style#layerRemove":
+             guard let arguments = methodCall.arguments as? [String: Any] else { return }
+             guard let layerId = arguments["id"] as? String else { return }
+            
+            removeLayer(layerId: layerId)
+            tappableLayers.remove(layerId)
+                       
+            result(nil)
         // case "line#getGeometry":
         //     guard let lineAnnotationController = lineAnnotationController else { return }
         //     guard let arguments = methodCall.arguments as? [String: Any] else { return }
@@ -739,23 +841,17 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
          case "style#addImage":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let name = arguments["name"] as? String else { return }
-            //guard let length = arguments["length"] as? NSNumber else { return }
             guard let bytes = arguments["bytes"] as? FlutterStandardTypedData else { return }
             guard let sdf = arguments["sdf"] as? Bool else { return }
-            guard let data = bytes.data as? Data else{ return }
-            guard let image = UIImage(data: data) else { return }
+            guard let image = UIImage(data: bytes.data) else { return }
             if let style = mapView.mapboxMap.style as? Style {
-                do {
-                   try style.addImage(
-                       image,
-                       id: name,
-                       sdf: sdf,
-                       stretchX: [],
-                       stretchY: []
-                    )
-                } catch {
-                    var a = 1;
-                }
+                try? style.addImage(
+                    image,
+                    id: name,
+                    sdf: sdf,
+                    stretchX: [],
+                    stretchY: []
+                 )
             }
              result(nil)
 
@@ -878,8 +974,22 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
 //        }
 //    }
 
-    private func updateMyLocationEnabled() {
-//        mapView.showsUserLocation = self.myLocationEnabled
+
+    
+    private func updateMyLocationTrackingMode() {
+        
+        self.mapView.location.addLocationConsumer(newConsumer: self.cameraLocationConsumer)
+    }
+    
+    func setMyLocationTrackingMode(myLocationTrackingMode: MyLocationTrackingMode) {
+        switch myLocationTrackingMode {
+        case .None:
+            mapView.location.removeLocationConsumer(consumer: cameraLocationConsumer)
+        case .Tracking:fallthrough
+        case .TrackingCompass:fallthrough
+        case .TrackingGPS:
+            mapView.location.addLocationConsumer(newConsumer: cameraLocationConsumer)
+        }
     }
     
     private func getCamera() -> CameraAnimationsManager? {
@@ -889,66 +999,56 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
     
     private var tappableLayers: Set<String> = Set<String>()
     
+    
+    private func getJsonStringFromObject(json: JSONObject?) -> String? {
+        let jsonEncoder = JSONEncoder()
+        if let jsonData = try? jsonEncoder.encode(json){
+            return String(data: jsonData, encoding: String.Encoding.utf16)
+        }
+        return nil;
+    }
+    
     /*
     *  UITapGestureRecognizer
     *  On tap invoke the map#onMapClick callback.
     */
-    @objc @IBAction func handleMapTap(sender: UITapGestureRecognizer) {
+    @objc @IBAction func handleMapTap(_ sender: UITapGestureRecognizer) {
+        guard sender.state == .ended else { return }
         // Get the CGPoint where the user tapped.
-//        let point = sender.location(in: mapView)
-//        let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
-//        channel?.invokeMethod("map#onMapClick", arguments: [
-//            "x": point.x,
-//            "y": point.y,
-//            "lng": coordinate.longitude,
-//            "lat": coordinate.latitude,
-//        ])
-//
-//        if sender.state == .ended && tappableLayers.count > 0 {
-//
-//            // We loop the list so we can figure out the layerid of the matching feature
-//            for tappableLayer in tappableLayers {
-//
-//                for feature in mapView.visibleFeatures(at: point, styleLayerIdentifiers: [tappableLayer]) {
-//                    channel?.invokeMethod("map#onLayerTap", arguments: [
-//                        "layerId": tappableLayer,
-//                        "x": point.x,
-//                        "y": point.y,
-//                        "lng": feature.coordinate.longitude,
-//                        "lat": feature.coordinate.latitude,
-//                        "data": feature.attributes
-//                    ])
-//                    return
-//                }
-//
-//                let touchCoordinate = mapView.convert(point, toCoordinateFrom: sender.view!)
-//                let touchLocation = CLLocation(latitude: touchCoordinate.latitude, longitude: touchCoordinate.longitude)
-//
-//                // Otherwise, get all features within a rect the size of a touch (44x44).
-//                let touchRect = CGRect(origin: point, size: .zero).insetBy(dx: -22.0, dy: -22.0)
-//                let possibleFeatures = mapView.visibleFeatures(in: touchRect, styleLayerIdentifiers: [tappableLayer]).filter { $0 is MGLPointFeature }
-//
-//                // Select the closest feature to the touch center.
-//                let closestFeatures = possibleFeatures.sorted(by: {
-//                    return CLLocation(latitude: $0.coordinate.latitude, longitude: $0.coordinate.longitude).distance(from: touchLocation) < CLLocation(latitude: $1.coordinate.latitude, longitude: $1.coordinate.longitude).distance(from: touchLocation)
-//                    })
-//                if let feature = closestFeatures.first {
-//                    channel?.invokeMethod("map#onLayerTap", arguments: [
-//                        "layerId": tappableLayer,
-//                        "x": point.x,
-//                        "y": point.y,
-//                        "lng": feature.coordinate.longitude,
-//                        "lat": feature.coordinate.latitude,
-//                        "data": feature.attributes
-//                    ])
-//                    return
-//                }
-//            }
-//            // If no features were found, deselect the selected annotation, if any.
-//            mapView.deselectAnnotation(mapView.selectedAnnotations.first, animated: true)
-//        }
+        let point = sender.location(in: mapView)
+        let coordinate = mapView.mapboxMap.coordinate(for: point)
         
-        
+        channel?.invokeMethod("map#onMapClick", arguments: [
+           "x": point.x,
+           "y": point.y,
+           "lng": coordinate.longitude,
+           "lat": coordinate.latitude,
+        ])
+
+        if sender.state == .ended && tappableLayers.count > 0 {
+              
+           let qOptions = RenderedQueryOptions.init(layerIds: Array(tappableLayers), filter: nil)
+           
+           mapView.mapboxMap.queryRenderedFeatures(at: point, options: qOptions, completion: { [weak self] result in
+                if case .success(let queriedfeatures) = result {
+                    if let qFearture = queriedfeatures.first,
+                       let feature = queriedfeatures.first?.feature,
+                       case .point(let featurePoint) = feature.geometry {
+                                                   
+                        self?.channel?.invokeMethod("map#onLayerTap", arguments: [
+                            "source": qFearture.source,
+                            "sourceLayer": qFearture.sourceLayer as Any,
+                            "x":  point.x,
+                            "y": point.y,
+                            "lng": featurePoint.coordinates.longitude,
+                            "lat": featurePoint.coordinates.latitude,
+                            "data": feature.properties?.rawValue ?? [:]
+                        ])
+                    }
+                }
+
+            })
+        }
     }
     
     /*
@@ -956,18 +1056,18 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
     *  After a long press invoke the map#onMapLongClick callback.
     */
     @objc @IBAction func handleMapLongPress(sender: UILongPressGestureRecognizer) {
-        //Fire when the long press starts
-//        if (sender.state == .began) {
-//          // Get the CGPoint where the user tapped.
-//            let point = sender.location(in: mapView)
-//            let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
-//            channel?.invokeMethod("map#onMapLongClick", arguments: [
-//                          "x": point.x,
-//                          "y": point.y,
-//                          "lng": coordinate.longitude,
-//                          "lat": coordinate.latitude,
-//                      ])
-//        }
+       // Fire when the long press starts
+       if (sender.state == .began) {
+         // Get the CGPoint where the user tapped.
+           let point = sender.location(in: mapView)
+           let coordinate = mapView.mapboxMap.coordinate(for: point)
+           channel?.invokeMethod("map#onMapLongClick", arguments: [
+                         "x": point.x,
+                         "y": point.y,
+                         "lng": coordinate.longitude,
+                         "lat": coordinate.latitude,
+                     ])
+       }
         
     }
     
@@ -1164,89 +1264,85 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
                     var a = 1;
                 }
             }
+        }
         
-            
-//            let tileUrls = Convert.getVectorURLTemplated(properties: properties)
-//            var source = VectorSource()
-//            if let url = properties["url"] as? String {
-//                source.url = url
-//            } else if tileUrls.count > 0 {
-//                source.tiles = tileUrls
-//                source.maxzoom = properties["maxZoom"] as? Double
-//                source.minzoom = properties["minZoom"] as? Double
-//            }
-//            do {
-//                try style.addSource(source, id: sourceId)
-//            } catch {
-//                var a = 1;
-//            }
-
-        }
-    }
-
-    func addSymbolLayer(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: Any]) {
-        if let style = mapView.mapboxMap.style as? Style {
-            let map = [
-                "id": layerId,
-                "type": "line",
-                "source": sourceId,
-                "source-layer": sourceLayerId
-            ].merging(properties) { (_, new) in new };
-            
-            
-            if let source = try? style.source(withId: sourceId) {
-                let jsonString = Convert.serializeJSON(from: map)
-                
-                if var layer = try? JSONDecoder().decode(SymbolLayer.self, from: jsonString!.data(using: .utf8)!) {
-                    layer.visibility = .constant(Visibility.visible)
-                    
-                    try? style.addLayer(layer)
-                }
-            }
-            
-            
-
-        }
-    }
-
-    
-    func updateSymbolLayer(layerId: String, properties: [String: Any]) {
-        if let style = mapView.mapboxMap.style as? Style {
-            try? style.setLayerProperties(for: layerId, properties: properties)
-        }
     }
     
-    func addLineLayer(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: Any]) {
+    private func getDefaultLayerType<T>(type: T.Type) -> LayerType? where T:Layer {
+        if T.self == LineLayer.self {
+            return LayerType.line
+        }
+        if T.self == SymbolLayer.self {
+            return LayerType.symbol
+        }
+        if T.self == CircleLayer.self {
+            return LayerType.circle
+        }
+        if T.self == FillLayer.self {
+            return LayerType.fill
+        }
+        return nil;
+    }
+    
+    private func addLayer<T>(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: Any], type: T.Type) where T:Layer {
         if let style = mapView.mapboxMap.style as? Style {
             
             let map = [
                 "id": layerId,
-                "type": "line",
+                "type": getDefaultLayerType(type: type)?.rawValue,
                 "source": sourceId,
                 "source-layer": sourceLayerId
             ].merging(properties) { (_, new) in new };
             
             let jsonString = Convert.serializeJSON(from: map)
             
-            if var lineLayer = try? JSONDecoder().decode(LineLayer.self, from: jsonString!.data(using: .utf8)!) {
-                lineLayer.visibility = .constant(Visibility.visible)
-                
-                try? style.addLayer(lineLayer)
+            if var layer: T = try? JSONDecoder().decode(type, from: jsonString!.data(using: .utf8)!) {
+                do {
+                    try? style.addLayer(layer)
+                } catch {
+                    var a = 1;
+                }
             }
         }
     }
     
-    func updateLineLayer(layerId: String, properties: [String: Any]) {
+    private func updateLayer(layerId: String, properties: [String: Any]) {
         if let style = mapView.mapboxMap.style as? Style {
             try? style.setLayerProperties(for: layerId, properties: properties)
         }
     }
     
+    private func removeLayer(layerId: String) {
+        if let style = mapView.mapboxMap.style as? Style {
+            try? style.removeLayer(withId: layerId)
+        }
+    }
+    
+    private func addSymbolLayer(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: Any]) {
+        addLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties, type: SymbolLayer.self);
+    }
+ 
+    private func addLineLayer(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: Any]) {
+        addLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties, type: LineLayer.self);
+    }
+    
+    private func addCircleLayer(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: Any]) {
+        addLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties, type: CircleLayer.self);
+    }
+    
+    private func addFillLayer(sourceId: String, layerId: String, sourceLayerId: String?, properties: [String: Any]) {
+        addLayer(sourceId: sourceId, layerId: layerId, sourceLayerId: sourceLayerId, properties: properties, type: FillLayer.self);
+    }
+    
+   
+
+    
+    /*
     func mapViewDidBecomeIdle(_ mapView: MapView) {
         if let channel = channel {
             channel.invokeMethod("map#onIdle", arguments: []);
         }
-    }
+    }*/
     
 //    func mapView(_ mapView: MGLMapView, regionWillChangeAnimated animated: Bool) {
 //        if let channel = channel {
@@ -1278,63 +1374,74 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
     func setCameraTargetBounds(bounds: CoordinateBounds?) {
         cameraTargetBounds = bounds
     }
-    func setCompassEnabled(compassEnabled: Bool) {
-//        mapView.compassView.isHidden = compassEnabled
-//        mapView.compassView.isHidden = !compassEnabled
+    func setCompassEnabled(enabled: Bool) {
+        mapView.ornaments.options.compass.visibility = enabled ? OrnamentVisibility.visible : OrnamentVisibility.hidden;
     }
     func setMinMaxZoomPreference(min: Double, max: Double) {
-//        mapView.minimumZoomLevel = min
-//        mapView.maximumZoomLevel = max
+        try? mapView.mapboxMap.setCameraBounds(with: CameraBoundsOptions(
+            maxZoom: min,
+            minZoom: max
+        ))
     }
+    
+    func setMinMaxPitchPreference(min: Double, max: Double) {
+        try? mapView.mapboxMap.setCameraBounds(with: CameraBoundsOptions(
+            maxPitch: min,
+            minPitch: max
+        ))
+    }
+    
     func setStyleString(styleString: String) {
-//        // Check if json, url, absolute path or asset path:
-//        if styleString.isEmpty {
-//            NSLog("setStyleString - string empty")
-//        } else if (styleString.hasPrefix("{") || styleString.hasPrefix("[")) {
-//            // Currently the iOS Mapbox SDK does not have a builder for json.
-//            NSLog("setStyleString - JSON style currently not supported")
-//        } else if (styleString.hasPrefix("/")) {
-//            // Absolute path
-//            mapView.styleURL = URL(fileURLWithPath: styleString, isDirectory: false)
-//        } else if (
-//            !styleString.hasPrefix("http://") &&
-//            !styleString.hasPrefix("https://") &&
-//            !styleString.hasPrefix("mapbox://")) {
-//            // We are assuming that the style will be loaded from an asset here.
-//            let assetPath = registrar.lookupKey(forAsset: styleString)
-//            mapView.styleURL = URL(string: assetPath, relativeTo: Bundle.main.resourceURL)
-//
-//
-//        } else {
-//            mapView.styleURL = URL(string: styleString)
-//        }
+       // Check if json, url, absolute path or asset path:
+       if styleString.isEmpty {
+           NSLog("setStyleString - string empty")
+       } else if (styleString.hasPrefix("{") || styleString.hasPrefix("[")) {
+           // Currently the iOS Mapbox SDK does not have a builder for json.
+           NSLog("setStyleString - JSON style currently not supported")
+       } else if (styleString.hasPrefix("/")) {
+           // Absolute path
+
+           mapView.mapboxMap.style.uri = StyleURI(url: URL(fileURLWithPath: styleString, isDirectory: false))
+       } else if (
+           !styleString.hasPrefix("http://") &&
+           !styleString.hasPrefix("https://") &&
+           !styleString.hasPrefix("mapbox://")) {
+           // We are assuming that the style will be loaded from an asset here.
+           let assetPath = registrar.lookupKey(forAsset: styleString)
+           mapView.mapboxMap.style.uri = StyleURI(url: URL(string: assetPath, relativeTo: Bundle.main.resourceURL)!)
+
+
+       } else {
+           mapView.mapboxMap.style.uri = StyleURI(url: URL(string: styleString)!)
+       }
     }
-    func setRotateGesturesEnabled(rotateGesturesEnabled: Bool) {
-//        mapView.allowsRotating = rotateGesturesEnabled
+    func setRotateGesturesEnabled(enabled: Bool) {
+        mapView.gestures.options.pinchRotateEnabled = enabled
     }
-    func setScrollGesturesEnabled(scrollGesturesEnabled: Bool) {
+    func setScrollGesturesEnabled(enabled: Bool) {
+        
 //        mapView.allowsScrolling = scrollGesturesEnabled
     }
-    func setTiltGesturesEnabled(tiltGesturesEnabled: Bool) {
-//        mapView.allowsTilting = tiltGesturesEnabled
+    func setTiltGesturesEnabled(enabled: Bool) {
+        mapView.gestures.options.pitchEnabled = enabled
     }
     func setTrackCameraPosition(trackCameraPosition: Bool) {
         self.trackCameraPosition = trackCameraPosition
     }
-    func setZoomGesturesEnabled(zoomGesturesEnabled: Bool) {
-//        mapView.allowsZooming = zoomGesturesEnabled
+    func setZoomGesturesEnabled(enabled: Bool) {
+        mapView.gestures.options.quickZoomEnabled = enabled
     }
-    func setMyLocationEnabled(myLocationEnabled: Bool) {
-        if (self.myLocationEnabled == myLocationEnabled) {
-            return
+    func setMyLocationEnabled(enabled: Bool) {
+        if enabled {
+            mapView.location.options.puckType = .puck2D()
+        } else {
+            mapView.location.options.puckType = nil
         }
-        self.myLocationEnabled = myLocationEnabled
-        updateMyLocationEnabled()
     }
 //    func setMyLocationTrackingMode(myLocationTrackingMode: MGLUserTrackingMode) {
 //        mapView.userTrackingMode = myLocationTrackingMode
 //    }
-    func setMyLocationRenderMode(myLocationRenderMode: MyLocationRenderMode) {
+    func setMyLocationRenderMode(renderMode: MyLocationRenderMode) {
 //        switch myLocationRenderMode {
 //        case .Normal:
 //            mapView.showsUserHeadingIndicator = false
@@ -1345,15 +1452,15 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink {
 //        }
     }
     func setLogoViewMargins(x: Double, y: Double) {
-//        mapView.logoViewMargins = CGPoint(x: x, y: y)
+        mapView.ornaments.options.logo.margins = CGPoint(x: x, y: y)
     }
     func setCompassViewPosition(position: OrnamentPosition) {
-//        mapView.compassViewPosition = position
+        mapView.ornaments.options.compass.position = position
     }
     func setCompassViewMargins(x: Double, y: Double) {
-//        mapView.compassViewMargins = CGPoint(x: x, y: y)
+        mapView.ornaments.options.compass.margins = CGPoint(x: x, y: y)
     }
     func setAttributionButtonMargins(x: Double, y: Double) {
-//        mapView.attributionButtonMargins = CGPoint(x: x, y: y)
+        mapView.ornaments.options.attributionButton.margins = CGPoint(x: x, y: y)
     }
 }

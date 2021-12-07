@@ -107,35 +107,36 @@ class CameraTargetBounds {
 // Used with [MapboxMapOptions] to wrap min and max zoom. This allows
 // distinguishing between specifying unbounded zooming (null `minZoom` and
 // `maxZoom`) from not specifying anything (null `MinMaxZoomPreference`).
-class MinMaxZoomPreference {
-  const MinMaxZoomPreference(this.minZoom, this.maxZoom)
-      : assert(minZoom == null || maxZoom == null || minZoom <= maxZoom);
+class MinMaxPreference {
+  const MinMaxPreference(this.min, this.max)
+      : assert(min == null || max == null || min <= max);
 
   /// The preferred minimum zoom level or null, if unbounded from below.
-  final double? minZoom;
+  final double? min;
 
   /// The preferred maximum zoom level or null, if unbounded from above.
-  final double? maxZoom;
+  final double? max;
 
   /// Unbounded zooming.
-  static const MinMaxZoomPreference unbounded =
-      MinMaxZoomPreference(null, null);
+  static const MinMaxPreference unbounded =
+      MinMaxPreference(null, null);
 
-  dynamic toJson() => <dynamic>[minZoom, maxZoom];
+  dynamic toJson() => <dynamic>[min, max];
 
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) return true;
     if (runtimeType != other.runtimeType) return false;
-    final MinMaxZoomPreference typedOther = other;
-    return minZoom == typedOther.minZoom && maxZoom == typedOther.maxZoom;
+    final MinMaxPreference typedOther = other;
+    return min == typedOther.min && max == typedOther.max;
   }
 
   @override
-  int get hashCode => hashValues(minZoom, maxZoom);
+  int get hashCode => hashValues(min, max);
 
   @override
   String toString() {
-    return 'MinMaxZoomPreference(minZoom: $minZoom, maxZoom: $maxZoom)';
+    return 'MinMaxPreference(minZoom: $min, maxZoom: $max)';
   }
 }
+

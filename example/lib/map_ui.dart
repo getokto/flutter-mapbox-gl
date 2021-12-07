@@ -44,7 +44,7 @@ class MapUiBodyState extends State<MapUiBody> {
   bool _isMoving = false;
   bool _compassEnabled = true;
   CameraTargetBounds _cameraTargetBounds = CameraTargetBounds.unbounded;
-  MinMaxZoomPreference _minMaxZoomPreference = MinMaxZoomPreference.unbounded;
+  MinMaxPreference _minMaxZoomPreference = MinMaxPreference.unbounded;
   int _styleStringIndex = 0;
   // Style string can a reference to a local or remote resources.
   // On Android the raw JSON can also be passed via a styleString, on iOS this is not supported.
@@ -154,14 +154,14 @@ class MapUiBodyState extends State<MapUiBody> {
 
   Widget _zoomBoundsToggler() {
     return TextButton(
-      child: Text(_minMaxZoomPreference.minZoom == null
+      child: Text(_minMaxZoomPreference.min == null
           ? 'bound zoom'
           : 'release zoom'),
       onPressed: () {
         setState(() {
-          _minMaxZoomPreference = _minMaxZoomPreference.minZoom == null
-              ? const MinMaxZoomPreference(12.0, 16.0)
-              : MinMaxZoomPreference.unbounded;
+          _minMaxZoomPreference = _minMaxZoomPreference.min == null
+              ? const MinMaxPreference(12.0, 16.0)
+              : MinMaxPreference.unbounded;
         });
       },
     );
@@ -302,7 +302,7 @@ class MapUiBodyState extends State<MapUiBody> {
       styleString: _styleStrings[_styleStringIndex],
       rotateGesturesEnabled: _rotateGesturesEnabled,
       scrollGesturesEnabled: _scrollGesturesEnabled,
-      tiltGesturesEnabled: _tiltGesturesEnabled,
+      pitchGesturesEnabled: _tiltGesturesEnabled,
       zoomGesturesEnabled: _zoomGesturesEnabled,
       myLocationEnabled: _myLocationEnabled,
       myLocationTrackingMode: _myLocationTrackingMode,
@@ -375,7 +375,7 @@ class MapUiBodyState extends State<MapUiBody> {
                   'camera target: ${_position!.target.latitude.toStringAsFixed(4)},'
                   '${_position!.target.longitude.toStringAsFixed(4)}'),
               Text('camera zoom: ${_position!.zoom}'),
-              Text('camera tilt: ${_position!.tilt}'),
+              Text('camera tilt: ${_position!.pitch}'),
               Text(_isMoving ? '(Camera moving)' : '(Camera idle)'),
               _queryFilterToggler(),
               _compassToggler(),

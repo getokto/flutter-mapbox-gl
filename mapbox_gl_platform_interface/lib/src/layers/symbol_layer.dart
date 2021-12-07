@@ -157,7 +157,7 @@ class SymbolLayerOptions extends StyleLayerOptions {
     this.textTranslateAnchor,
     this.textVariableAnchor,
     this.textWritingMode,
-    this.visibility,
+    this.visibility = Visibility.Visible,
 
   });
 
@@ -310,69 +310,69 @@ class SymbolLayerOptions extends StyleLayerOptions {
   final TextWritingMode? textWritingMode;
 
   /// Optional enum. One of "visible", "none". Defaults to "visible".
-  final Visibility? visibility;
+  final Visibility visibility;
 
   Map<String, dynamic> toMap() => {
     'layout': {
-      if (iconAllowOverlap != null) 'icon-allow-overlap': _serializeJson(iconAllowOverlap),
-      if (iconAnchor != null) 'icon-anchor': _serializeJson(iconAnchor),
-      if (iconIgnorePlacement != null) 'icon-ignore-placement': _serializeJson(iconIgnorePlacement),
-      if (iconImage != null) 'icon-image': _serializeJson(iconImage),
-      if (iconKeepUpright != null) 'icon-keep-upright': _serializeJson(iconKeepUpright),
-      if (iconOffset != null) 'icon-offset': _serializeJson(iconOffset),
-      if (iconOptional != null) 'icon-optional': _serializeJson(iconOptional),
-      if (iconPadding != null) 'icon-padding': _serializeJson(iconPadding),
-      if (iconPitchAlignment != null) 'icon-pitch-alignment': _serializeJson(iconPitchAlignment),
-      if (iconRotate != null) 'icon-rotate': _serializeJson(iconRotate),
-      if (iconRotationAlignment != null) 'icon-rotation-alignment': _serializeJson(iconRotationAlignment),
-      if (iconSize != null) 'icon-size': _serializeJson(iconSize),
-      if (iconTextFit != null) 'icon-text-fit': _serializeJson(iconTextFit),
-      if (iconTextFitPadding != null) 'icon-text-fit-padding': _serializeJson(iconTextFitPadding),
-      if (symbolAvoidEdges != null) 'symbol-avoid-edges': _serializeJson(symbolAvoidEdges),
-      if (symbolPlacement != null) 'symbol-placement': _serializeJson(symbolPlacement),
-      if (symbolSortKey != null) 'symbol-sort-key': _serializeJson(symbolSortKey),
-      if (symbolSpacing != null) 'symbol-spacing': _serializeJson(symbolSpacing),
-      if (symbolZOrder != null) 'symbol-z-order': _serializeJson(symbolZOrder),
-      if (textAllowOverlap != null) 'text-allow-overlap': _serializeJson(textAllowOverlap),
-      if (textAnchor != null) 'text-anchor': _serializeJson(textAnchor),
-      if (textField != null) 'text-field': _serializeJson(textField),
-      if (textFont != null) 'text-font': _serializeJson(textFont),
-      if (textIgnorePlacement != null) 'text-ignore-placement': _serializeJson(textIgnorePlacement),
-      if (textJustify != null) 'text-justify': _serializeJson(textJustify),
-      if (textKeepUpright != null) 'text-keep-upright': _serializeJson(textKeepUpright),
-      if (textLetterSpacing != null) 'text-letter-spacing': _serializeJson(textLetterSpacing),
-      if (textLineHeight != null) 'text-line-height': _serializeJson(textLineHeight),
-      if (textMaxAngle != null) 'text-max-angle': _serializeJson(textMaxAngle),
-      if (textMaxWidth != null) 'text-max-width': _serializeJson(textMaxWidth),
-      if (textOffset != null) 'text-offset': _serializeJson(textOffset),
-      if (textOptional != null) 'text-optional': _serializeJson(textOptional),
-      if (textPadding != null) 'text-padding': _serializeJson(textPadding),
-      if (textPitchAlignment != null) 'text-pitch-alignment': _serializeJson(textPitchAlignment),
-      if (textRadialOffset != null) 'text-radial-offset': _serializeJson(textRadialOffset),
-      if (textRotate != null) 'text-rotate': _serializeJson(textRotate),
-      if (textRotationAlignment != null) 'text-rotation-alignment': _serializeJson(textRotationAlignment),
-      if (textSize != null) 'text-size': _serializeJson(textSize),
-      if (textTransform != null) 'text-transform': _serializeJson(textTransform),
-      if (textVariableAnchor != null) 'text-variable-anchor': _serializeJson(textVariableAnchor),
-      if (textWritingMode != null) 'text-writing-mode': _serializeJson(textWritingMode),
-      if (visibility != null) 'visibility': _serializeJson(visibility),
+      if (iconAllowOverlap != null) 'icon-allow-overlap': serializeValue(iconAllowOverlap),
+      if (iconAnchor != null) 'icon-anchor': serializeValue(iconAnchor),
+      if (iconIgnorePlacement != null) 'icon-ignore-placement': serializeValue(iconIgnorePlacement),
+      if (iconImage != null) 'icon-image': serializeValue(iconImage),
+      if (iconKeepUpright != null) 'icon-keep-upright': serializeValue(iconKeepUpright),
+      if (iconOffset != null) 'icon-offset': serializeValue(iconOffset),
+      if (iconOptional != null) 'icon-optional': serializeValue(iconOptional),
+      if (iconPadding != null) 'icon-padding': serializeValue(iconPadding),
+      if (iconPitchAlignment != null) 'icon-pitch-alignment': serializeValue(iconPitchAlignment),
+      if (iconRotate != null) 'icon-rotate': serializeValue(iconRotate),
+      if (iconRotationAlignment != null) 'icon-rotation-alignment': serializeValue(iconRotationAlignment),
+      if (iconSize != null) 'icon-size': serializeValue(iconSize),
+      if (iconTextFit != null) 'icon-text-fit': serializeValue(iconTextFit),
+      if (iconTextFitPadding != null) 'icon-text-fit-padding': serializeValue(iconTextFitPadding),
+      if (symbolAvoidEdges != null) 'symbol-avoid-edges': serializeValue(symbolAvoidEdges),
+      if (symbolPlacement != null) 'symbol-placement': serializeValue(symbolPlacement),
+      if (symbolSortKey != null) 'symbol-sort-key': serializeValue(symbolSortKey),
+      if (symbolSpacing != null) 'symbol-spacing': serializeValue(symbolSpacing),
+      if (symbolZOrder != null) 'symbol-z-order': serializeValue(symbolZOrder),
+      if (textAllowOverlap != null) 'text-allow-overlap': serializeValue(textAllowOverlap),
+      if (textAnchor != null) 'text-anchor': serializeValue(textAnchor),
+      if (textField != null) 'text-field': serializeValue(textField),
+      if (textFont != null) 'text-font': serializeValue(textFont),
+      if (textIgnorePlacement != null) 'text-ignore-placement': serializeValue(textIgnorePlacement),
+      if (textJustify != null) 'text-justify': serializeValue(textJustify),
+      if (textKeepUpright != null) 'text-keep-upright': serializeValue(textKeepUpright),
+      if (textLetterSpacing != null) 'text-letter-spacing': serializeValue(textLetterSpacing),
+      if (textLineHeight != null) 'text-line-height': serializeValue(textLineHeight),
+      if (textMaxAngle != null) 'text-max-angle': serializeValue(textMaxAngle),
+      if (textMaxWidth != null) 'text-max-width': serializeValue(textMaxWidth),
+      if (textOffset != null) 'text-offset': serializeValue(textOffset),
+      if (textOptional != null) 'text-optional': serializeValue(textOptional),
+      if (textPadding != null) 'text-padding': serializeValue(textPadding),
+      if (textPitchAlignment != null) 'text-pitch-alignment': serializeValue(textPitchAlignment),
+      if (textRadialOffset != null) 'text-radial-offset': serializeValue(textRadialOffset),
+      if (textRotate != null) 'text-rotate': serializeValue(textRotate),
+      if (textRotationAlignment != null) 'text-rotation-alignment': serializeValue(textRotationAlignment),
+      if (textSize != null) 'text-size': serializeValue(textSize),
+      if (textTransform != null) 'text-transform': serializeValue(textTransform),
+      if (textVariableAnchor != null) 'text-variable-anchor': serializeValue(textVariableAnchor),
+      if (textWritingMode != null) 'text-writing-mode': serializeValue(textWritingMode),
+      'visibility': serializeValue(visibility),
 
     },
     'paint': {
-      if (iconColor != null) 'icon-color': _serializeJson(iconColor),
-      if (iconHaloBlur != null) 'icon-halo-blur': _serializeJson(iconHaloBlur),
-      if (iconHaloColor != null) 'icon-halo-color': _serializeJson(iconHaloColor),
-      if (iconHaloWidth != null) 'icon-halo-width': _serializeJson(iconHaloWidth),
-      if (iconOpacity != null) 'icon-opacity': _serializeJson(iconOpacity),
-      if (iconTranslate != null) 'icon-translate': _serializeJson(iconTranslate),
-      if (iconTranslateAnchor != null) 'icon-translate-anchor': _serializeJson(iconTranslateAnchor),
-      if (textColor != null) 'text-color': _serializeJson(textColor),
-      if (textHaloBlur != null) 'text-halo-blur': _serializeJson(textHaloBlur),
-      if (textHaloColor != null) 'text-halo-color': _serializeJson(textHaloColor),
-      if (textHaloWidth != null) 'text-halo-width': _serializeJson(textHaloWidth),
-      if (textOpacity != null) 'text-opacity': _serializeJson(textOpacity),
-      if (textTranslate != null) 'text-translate': _serializeJson(textTranslate),
-      if (textTranslateAnchor != null) 'text-translate-anchor': _serializeJson(textTranslateAnchor),
+      if (iconColor != null) 'icon-color': serializeValue(iconColor),
+      if (iconHaloBlur != null) 'icon-halo-blur': serializeValue(iconHaloBlur),
+      if (iconHaloColor != null) 'icon-halo-color': serializeValue(iconHaloColor),
+      if (iconHaloWidth != null) 'icon-halo-width': serializeValue(iconHaloWidth),
+      if (iconOpacity != null) 'icon-opacity': serializeValue(iconOpacity),
+      if (iconTranslate != null) 'icon-translate': serializeValue(iconTranslate),
+      if (iconTranslateAnchor != null) 'icon-translate-anchor': serializeValue(iconTranslateAnchor),
+      if (textColor != null) 'text-color': serializeValue(textColor),
+      if (textHaloBlur != null) 'text-halo-blur': serializeValue(textHaloBlur),
+      if (textHaloColor != null) 'text-halo-color': serializeValue(textHaloColor),
+      if (textHaloWidth != null) 'text-halo-width': serializeValue(textHaloWidth),
+      if (textOpacity != null) 'text-opacity': serializeValue(textOpacity),
+      if (textTranslate != null) 'text-translate': serializeValue(textTranslate),
+      if (textTranslateAnchor != null) 'text-translate-anchor': serializeValue(textTranslateAnchor),
 
     },
   };
@@ -436,18 +436,6 @@ class SymbolLayerOptions extends StyleLayerOptions {
       textWritingMode: deserializeJson(map,'layout', 'text-writing-mode'),
       visibility: deserializeJson(map,'layout', 'visibility'),
     );
-  }
-
-  dynamic _serializeJson<T>(T value) {
-    if (value is LayerProperty) {
-      return value.serialize();
-    }
-    if (value is EnumLike) {
-      return value.toString();
-    } if (value is Color) {
-      return ["rgba", value.red, value.green, value.blue, value.opacity];
-    }
-    return value;
   }
 
   @override
