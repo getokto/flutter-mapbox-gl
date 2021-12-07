@@ -1047,14 +1047,29 @@ class MapboxMapController extends ChangeNotifier {
         .getMetersPerPixelAtLatitude(latitude);
   }
 
-  Stream<dynamic> featureDataStream(String source, {
+  Stream<List<FeatureBase>> featureDataStream(String source, {
     List<String>? sourceLayers,
     List<dynamic>? filter,
   }) {
-    return MapboxGlPlatform.getInstance(_id).featureDataStream(
+    return _featureDataStream(
       source,
       sourceLayers: sourceLayers,
       filter: filter,
-    ).map((event) => json.decode(event));
+    ).distinct(listEquals);
   }
+
+  Stream<List<FeatureBase>> _featureDataStream(String source, {
+    List<String>? sourceLayers,
+    List<dynamic>? filter,
+  }) async* {
+    await for(final _result in MapboxGlPlatform.getInstance(_id).featureDataStream(
+      source,
+      sourceLayers: sourceLayers,
+      filter: filter,
+    )) {
+      final List<dynamic> result = List.from(_result);
+      yield result.map((x) => FeatureBase.fromMap(Map.from(x))).toList();
+    }
+  }
+
 }
