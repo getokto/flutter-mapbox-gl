@@ -13,6 +13,9 @@ class Convert {
         if let minMaxZoomPreference = options["minMaxZoomPreference"] as? [Double] {
             delegate.setMinMaxZoomPreference(min: minMaxZoomPreference[0], max: minMaxZoomPreference[1])
         }
+        if let minMaxPitchPreference = options["minMaxPitchPreference"] as? [Double] {
+            delegate.setMinMaxPitchPreference(min: minMaxPitchPreference[0], max: minMaxPitchPreference[1])
+        }
         if let styleString = options["styleString"] as? String {
             delegate.setStyleString(styleString: styleString)
         }
@@ -34,12 +37,12 @@ class Convert {
         if let myLocationEnabled = options["myLocationEnabled"] as? Bool {
             delegate.setMyLocationEnabled(enabled: myLocationEnabled)
         }
-//        if let myLocationTrackingMode = options["myLocationTrackingMode"] as? UInt, let trackingMode = UserTrackingMode(rawValue: myLocationTrackingMode) {
-//            delegate.setMyLocationTrackingMode(myLocationTrackingMode: trackingMode)
-//        }
-        if let myLocationRenderMode = options["myLocationRenderMode"] as? Int, let renderMode = MyLocationRenderMode(rawValue: myLocationRenderMode) {
-            delegate.setMyLocationRenderMode(renderMode: renderMode)
+        if let myLocationTrackingMode = options["myLocationTrackingMode"] as? UInt, let trackingMode = MyLocationTrackingMode(rawValue: myLocationTrackingMode) {
+            delegate.setMyLocationTrackingMode(myLocationTrackingMode: trackingMode)
         }
+//        if let myLocationRenderMode = options["myLocationRenderMode"] as? Int, let renderMode = MyLocationRenderMode(rawValue: myLocationRenderMode) {
+//            delegate.setMyLocationRenderMode(renderMode: renderMode)
+//        }
         if let logoViewMargins = options["logoViewMargins"] as? [Double] {
             delegate.setLogoViewMargins(x: logoViewMargins[0], y: logoViewMargins[1])
         }

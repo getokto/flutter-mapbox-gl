@@ -20,7 +20,7 @@ class MapboxMap extends StatefulWidget {
     this.cameraTargetBounds = CameraTargetBounds.unbounded,
     this.styleString,
     this.minMaxZoomPreference = MinMaxPreference.unbounded,
-    this.minMaxPitchPreference = MinMaxPreference.unbounded,
+    this.minMaxPitchPreference = const MinMaxPreference(0, 85),
     this.rotateGesturesEnabled = true,
     this.scrollGesturesEnabled = true,
     this.zoomGesturesEnabled = true,

@@ -28,7 +28,7 @@ enum MyLocationTrackingMode: UInt, CaseIterable {
   case TrackingGPS
 }
 
-class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, LocationPermissionsDelegate {
+class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, LocationPermissionsDelegate, GestureManagerDelegate {
 
     private var registrar: FlutterPluginRegistrar
     private var channel: FlutterMethodChannel?
@@ -110,6 +110,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
             styleURI: styleUri != nil ? StyleURI(rawValue: styleUri!) : nil
         )
         
+        
         mapView = MapView(frame: frame, mapInitOptions: initOptions)
         
         cameraLocationConsumer = CameraLocationConsumer(mapView: mapView, duration: 1.3)
@@ -122,6 +123,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
         
         super.init()
        
+        
+        mapView.gestures.delegate = self
+        
         mapView.mapboxMap.onNext(.mapLoaded) { _ in
             self.setMyLocationEnabled(enabled: myLocationEnabled)
             self.setMyLocationTrackingMode(myLocationTrackingMode: myLocationTrackingMode)
@@ -217,14 +221,15 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
             } else {
                 mapReadyResult = result
             }
-//        case "map#update":
-//            guard let arguments = methodCall.arguments as? [String: Any] else { return }
-//            Convert.interpretMapboxMapOptions(options: arguments["options"], delegate: self)
-//            if let camera = getCamera() {
-//                result(camera.toDict(mapView: mapView))
-//            } else {
-//                result(nil)
-//            }
+        case "map#update":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            Convert.interpretMapboxMapOptions(options: arguments["options"], delegate: self)
+            if let camera = getCamera() {
+                result(camera.toDict())
+            } else {
+                result(nil)
+            }
+            result(nil)
 //        case "map#invalidateAmbientCache":
 //            MGLOfflineStorage.shared.invalidateAmbientCache{
 //                (error) in
@@ -975,12 +980,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
 //    }
 
 
-    
-    private func updateMyLocationTrackingMode() {
-        
-        self.mapView.location.addLocationConsumer(newConsumer: self.cameraLocationConsumer)
-    }
-    
+
     func setMyLocationTrackingMode(myLocationTrackingMode: MyLocationTrackingMode) {
         switch myLocationTrackingMode {
         case .None:
@@ -990,10 +990,18 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
         case .TrackingGPS:
             mapView.location.addLocationConsumer(newConsumer: cameraLocationConsumer)
         }
+        
+        
+        if let channel = channel {
+            channel.invokeMethod("map#onCameraTrackingChanged", arguments: ["mode": myLocationTrackingMode.rawValue])
+            if myLocationTrackingMode == .None {
+                channel.invokeMethod("map#onCameraTrackingDismissed", arguments: [])
+            }
+        }
     }
     
-    private func getCamera() -> CameraAnimationsManager? {
-        return trackCameraPosition ? mapView.camera : nil
+    private func getCamera() -> CameraState? {
+        return trackCameraPosition ? mapView.cameraState : nil
         
     }
     
@@ -1369,6 +1377,28 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
 //    }
     
     /*
+     * GestureManagerDelegate
+     */
+    
+    func gestureManager(_ gestureManager: GestureManager, didBegin gestureType: GestureType) {
+        if (gestureType != GestureType.pan) { return }
+        
+        let nextTrackingMode = MyLocationTrackingMode.None;
+        
+        // if we start a pan gesture we should cancel tracking
+        self.setMyLocationTrackingMode(myLocationTrackingMode: nextTrackingMode)
+
+    }
+
+    func gestureManager(_ gestureManager: GestureManager, didEnd gestureType: GestureType, willAnimate: Bool) {
+        
+    }
+
+    func gestureManager(_ gestureManager: GestureManager, didEndAnimatingFor gestureType: GestureType) {
+        
+    }
+    
+    /*
      *  MapboxMapOptionsSink
      */
     func setCameraTargetBounds(bounds: CoordinateBounds?) {
@@ -1377,6 +1407,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
     func setCompassEnabled(enabled: Bool) {
         mapView.ornaments.options.compass.visibility = enabled ? OrnamentVisibility.visible : OrnamentVisibility.hidden;
     }
+    
     func setMinMaxZoomPreference(min: Double, max: Double) {
         try? mapView.mapboxMap.setCameraBounds(with: CameraBoundsOptions(
             maxZoom: min,
@@ -1438,9 +1469,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
             mapView.location.options.puckType = nil
         }
     }
-//    func setMyLocationTrackingMode(myLocationTrackingMode: MGLUserTrackingMode) {
-//        mapView.userTrackingMode = myLocationTrackingMode
-//    }
+
     func setMyLocationRenderMode(renderMode: MyLocationRenderMode) {
 //        switch myLocationRenderMode {
 //        case .Normal:

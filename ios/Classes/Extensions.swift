@@ -1,14 +1,18 @@
 import MapboxMaps
 
-extension CameraOptions {
+extension CameraState {
     func toDict() -> [String: Any] {
         return [
             "bearing": bearing,
-            "target": center?.toArray(),
+            "target": center.toArray(),
             "pitch": pitch,
             "zoom": zoom
         ]
     }
+}
+
+
+extension CameraOptions {
     static func fromDict(_ dict: [String: Any]) -> CameraOptions? {
         guard let target = dict["target"] as? [Double],
             let zoom = dict["zoom"] as? Double,
