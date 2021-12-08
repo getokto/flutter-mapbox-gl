@@ -57,6 +57,104 @@ class Convert {
         }
     }
     
+    class func parseCameraUpdate(cameraUpdate: [Any], mapView: MapView) -> CameraOptions? {
+            guard let type = cameraUpdate[0] as? String else { return nil }
+            switch (type) {
+
+            case "newCameraPosition":
+                guard let cameraPosition = cameraUpdate[1] as? [String: Any] else { return nil }
+                if let camera = mapView.camera,
+                    let center = cameraPosition["target"] as? [Double],
+                    let zoom = cameraPosition["zoom"] as? Double,
+                    let bearing = cameraPosition["bearing"] as? Double,
+                    let pitch = cameraPosition["pitch"] as? Double {
+                    let cameraState = mapView.cameraState
+                    return CameraOptions(
+                        center: CLLocationCoordinate2D.fromArray(center),
+                        padding: nil,
+                        anchor: nil,
+                        zoom: zoom,
+                        bearing: bearing,
+                        pitch: pitch
+                    )
+                }
+                /*
+            case "newLatLng":
+                guard let coordinate = cameraUpdate[1] as? [Double] else { return nil }
+                let camera = mapView.camera
+                camera.cameraViewContainerView.center = CLLocationCoordinate2D.fromArray(coordinate)
+                camera.centerCoordinate = CLLocationCoordinate2D.fromArray(coordinate)
+                return camera
+            case "newLatLngBounds":
+                guard let bounds = cameraUpdate[1] as? [[Double]] else { return nil }
+                guard let paddingLeft = cameraUpdate[2] as? CGFloat else { return nil }
+                guard let paddingTop = cameraUpdate[3] as? CGFloat else { return nil }
+                guard let paddingRight = cameraUpdate[4] as? CGFloat else { return nil }
+                guard let paddingBottom = cameraUpdate[5] as? CGFloat else { return nil }
+                return mapView.cameraThatFitsCoordinateBounds(MGLCoordinateBounds.fromArray(bounds), edgePadding: UIEdgeInsets.init(top: paddingTop, left: paddingLeft, bottom: paddingBottom, right: paddingRight))
+            case "newLatLngZoom":
+                guard let coordinate = cameraUpdate[1] as? [Double] else { return nil }
+                guard let zoom = cameraUpdate[2] as? Double else { return nil }
+                let camera = mapView.camera
+                camera.centerCoordinate = CLLocationCoordinate2D.fromArray(coordinate)
+                let altitude = getAltitude(zoom: zoom, mapView: mapView)
+                return MGLMapCamera(lookingAtCenter: camera.centerCoordinate, altitude: altitude, pitch: camera.pitch, heading: camera.heading)
+            case "scrollBy":
+                guard let x = cameraUpdate[1] as? CGFloat else { return nil }
+                guard let y = cameraUpdate[2] as? CGFloat else { return nil }
+                let camera = mapView.camera
+                let mapPoint = mapView.convert(camera.centerCoordinate, toPointTo: mapView)
+                let movedPoint = CGPoint(x: mapPoint.x + x, y: mapPoint.y + y)
+                camera.centerCoordinate = mapView.convert(movedPoint, toCoordinateFrom: mapView)
+                return camera
+            case "zoomBy":
+                guard let zoomBy = cameraUpdate[1] as? Double else { return nil }
+                let camera = mapView.camera
+                let zoom = getZoom(mapView: mapView)
+                let altitude = getAltitude(zoom: zoom+zoomBy, mapView: mapView)
+                camera.altitude = altitude
+                if (cameraUpdate.count == 2) {
+                    return camera
+                } else {
+                    guard let point = cameraUpdate[2] as? [CGFloat], point.count == 2 else { return nil }
+                    let movedPoint = CGPoint(x: point[0], y: point[1])
+                    camera.centerCoordinate = mapView.convert(movedPoint, toCoordinateFrom: mapView)
+                    return camera
+                }
+                 */
+            case "zoomIn":
+                if let camera = mapView.camera {
+                    let cameraState = mapView.cameraState
+                    return CameraOptions(center: nil, padding: nil, anchor: nil, zoom: cameraState.zoom + 1 , bearing: nil, pitch: nil)
+                }
+            case "zoomOut":
+                if let camera = mapView.camera{
+                    let cameraState = mapView.cameraState
+                    return  CameraOptions(center: nil, padding: nil, anchor: nil, zoom: cameraState.zoom - 1, bearing: nil, pitch: nil)
+                }
+            case "zoomTo":
+                guard let zoom = cameraUpdate[1] as? Double else { return nil }
+                if let camera = mapView.camera {
+                    return  CameraOptions(center: nil, padding: nil, anchor: nil, zoom: zoom, bearing: nil, pitch: nil)
+                }
+               
+            case "bearingTo":
+                guard let bearing = cameraUpdate[1] as? Double else { return nil }
+                if let camera = mapView.camera {
+                    return  CameraOptions(center: nil, padding: nil, anchor: nil, zoom: nil, bearing: bearing, pitch: nil)
+                }
+            case "pitchTo":
+                guard let pitch = cameraUpdate[1] as? CGFloat else { return nil }
+                if let camera = mapView.camera {
+                    return CameraOptions(center: nil, padding: nil, anchor: nil, zoom: nil, bearing: nil, pitch: pitch)
+                }
+
+            default:
+                print("\(type) not implemented!")
+            }
+            return nil
+        }
+    
     
     class func toPolygons(geometry: [[[Double]]]) -> [Polygon] {
         var polygons:[Polygon] = []

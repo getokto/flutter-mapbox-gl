@@ -360,25 +360,29 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
         //     reply["latitude"] = coordinates.latitude as NSObject
         //     reply["longitude"] = coordinates.longitude as NSObject
         //     result(reply)
-        // case "camera#move":
-        //     guard let arguments = methodCall.arguments as? [String: Any] else { return }
-        //     guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
-        //     if let camera = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
-        //         mapView.setCamera(camera, animated: false)
-        //     }
-        //     result(nil)
-        // case "camera#animate":
-        //     guard let arguments = methodCall.arguments as? [String: Any] else { return }
-        //     guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
-        //     if let camera = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
-        //         if let duration = arguments["duration"] as? TimeInterval {
-        //             mapView.setCamera(camera, withDuration: TimeInterval(duration / 1000), 
-        //                 animationTimingFunction: CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut))
-        //             result(nil)
-        //         }
-        //         mapView.setCamera(camera, animated: true)
-        //     }
-        //     result(nil)
+        case "camera#move":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
+            if let camera = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
+                mapView.mapboxMap.setCamera(to: camera)
+            }
+            result(nil)
+         case "camera#animate":
+             guard let arguments = methodCall.arguments as? [String: Any] else { return }
+             guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
+            if let cameraOptions = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
+                 if let duration = arguments["duration"] as? TimeInterval {
+                     mapView.camera.fly(to: cameraOptions, duration: duration) { position in
+                         result(nil)
+                     }
+                 } else {
+                     mapView.camera.fly(to: cameraOptions, duration: nil) { position in
+                         result(nil)
+                     }
+                 }
+                
+             }
+             result(nil)
         // case "symbols#addAll":
         //     guard let symbolAnnotationController = symbolAnnotationController else { return }
         //     guard let arguments = methodCall.arguments as? [String: Any] else { return }

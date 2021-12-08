@@ -43,6 +43,7 @@ class AnimateCameraState extends State<AnimateCamera> {
             height: 200.0,
             child: MapboxMap(
               accessToken: MapsDemo.ACCESS_TOKEN,
+              styleString: "mapbox://styles/mapbox/light-v10",
               onMapCreated: _onMapCreated,
               initialCameraPosition:
                   const CameraPosition(target: LatLng(0.0, 0.0)),
@@ -178,10 +179,10 @@ class AnimateCameraState extends State<AnimateCamera> {
                 TextButton(
                   onPressed: () {
                     mapController.animateCamera(
-                      CameraUpdate.tiltTo(30.0),
+                      CameraUpdate.pitchTo(30.0),
                     );
                   },
-                  child: const Text('tiltTo'),
+                  child: const Text('pitchTo'),
                 ),
               ],
             ),

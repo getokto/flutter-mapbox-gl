@@ -176,7 +176,7 @@ class Convert {
           pitch: mapboxMap.getPitch(),
           bearing: bearing,
         );
-      case 'tiltTo':
+      case 'pitchTo':
         final tilt = json[1];
         return CameraOptions(
           center: mapboxMap.getCenter(),

@@ -6,6 +6,8 @@ part of mapbox_gl;
 
 enum AnnotationType { fill, line, circle, symbol }
 
+const String _kDefaultStyleString= 'mapbox://styles/mapbox/light-v10';
+
 typedef void MapCreatedCallback(MapboxMapController controller);
 
 class MapboxMap extends StatefulWidget {
@@ -18,7 +20,7 @@ class MapboxMap extends StatefulWidget {
     this.gestureRecognizers,
     this.compassEnabled = true,
     this.cameraTargetBounds = CameraTargetBounds.unbounded,
-    this.styleString,
+    this.styleString = _kDefaultStyleString,
     this.minMaxZoomPreference = MinMaxPreference.unbounded,
     this.minMaxPitchPreference = const MinMaxPreference(0, 85),
     this.rotateGesturesEnabled = true,

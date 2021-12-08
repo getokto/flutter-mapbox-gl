@@ -184,8 +184,8 @@ class CameraUpdate {
   }
 
   /// Returns a camera update that sets the camera bearing.
-  static CameraUpdate tiltTo(double tilt) {
-    return CameraUpdate._(<dynamic>['tiltTo', tilt]);
+  static CameraUpdate pitchTo(double tilt) {
+    return CameraUpdate._(<dynamic>['pitchTo', tilt]);
   }
 
   final dynamic _json;

@@ -172,10 +172,10 @@ class MoveCameraState extends State<MoveCamera> {
                 TextButton(
                   onPressed: () {
                     mapController.moveCamera(
-                      CameraUpdate.tiltTo(30.0),
+                      CameraUpdate.pitchTo(30.0),
                     );
                   },
-                  child: const Text('tiltTo'),
+                  child: const Text('pitchTo'),
                 ),
               ],
             ),
