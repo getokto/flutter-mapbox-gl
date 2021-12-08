@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -126,7 +127,8 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
           children: [
             MapboxMap(
               accessToken: MapsDemo.ACCESS_TOKEN,
-              styleString: "mapbox://styles/mapbox/light-v10",
+              compassEnabled: false,
+              scaleBarEnabled: false,
               trackCameraPosition: true,
               myLocationEnabled: false,
               myLocationTrackingMode: MyLocationTrackingMode.None,

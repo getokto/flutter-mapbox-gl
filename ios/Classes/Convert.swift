@@ -10,6 +10,9 @@ class Convert {
         if let compassEnabled = options["compassEnabled"] as? Bool {
             delegate.setCompassEnabled(enabled: compassEnabled)
         }
+        if let scaleBarEnabled = options["scaleBarEnabled"] as? Bool {
+            delegate.setScaleBarEnabled(enabled: scaleBarEnabled)
+        }
         if let minMaxZoomPreference = options["minMaxZoomPreference"] as? [Double] {
             delegate.setMinMaxZoomPreference(min: minMaxZoomPreference[0], max: minMaxZoomPreference[1])
         }

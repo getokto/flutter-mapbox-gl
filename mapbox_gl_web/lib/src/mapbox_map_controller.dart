@@ -527,7 +527,7 @@ class MapboxMapController extends MapboxGlPlatform
 
   void _updateNavigationControl({
     bool? compassEnabled,
-    CompassViewPosition? position,
+    OrnamentViewPosition? position,
   }) {
     bool? prevShowCompass;
     if (_navigationControl != null) {
@@ -537,16 +537,16 @@ class MapboxMapController extends MapboxGlPlatform
 
     String? positionString;
     switch (position) {
-      case CompassViewPosition.TopRight:
+      case OrnamentViewPosition.TopRight:
         positionString = 'top-right';
         break;
-      case CompassViewPosition.TopLeft:
+      case OrnamentViewPosition.TopLeft:
         positionString = 'top-left';
         break;
-      case CompassViewPosition.BottomRight:
+      case OrnamentViewPosition.BottomRight:
         positionString = 'bottom-right';
         break;
-      case CompassViewPosition.BottomLeft:
+      case OrnamentViewPosition.BottomLeft:
         positionString = 'bottom-left';
         break;
       default:
@@ -613,7 +613,7 @@ class MapboxMapController extends MapboxGlPlatform
 
   @override
   void setCompassGravity(int gravity) {
-    _updateNavigationControl(position: CompassViewPosition.values[gravity]);
+    _updateNavigationControl(position: OrnamentViewPosition.values[gravity]);
   }
 
   @override

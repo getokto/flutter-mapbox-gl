@@ -60,7 +60,7 @@ enum MyLocationRenderMode {
 }
 
 /// Compass View Position
-enum CompassViewPosition {
+enum OrnamentViewPosition {
   TopLeft,
   TopRight,
   BottomLeft,

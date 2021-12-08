@@ -18,7 +18,6 @@ class MapboxMap extends StatefulWidget {
     this.onMapCreated,
     this.onStyleLoadedCallback,
     this.gestureRecognizers,
-    this.compassEnabled = true,
     this.cameraTargetBounds = CameraTargetBounds.unbounded,
     this.styleString = _kDefaultStyleString,
     this.minMaxZoomPreference = MinMaxPreference.unbounded,
@@ -32,8 +31,12 @@ class MapboxMap extends StatefulWidget {
     this.myLocationTrackingMode = MyLocationTrackingMode.None,
     this.myLocationRenderMode = MyLocationRenderMode.COMPASS,
     this.logoViewMargins,
+    this.compassEnabled = true,
     this.compassViewPosition,
     this.compassViewMargins,
+    this.scaleBarEnabled = true,
+    this.scaleBarViewPosition,
+    this.scaleBarViewMargins,
     this.attributionButtonMargins,
     this.onMapClick,
     this.onLayerTap,
@@ -84,9 +87,6 @@ class MapboxMap extends StatefulWidget {
 
   /// The initial position of the map's camera.
   final CameraPosition initialCameraPosition;
-
-  /// True if the map should show a compass when rotated.
-  final bool compassEnabled;
 
   /// Geographical bounding box for the camera target.
   final CameraTargetBounds cameraTargetBounds;
@@ -159,11 +159,23 @@ class MapboxMap extends StatefulWidget {
   /// Set the layout margins for the Mapbox Logo
   final Point? logoViewMargins;
 
+  /// True if the map should show a compass when rotated.
+  final bool compassEnabled;
+
   /// Set the position for the Mapbox Compass
-  final CompassViewPosition? compassViewPosition;
+  final OrnamentViewPosition? compassViewPosition;
 
   /// Set the layout margins for the Mapbox Compass
   final Point? compassViewMargins;
+
+  /// True if the map should show a compass when rotated.
+  final bool scaleBarEnabled;
+
+  /// Set the position for the Mapbox ScaleBar
+  final OrnamentViewPosition? scaleBarViewPosition;
+
+  /// Set the layout margins for the Mapbox ScaleBar
+  final Point? scaleBarViewMargins;
 
   /// Set the layout margins for the Mapbox Attribution Buttons
   final Point? attributionButtonMargins;
@@ -307,7 +319,6 @@ class _MapboxMapState extends State<MapboxMap> {
 /// "do not change this configuration option".
 class _MapboxMapOptions {
   _MapboxMapOptions({
-    this.compassEnabled,
     this.cameraTargetBounds,
     this.styleString,
     this.minMaxZoomPreference,
@@ -321,14 +332,17 @@ class _MapboxMapOptions {
     this.myLocationTrackingMode,
     this.myLocationRenderMode,
     this.logoViewMargins,
+    this.compassEnabled,
     this.compassViewPosition,
     this.compassViewMargins,
+    this.scaleBarEnabled,
+    this.scaleBarViewPosition,
+    this.scaleBarViewMargins,
     this.attributionButtonMargins,
   });
 
   static _MapboxMapOptions fromWidget(MapboxMap map) {
     return _MapboxMapOptions(
-      compassEnabled: map.compassEnabled,
       cameraTargetBounds: map.cameraTargetBounds,
       styleString: map.styleString,
       minMaxZoomPreference: map.minMaxZoomPreference,
@@ -342,13 +356,15 @@ class _MapboxMapOptions {
       myLocationTrackingMode: map.myLocationTrackingMode,
       myLocationRenderMode: map.myLocationRenderMode,
       logoViewMargins: map.logoViewMargins,
+      compassEnabled: map.compassEnabled,
       compassViewPosition: map.compassViewPosition,
       compassViewMargins: map.compassViewMargins,
+      scaleBarEnabled: map.scaleBarEnabled,
+      scaleBarViewMargins: map.scaleBarViewMargins,
+      scaleBarViewPosition: map.scaleBarViewPosition,
       attributionButtonMargins: map.attributionButtonMargins,
     );
   }
-
-  final bool? compassEnabled;
 
   final CameraTargetBounds? cameraTargetBounds;
 
@@ -376,9 +392,17 @@ class _MapboxMapOptions {
 
   final Point? logoViewMargins;
 
-  final CompassViewPosition? compassViewPosition;
+  final bool? compassEnabled;
+
+  final OrnamentViewPosition? compassViewPosition;
 
   final Point? compassViewMargins;
+
+  final bool? scaleBarEnabled;
+
+  final OrnamentViewPosition? scaleBarViewPosition;
+
+  final Point? scaleBarViewMargins;
 
   final Point? attributionButtonMargins;
 
@@ -399,7 +423,6 @@ class _MapboxMapOptions {
       return null;
     }
 
-    addIfNonNull('compassEnabled', compassEnabled);
     addIfNonNull('cameraTargetBounds', cameraTargetBounds?.toJson());
     addIfNonNull('styleString', styleString);
     addIfNonNull('minMaxZoomPreference', minMaxZoomPreference?.toJson());
@@ -412,8 +435,12 @@ class _MapboxMapOptions {
     addIfNonNull('myLocationTrackingMode', myLocationTrackingMode?.index);
     addIfNonNull('myLocationRenderMode', myLocationRenderMode?.index);
     addIfNonNull('logoViewMargins', pointToArray(logoViewMargins));
+    addIfNonNull('compassEnabled', compassEnabled);
     addIfNonNull('compassViewPosition', compassViewPosition?.index);
     addIfNonNull('compassViewMargins', pointToArray(compassViewMargins));
+    addIfNonNull('scaleBarEnabled', scaleBarEnabled);
+    addIfNonNull('scaleBarViewPosition', scaleBarViewPosition?.index);
+    addIfNonNull('scaleBarViewMargins', pointToArray(scaleBarViewMargins));
     addIfNonNull(
         'attributionButtonMargins', pointToArray(attributionButtonMargins));
     return optionsMap;

@@ -4,6 +4,7 @@ import MapboxMaps
 protocol MapboxMapOptionsSink {
     func setCameraTargetBounds(bounds: CoordinateBounds?)
     func setCompassEnabled(enabled: Bool)
+    func setScaleBarEnabled (enabled: Bool)
     func setStyleString(styleString: String)
     func setMinMaxZoomPreference(min: Double, max: Double)
     func setMinMaxPitchPreference(min: Double, max: Double)

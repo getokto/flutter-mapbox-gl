@@ -1412,6 +1412,10 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
         mapView.ornaments.options.compass.visibility = enabled ? OrnamentVisibility.visible : OrnamentVisibility.hidden;
     }
     
+    func setScaleBarEnabled (enabled: Bool){
+        mapView.ornaments.options.scaleBar.visibility = enabled ? OrnamentVisibility.visible : OrnamentVisibility.hidden;
+    }
+    
     func setMinMaxZoomPreference(min: Double, max: Double) {
         try? mapView.mapboxMap.setCameraBounds(with: CameraBoundsOptions(
             maxZoom: min,
