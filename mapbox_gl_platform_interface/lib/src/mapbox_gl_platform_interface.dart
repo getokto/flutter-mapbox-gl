@@ -386,12 +386,12 @@ abstract class MapboxGlPlatform {
         'removeFillLayer() has not been implemented.');
   }
 
-  Stream<dynamic> featureDataStream(String source, {
+  Stream<dynamic> streamSourceFeaturesQuery(String source, {
     List<String>? sourceLayers,
     List<dynamic>? filter,
   }) async* {
     throw UnimplementedError(
-        'featureDataStream() has not been implemented.');
+        'streamSourceFeaturesQuery() has not been implemented.');
   }
 
 }

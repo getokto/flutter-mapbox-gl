@@ -888,7 +888,7 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   }
 
   @override
-  Stream<dynamic> featureDataStream(String source, {
+  Stream<dynamic> streamSourceFeaturesQuery(String source, {
     List<String>? sourceLayers,
     List<dynamic>? filter,
   }) {
