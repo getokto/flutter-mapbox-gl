@@ -36,8 +36,10 @@ class FeaturesStreamHandler : NSObject, FlutterStreamHandler {
                     return feature.feature;
                 }
                 if let data = try? JSONEncoder().encode(rawFeatures) {
-                    let result = String(data: data, encoding: String.Encoding.utf8);
-                    self.events?(result)
+                    if let result = try? JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] {
+                        self.events?(result)
+                    }
+//                    let result = String(data: data, encoding: String.Encoding.utf8);
                 }
             }
        }
