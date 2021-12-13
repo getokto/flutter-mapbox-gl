@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 package com.mapbox.mapboxgl
 
-import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.google.android.gms.maps.model.LatLngBounds
 
 /**
  * Receiver of MapboxMap configuration options.

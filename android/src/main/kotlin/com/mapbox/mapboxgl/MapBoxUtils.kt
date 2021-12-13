@@ -3,13 +3,14 @@ package com.mapbox.mapboxgl
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
-import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.maps.plugin.Plugin
 
 internal object MapBoxUtils {
     private const val TAG = "MapboxMapController"
-    fun getMapbox(context: Context, accessToken: String?): Mapbox {
-        return Mapbox.getInstance(context, accessToken ?: getAccessToken(context))
-    }
+//    fun getMapbox(context: Context, accessToken: String?): Plugin.Mapbox {
+//        return MapView =
+//        return Mapbox.getInstance(context, accessToken ?: getAccessToken(context))
+//    }
 
     private fun getAccessToken(context: Context): String? {
         try {

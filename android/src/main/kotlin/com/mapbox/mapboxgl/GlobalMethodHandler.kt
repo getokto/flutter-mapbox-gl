@@ -2,8 +2,6 @@ package com.mapbox.mapboxgl
 
 import android.content.Context
 import android.util.Log
-import com.mapbox.mapboxgl.GlobalMethodHandler
-import com.mapbox.mapboxsdk.net.ConnectivityReceiver
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterAssets
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
@@ -33,39 +31,39 @@ internal class GlobalMethodHandler : MethodCallHandler {
 
     override fun onMethodCall(methodCall: MethodCall, result: MethodChannel.Result) {
         val accessToken = methodCall.argument<String>("accessToken")
-        MapBoxUtils.getMapbox(context, accessToken)
+        //MapBoxUtils.getMapbox(context, accessToken)
         when (methodCall.method) {
-            "installOfflineMapTiles" -> {
-                val tilesDb = methodCall.argument<String>("tilesdb")
-                installOfflineMapTiles(tilesDb)
-                result.success(null)
-            }
-            "setOffline" -> {
-                val offline = methodCall.argument<Boolean>("offline")!!
-                ConnectivityReceiver.instance(context).setConnected(if (offline) false else null)
-                result.success(null)
-            }
-            "mergeOfflineRegions" -> OfflineManagerUtils.mergeRegions(result, context, methodCall.argument("path"))
-            "setOfflineTileCountLimit" -> OfflineManagerUtils.setOfflineTileCountLimit(result, context, methodCall.argument<Number>("limit")!!.toLong())
-            "downloadOfflineRegion" -> {
-                // Get args from caller
-                val definitionMap = methodCall.argument<Any>("definition") as Map<String, Any>?
-                val metadataMap = methodCall.argument<Any>("metadata") as Map<String, Any>?
-                val channelName = methodCall.argument<String>("channelName")
-
-                // Prepare args
-                val channelHandler = OfflineChannelHandlerImpl(messenger, channelName)
-
-                // Start downloading
-                OfflineManagerUtils.downloadRegion(result, context, definitionMap, metadataMap, channelHandler)
-            }
-            "getListOfRegions" -> OfflineManagerUtils.regionsList(result, context)
-            "updateOfflineRegionMetadata" -> {
-                // Get download region arguments from caller
-                val metadata = methodCall.argument<Any>("metadata") as Map<String, Any>?
-                OfflineManagerUtils.updateRegionMetadata(result, context, methodCall.argument<Number>("id")!!.toLong(), metadata)
-            }
-            "deleteOfflineRegion" -> OfflineManagerUtils.deleteRegion(result, context, methodCall.argument<Number>("id")!!.toLong())
+//            "installOfflineMapTiles" -> {
+//                val tilesDb = methodCall.argument<String>("tilesdb")
+//                installOfflineMapTiles(tilesDb)
+//                result.success(null)
+//            }
+//            "setOffline" -> {
+//                val offline = methodCall.argument<Boolean>("offline")!!
+//                ConnectivityReceiver.instance(context).setConnected(if (offline) false else null)
+//                result.success(null)
+//            }
+//            "mergeOfflineRegions" -> OfflineManagerUtils.mergeRegions(result, context, methodCall.argument("path"))
+//            "setOfflineTileCountLimit" -> OfflineManagerUtils.setOfflineTileCountLimit(result, context, methodCall.argument<Number>("limit")!!.toLong())
+//            "downloadOfflineRegion" -> {
+//                // Get args from caller
+//                val definitionMap = methodCall.argument<Any>("definition") as Map<String, Any>?
+//                val metadataMap = methodCall.argument<Any>("metadata") as Map<String, Any>?
+//                val channelName = methodCall.argument<String>("channelName")
+//
+//                // Prepare args
+//                val channelHandler = OfflineChannelHandlerImpl(messenger, channelName)
+//
+//                // Start downloading
+//                OfflineManagerUtils.downloadRegion(result, context, definitionMap, metadataMap, channelHandler)
+//            }
+//            "getListOfRegions" -> OfflineManagerUtils.regionsList(result, context)
+//            "updateOfflineRegionMetadata" -> {
+//                // Get download region arguments from caller
+//                val metadata = methodCall.argument<Any>("metadata") as Map<String, Any>?
+//                OfflineManagerUtils.updateRegionMetadata(result, context, methodCall.argument<Number>("id")!!.toLong(), metadata)
+//            }
+//            "deleteOfflineRegion" -> OfflineManagerUtils.deleteRegion(result, context, methodCall.argument<Number>("id")!!.toLong())
             else -> result.notImplemented()
         }
     }
