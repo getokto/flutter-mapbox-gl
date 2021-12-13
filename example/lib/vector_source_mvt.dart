@@ -94,9 +94,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
     // ), tappable: true);
 
 
-    _mapController.featureDataStream('test',
-      sourceLayers: ["agp"],
-    ).listen(_handleDataStream);
+    _mapController.streamSourceFeaturesQuery('auto-points', sourceLayers: ['agp']).listen(_handleDataStream);
   }
 
   void _handleDataStream (event) {
