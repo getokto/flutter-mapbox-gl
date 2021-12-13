@@ -84,11 +84,11 @@ internal class MapboxMapController(
         accessToken: String?,
         styleStringInitial: String?,
         annotationOrder: List<String?>?,
-        annotationConsumeTapEvents: List<String?>?) : DefaultLifecycleObserver, OnCameraIdleListener, MapboxMap.OnCameraMoveListener, OnCameraMoveStartedListener, OnAnnotationClickListener<Any?>, OnMapClickListener, OnMapLongClickListener, MapboxMapOptionsSink, MethodCallHandler, OnMapReadyCallback, OnCameraTrackingChangedListener, OnSymbolTappedListener, OnLineTappedListener, OnCircleTappedListener, OnFillTappedListener, PlatformView {
+        annotationConsumeTapEvents: List<String?>?) : DefaultLifecycleObserver, OnCameraIdleListener, MapboxMap.OnCameraMoveListener, OnCameraMoveStartedListener, OnAnnotationClickListener<com.mapbox.mapboxsdk.plugins.annotation.Annotation<*>>, OnMapClickListener, OnMapLongClickListener, MapboxMapOptionsSink, MethodCallHandler, OnMapReadyCallback, OnCameraTrackingChangedListener, OnSymbolTappedListener, OnLineTappedListener, OnCircleTappedListener, OnFillTappedListener, PlatformView {
     private val id: Int
-    private val methodChannel: MethodChannel
+    private lateinit var methodChannel: MethodChannel
     private val lifecycleProvider: LifecycleProvider
-    private var mapView: MapView
+    private lateinit var mapView: MapView
     private var mapboxMap: MapboxMap? = null
     private val symbols: MutableMap<String?, SymbolController>
     private val lines: MutableMap<String?, LineController>
@@ -120,7 +120,7 @@ internal class MapboxMapController(
     }
 
     fun init() {
-        lifecycleProvider.lifecycle!!.addObserver(this)
+        lifecycleProvider.getLifecycle()!!.addObserver(this)
         mapView.getMapAsync(this)
     }
 
@@ -238,8 +238,13 @@ internal class MapboxMapController(
         // is fixed with 0.6.0 of annotations plugin
         mapboxMap!!.addOnMapClickListener(this@MapboxMapController)
         mapboxMap!!.addOnMapLongClickListener(this@MapboxMapController)
-        localizationPlugin = LocalizationPlugin(mapView, mapboxMap!!, style!!)
-        methodChannel.invokeMethod("map#onStyleLoaded", null)
+
+        mapView.let {
+            localizationPlugin = LocalizationPlugin(mapView, mapboxMap!!, style!!)
+            methodChannel.invokeMethod("map#onStyleLoaded", null)
+        }
+
+
     }
 
     private fun enableLocationComponent(style: Style) {
@@ -299,7 +304,7 @@ internal class MapboxMapController(
             if (tileVersion == null) {
                 tileVersion = "2.2.0"
             }
-            val tilesObjectArray: Array<Any> = (properties["tiles"] as ArrayList<*>?).toTypedArray()
+            val tilesObjectArray: Array<Any> = (properties["tiles"] as ArrayList<*>).toTypedArray()
             val tileUrls = Arrays.copyOf<String, Any>(tilesObjectArray, tilesObjectArray.size, Array<String>::class.java)
             var i = 0
             while (i < tileUrls.size) {
@@ -330,7 +335,7 @@ internal class MapboxMapController(
     private fun addSymbolLayer(layerName: String?,
                                sourceName: String?,
                                sourceLayer: String?,
-                               properties: Array<PropertyValue<*>?>?) {
+                               properties: Array<PropertyValue<*>>?) {
         val symbolLayer = SymbolLayer(layerName, sourceName)
         if (sourceLayer != null) {
             symbolLayer.sourceLayer = sourceLayer
@@ -340,7 +345,7 @@ internal class MapboxMapController(
     }
 
     private fun updateSymbolLayer(layerName: String?,
-                                  properties: Array<PropertyValue<*>?>?) {
+                                  properties: Array<PropertyValue<*>>?) {
         val lineLayer = style!!.getLayerAs<LineLayer>(layerName!!)
         lineLayer!!.setProperties(*properties!!)
     }
@@ -348,7 +353,7 @@ internal class MapboxMapController(
     private fun addLineLayer(layerName: String?,
                              sourceName: String?,
                              sourceLayer: String?,
-                             properties: Array<PropertyValue<*>?>?) {
+                             properties: Array<PropertyValue<*>>?) {
         val lineLayer = LineLayer(layerName, sourceName)
         if (sourceLayer != null) {
             lineLayer.sourceLayer = sourceLayer
@@ -358,7 +363,7 @@ internal class MapboxMapController(
     }
 
     private fun updateLineLayer(layerName: String?,
-                                properties: Array<PropertyValue<*>?>?) {
+                                properties: Array<PropertyValue<*>>?) {
         val lineLayer = style!!.getLayerAs<LineLayer>(layerName!!)
         lineLayer!!.setProperties(*properties!!)
     }
@@ -370,28 +375,28 @@ internal class MapboxMapController(
             symbolManager!!.iconIgnorePlacement = true
             symbolManager!!.textAllowOverlap = true
             symbolManager!!.textIgnorePlacement = true
-            symbolManager!!.addClickListener(OnSymbolClickListener { annotation: Annotation<*>? -> this@MapboxMapController.onAnnotationClick(annotation) })
+            //symbolManager!!.addClickListener(OnSymbolClickListener { annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*> -> this@MapboxMapController.onAnnotationClick(annotation) })
         }
     }
 
     private fun enableLineManager(style: Style) {
         if (lineManager == null) {
             lineManager = LineManager(mapView, mapboxMap!!, style)
-            lineManager!!.addClickListener(OnLineClickListener { annotation: Annotation<*>? -> this@MapboxMapController.onAnnotationClick(annotation) })
+            //lineManager!!.addClickListener(OnLineClickListener { annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*> -> this@MapboxMapController.onAnnotationClick(annotation) })
         }
     }
 
     private fun enableCircleManager(style: Style) {
         if (circleManager == null) {
             circleManager = CircleManager(mapView, mapboxMap!!, style)
-            circleManager!!.addClickListener(OnCircleClickListener { annotation: Annotation<*>? -> this@MapboxMapController.onAnnotationClick(annotation) })
+            // circleManager!!.addClickListener(OnCircleClickListener { annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*> -> this@MapboxMapController.onAnnotationClick(annotation) })
         }
     }
 
     private fun enableFillManager(style: Style) {
         if (fillManager == null) {
             fillManager = FillManager(mapView, mapboxMap!!, style)
-            fillManager!!.addClickListener(OnFillClickListener { annotation: Annotation<*>? -> this@MapboxMapController.onAnnotationClick(annotation) })
+            // fillManager!!.addClickListener(OnFillClickListener { annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*> -> this@MapboxMapController.onAnnotationClick(annotation) })
         }
     }
 
@@ -519,7 +524,7 @@ internal class MapboxMapController(
             "map#queryRenderedFeatures" -> {
                 val reply: MutableMap<String, Any> = HashMap()
                 val features: List<Feature>
-                val layerIds: Array<String> = (call.argument<Any>("layerIds") as List<String?>?).toTypedArray<String>()
+                val layerIds: Array<String> = (call.argument<Any>("layerIds") as List<String>).toTypedArray<String>()
                 val filter = call.argument<List<Any>>("filter")
                 val jsonElement = if (filter == null) null else Gson().toJsonTree(filter)
                 var jsonArray: JsonArray? = null
@@ -617,7 +622,7 @@ internal class MapboxMapController(
                 run {
                     val symbolId = call.argument<String>("symbol")
                     val symbol = symbol(symbolId)
-                    val symbolLatLng = symbol.geometry
+                    val symbolLatLng = symbol.getGeometry()
                     val hashMapLatLng: MutableMap<String, Double> = HashMap()
                     hashMapLatLng.put("latitude", symbolLatLng!!.latitude)
                     hashMapLatLng.put("longitude", symbolLatLng!!.longitude)
@@ -710,7 +715,7 @@ internal class MapboxMapController(
             "line#getGeometry" -> {
                 val lineId = call.argument<String>("line")
                 val line = line(lineId)
-                val lineLatLngs = line.geometry
+                val lineLatLngs = line.getGeometry()
                 val resultList: MutableList<Any> = ArrayList()
                 for (latLng in lineLatLngs!!) {
                     val hashMapLatLng: MutableMap<String, Double> = HashMap()
@@ -782,7 +787,7 @@ internal class MapboxMapController(
             "circle#getGeometry" -> {
                 val circleId = call.argument<String>("circle")
                 val circle = circle(circleId)
-                val circleLatLng = circle.geometry
+                val circleLatLng = circle.getGeometry()
                 val hashMapLatLng: MutableMap<String, Double> = HashMap()
                 hashMapLatLng.put("latitude", circleLatLng!!.latitude)
                 hashMapLatLng.put("longitude", circleLatLng!!.longitude)
@@ -1004,7 +1009,7 @@ internal class MapboxMapController(
         methodChannel.invokeMethod("map#onCameraTrackingDismissed", HashMap<Any, Any>())
     }
 
-    override fun onAnnotationClick(annotation: Annotation<*>?): Boolean {
+    override fun onAnnotationClick(annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*>): Boolean {
         if (annotation is Symbol) {
             val symbolController = symbols[annotation.getId().toString()]
             if (symbolController != null) {
@@ -1098,7 +1103,7 @@ internal class MapboxMapController(
         disposed = true
         methodChannel.setMethodCallHandler(null)
         destroyMapViewIfNecessary()
-        val lifecycle = lifecycleProvider.lifecycle
+        val lifecycle = lifecycleProvider.getLifecycle()
         lifecycle?.removeObserver(this)
     }
 
@@ -1123,7 +1128,6 @@ internal class MapboxMapController(
         }
         stopListeningForLocationUpdates()
         mapView.onDestroy()
-        mapView = null
     }
 
     override fun onCreate(owner: LifecycleOwner) {
@@ -1198,8 +1202,8 @@ internal class MapboxMapController(
     }
 
     override fun setMinMaxZoomPreference(min: Float?, max: Float?) {
-        mapboxMap!!.setMinZoomPreference(min ?: MapboxConstants.MINIMUM_ZOOM.toDouble())
-        mapboxMap!!.setMaxZoomPreference(max ?: MapboxConstants.MAXIMUM_ZOOM.toDouble())
+        mapboxMap!!.setMinZoomPreference((min ?: MapboxConstants.MINIMUM_ZOOM).toDouble())
+        mapboxMap!!.setMaxZoomPreference((max ?: MapboxConstants.MAXIMUM_ZOOM).toDouble())
     }
 
     override fun setZoomGesturesEnabled(zoomGesturesEnabled: Boolean) {
@@ -1277,15 +1281,17 @@ internal class MapboxMapController(
     }
 
     private fun startListeningForLocationUpdates() {
-        if (locationEngineCallback == null && locationComponent != null && locationComponent!!.locationEngine != null) {
-            locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
+        var _locationEngineCallback = locationEngineCallback;
+
+        if (_locationEngineCallback == null && locationComponent != null && locationComponent!!.locationEngine != null) {
+            _locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
                 override fun onSuccess(result: LocationEngineResult) {
                     onUserLocationUpdate(result.lastLocation)
                 }
 
                 override fun onFailure(exception: Exception) {}
             }
-            locationComponent!!.locationEngine!!.requestLocationUpdates(locationComponent!!.locationEngineRequest, locationEngineCallback, null)
+            locationComponent!!.locationEngine!!.requestLocationUpdates(locationComponent!!.locationEngineRequest, _locationEngineCallback, null)
         }
     }
 

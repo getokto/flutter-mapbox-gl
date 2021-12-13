@@ -65,12 +65,13 @@ class MapboxMapsPlugin : FlutterPlugin, ActivityAware {
     private class ProxyLifecycleProvider(activity: Activity) : Application.ActivityLifecycleCallbacks, LifecycleOwner, LifecycleProvider {
         private val lifecycle = LifecycleRegistry(this)
         private val registrarActivityHashCode: Int
-        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle) {
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
             if (activity.hashCode() != registrarActivityHashCode) {
                 return
             }
             lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
         }
+
 
         override fun onActivityStarted(activity: Activity) {
             if (activity.hashCode() != registrarActivityHashCode) {

@@ -61,8 +61,8 @@ internal object Convert {
 
     fun toAnnotationOrder(o: Any?): List<String?> {
         val data = toList(o)
-        val annotations: MutableList<String?> = ArrayList<Any?>()
-        for (index in data.indices) {
+        val annotations: MutableList<String?> = arrayListOf();
+        for (index in data!!.indices) {
             annotations.add(toString(data!![index]!!))
         }
         return annotations
@@ -110,7 +110,7 @@ internal object Convert {
     }
 
     private fun toFloat(o: Any?): Float {
-        return (o as Number?)!!.toFloat()
+        return (o as Number?)?.toFloat() ?: (0.0).toFloat()
     }
 
     private fun toFloatWrapper(o: Any?): Float? {
@@ -160,7 +160,7 @@ internal object Convert {
         }
         val data = toList(o)
         val latLngList: MutableList<LatLng> = ArrayList()
-        for (i in data.indices) {
+        for (i in data!!.indices) {
             val coords = toList(data!![i])
             latLngList.add(LatLng(toDouble(coords!![0]!!), toDouble(coords[1]!!)))
         }
@@ -173,7 +173,7 @@ internal object Convert {
         }
         val data = toList(o)
         val latLngListList: MutableList<List<LatLng>?> = ArrayList()
-        for (i in data.indices) {
+        for (i in data!!.indices) {
             val latLngList = toLatLngList(data!![i])
             latLngListList.add(latLngList)
         }
@@ -536,7 +536,7 @@ internal object Convert {
 
     fun interpretSymbolLayerProperties(o: Any?): Array<PropertyValue<*>> {
         val data = toMap(o) as Map<String, Map<String, *>>?
-        val properties: MutableList<PropertyValue<*>?> = LinkedList<Any?>()
+        val properties: MutableList<PropertyValue<*>> = mutableListOf(); //  LinkedList<Any?>()
         val gson = GsonBuilder().setPrettyPrinting().create()
         for ((_, value) in data!!) {
             for ((key, value1) in value.entries) {
@@ -609,7 +609,7 @@ internal object Convert {
 
     fun interpretLineLayerProperties(o: Any?): Array<PropertyValue<*>> {
         val data = toMap(o) as Map<String, Map<String, *>>?
-        val properties: MutableList<PropertyValue<*>?> = LinkedList<Any?>()
+        val properties: MutableList<PropertyValue<*>> = mutableListOf(); // LinkedList<Any?>()
         val gson = GsonBuilder().setPrettyPrinting().create()
         for ((_, value) in data!!) {
             for ((key, value1) in value.entries) {

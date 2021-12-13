@@ -12,7 +12,6 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import java.io.*
-import kotlin.Throws
 
 internal class GlobalMethodHandler : MethodCallHandler {
     private var registrar: Registrar? = null
@@ -82,7 +81,7 @@ internal class GlobalMethodHandler : MethodCallHandler {
 
     @Throws(IOException::class)
     private fun openTilesDbFile(tilesDb: String?): InputStream {
-        return if (tilesDb.startsWith("/")) { // Absolute path.
+        return if (tilesDb!!.startsWith("/")) { // Absolute path.
             FileInputStream(File(tilesDb))
         } else {
             val assetKey: String

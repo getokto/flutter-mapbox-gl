@@ -122,7 +122,7 @@ internal class SymbolBuilder : SymbolOptionsSink {
         symbolOptions.withDraggable(draggable)
     }
 
-    val customImage: Boolean
+    val customImage: Boolean = false
 
     companion object {
         private const val customImage = false

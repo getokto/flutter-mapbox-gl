@@ -24,8 +24,8 @@ internal class MapboxMapBuilder : MapboxMapOptionsSink {
     private var myLocationTrackingMode = 0
     private var myLocationRenderMode = 0
     private var styleString: String? = Style.MAPBOX_STREETS
-    private var annotationOrder: List<String?>? = ArrayList<Any?>()
-    private var annotationConsumeTapEvents: List<String?>? = ArrayList<Any?>()
+    private var annotationOrder: List<String?>? = arrayListOf(); // ArrayList<Any?>()
+    private var annotationConsumeTapEvents: List<String?>? = arrayListOf(); // ArrayList<Any?>()
     fun build(
             id: Int, context: Context, messenger: BinaryMessenger?, lifecycleProvider: LifecycleProvider, accessToken: String?): MapboxMapController {
         val controller = MapboxMapController(id, context, messenger, lifecycleProvider, options, accessToken, styleString, annotationOrder, annotationConsumeTapEvents)

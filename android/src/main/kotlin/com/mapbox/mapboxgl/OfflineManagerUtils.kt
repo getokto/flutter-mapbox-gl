@@ -226,7 +226,7 @@ internal object OfflineManagerUtils {
     }
 
     private fun offlineRegionToMap(region: OfflineRegion): MutableMap<String?, Any?> {
-        val result: MutableMap<String?, Any?> = HashMap<Any?, Any?>()
+        val result: MutableMap<String?, Any?> = hashMapOf(); // HashMap<Any?, Any?>()
         result.put("id", region.id)
         result.put("definition", offlineRegionDefinitionToMap(region.definition))
         result.put("metadata", metadataBytesToMap(region.metadata))
@@ -234,7 +234,7 @@ internal object OfflineManagerUtils {
     }
 
     private fun offlineRegionDefinitionToMap(definition: OfflineRegionDefinition): Map<String?, Any?> {
-        val result: MutableMap<String?, Any?> = HashMap<Any?, Any?>()
+        val result: MutableMap<String?, Any?> = hashMapOf(); // HashMap<Any?, Any?>()
         result.put("mapStyleUrl", definition.styleURL)
         result.put("bounds", boundsToList(definition.bounds))
         result.put("minZoom", definition.minZoom)
@@ -254,7 +254,7 @@ internal object OfflineManagerUtils {
 
     private fun metadataBytesToMap(metadataBytes: ByteArray?): Map<String?, Any?> {
         return if (metadataBytes != null) {
-            Gson().fromJson<HashMap<*, *>>(String(metadataBytes), HashMap::class.java)
-        } else HashMap<Any?, Any?>()
+            Gson().fromJson<HashMap<String?, Any?>>(String(metadataBytes), HashMap::class.java)
+        } else hashMapOf<String?, Any?>()
     }
 }
