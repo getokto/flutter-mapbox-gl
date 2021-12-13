@@ -50,8 +50,7 @@ internal class MapboxMapController(
         id: Int,
         context: Context,
         messenger: BinaryMessenger?,
-        accessToken: String?,
-        styleStringInitial: String?) : DefaultLifecycleObserver,  MapboxMapOptionsSink, MethodCallHandler, PlatformView {
+        params: Map<String, Any>) : DefaultLifecycleObserver,  MapboxMapOptionsSink, MethodCallHandler, PlatformView {
     private val id: Int = id
     private lateinit var methodChannel: MethodChannel
 
@@ -76,7 +75,6 @@ internal class MapboxMapController(
     //    private val density: Float
 //    private var mapReadyResult: MethodChannel.Result? = null
     private val context: Context = context
-    private val styleStringInitial: String? = styleStringInitial
 
     //    private var locationComponent: LocationComponent? = null
 //    private var locationEngine: LocationEngine? = null
@@ -1367,27 +1365,74 @@ internal class MapboxMapController(
 
     init {
         val mapOptions = MapOptions.Builder()
-                .build()
 
         val resourceOptions =  ResourceOptions.Builder()
-                .accessToken(accessToken!!)
-                .build()
+
 
         val initialCameraOptions = CameraOptions.Builder()
                 .center(Point.fromLngLat(-122.4194, 37.7749))
                 .zoom(9.0)
+
                 .bearing(120.0)
-                .build()
+        val cameraBoundsOptions = CameraBoundsOptions.Builder()
 
-        val plugins: List<Plugin> = listOf()
 
-        val mapInitOptions =
-                MapInitOptions(context, resourceOptions, mapOptions, plugins, initialCameraOptions, true)
+        (params["accessToken"] as String?)?.let { accessToken ->
+            resourceOptions.accessToken(accessToken)
+        }
 
+
+        (params["initialCameraPosition"] as? Map<String, Any>)?.let { position ->
+
+            (position["bearing"] as Double?)?.let { bearing ->
+                initialCameraOptions.bearing(bearing)
+            }
+
+            (position["zoom"] as Double?)?.let { zoom ->
+                initialCameraOptions.zoom(zoom)
+            }
+
+            (position["pitch"] as Double?)?.let { pitch ->
+                initialCameraOptions.pitch(pitch)
+            }
+
+            (position["target"] as List<Double>?)?.let { center ->
+                initialCameraOptions.center(Point.fromLngLat(center[1], center[0]))
+            }
+
+        }
+
+        (params.containsKey("minMaxZoomPreferences") as? List<Double>)?.let { value ->
+            if (value.count() == 2) {
+                cameraBoundsOptions.minZoom(value[0])
+                cameraBoundsOptions.maxZoom(value[1])
+            }
+        }
+
+        (params.containsKey("minMaxPitchPreferences") as? List<Double>)?.let { value ->
+            if (value.count() == 2) {
+                cameraBoundsOptions.minPitch(value[0])
+                cameraBoundsOptions.maxPitch(value[1])
+            }
+        }
+
+        val mapInitOptions = MapInitOptions(
+            context,
+            resourceOptions.build(),
+            mapOptions.build(),
+            listOf(),
+            initialCameraOptions.build(),
+            true
+        )
 
         mapView = MapView(context,  mapInitOptions)
 
-        mapView.getMapboxMap().loadStyleUri(Style.MAPBOX_STREETS)
+        (params["options"] as Map<String, Any>?)?.let { options ->
+            (options["styleString"] as String?)?.let { styleString ->
+                mapView.getMapboxMap().loadStyleUri(styleString)
+            }
+        }
+
         methodChannel = MethodChannel(messenger, "plugins.flutter.io/mapbox_maps_$id")
         methodChannel.setMethodCallHandler(this)
     }
