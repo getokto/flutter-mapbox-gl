@@ -11,6 +11,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
 
@@ -37,6 +38,7 @@ rootProject.allprojects {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlinx-serialization'
 
 android {
     compileSdkVersion 30
@@ -61,6 +63,10 @@ android {
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
         implementation 'com.mapbox.maps:android:10.1.0'
+        implementation "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+//        implementation 'com.mapbox.plugin:maps-gestures:0.1.0'
+//        implementation 'com.mapbox.plugin:maps-annotation:0.1.0'
+//        implementation 'com.mapbox.plugin:maps-compass:0.1.0'
     }
 }
 

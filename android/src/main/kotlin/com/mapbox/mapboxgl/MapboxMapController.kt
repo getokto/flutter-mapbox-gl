@@ -8,39 +8,40 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.graphics.PointF
-import android.graphics.RectF
 import android.location.Location
-import android.os.Build
 import android.os.Process
-import android.util.Log
+import android.view.Gravity
 import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.mapbox.android.core.location.LocationEngine
-import com.mapbox.android.core.location.LocationEngineCallback
-import com.mapbox.android.core.location.LocationEngineProvider
-import com.mapbox.android.core.location.LocationEngineResult
-import com.mapbox.geojson.Feature
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
+import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxgl.MapboxMapController
-import com.mapbox.mapboxgl.MapboxMapsPlugin.LifecycleProvider
 import com.mapbox.maps.*
-import com.mapbox.maps.plugin.Plugin
-import com.mapbox.maps.plugin.animation.camera
+import com.mapbox.maps.extension.observable.eventdata.StyleLoadedEventData
+import com.mapbox.maps.extension.style.sources.addSource
+import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.plugin.animation.MapAnimationOptions
+import com.mapbox.maps.plugin.animation.flyTo
+import com.mapbox.maps.plugin.attribution.attribution
+import com.mapbox.maps.plugin.compass.compass
+import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
+import com.mapbox.maps.plugin.gestures.OnMapClickListener
+import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.logo.logo
+import io.flutter.Log
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.localization.LocalizationPlugin
 import io.flutter.plugin.platform.PlatformView
-import java.io.UnsupportedEncodingException
-import java.net.URLDecoder
+import org.json.JSONObject
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Controller of a single MapboxMaps MapView instance.
@@ -50,339 +51,151 @@ internal class MapboxMapController(
         id: Int,
         context: Context,
         messenger: BinaryMessenger?,
-        params: Map<String, Any>) : DefaultLifecycleObserver,  MapboxMapOptionsSink, MethodCallHandler, PlatformView {
+        params: Map<String, Any>) : DefaultLifecycleObserver, OnMapClickListener, OnStyleLoadedListener, MapboxMapOptionsSink, MethodCallHandler, PlatformView {
     private val id: Int = id
-    private lateinit var methodChannel: MethodChannel
+    private var methodChannel: MethodChannel
 
-    //    private val lifecycleProvider: LifecycleProvider
-    private lateinit var mapView: MapView
-    private var mapboxMap: MapboxMap? = null
-
-//    private val symbols: MutableMap<String?, SymbolController>
-//    private val lines: MutableMap<String?, LineController>
-//    private val circles: MutableMap<String?, CircleController>
-//    private val fills: MutableMap<String?, FillController>
-//    private var symbolManager: SymbolManager? = null
-//    private var lineManager: LineManager? = null
-//    private var circleManager: CircleManager? = null
-//    private var fillManager: FillManager? = null
+    private  var mapView: MapView
     private var trackCameraPosition = false
     private var myLocationEnabled = false
     private var myLocationTrackingMode = 0
     private var myLocationRenderMode = 0
     private var disposed = false
 
-    //    private val density: Float
-//    private var mapReadyResult: MethodChannel.Result? = null
+    private val density: Float
     private val context: Context = context
 
-    //    private var locationComponent: LocationComponent? = null
-//    private var locationEngine: LocationEngine? = null
-//    private var locationEngineCallback: LocationEngineCallback<LocationEngineResult>? = null
-//    private var localizationPlugin: LocalizationPlugin? = null
-    private var style: Style? = null
-
-    //    private val annotationOrder: List<String?>?
-//    private val annotationConsumeTapEvents: List<String?>?
-    private val tappableLayers = HashSet<String?>()
+    private val tappableLayers = HashSet<String>()
     override fun getView(): View {
         return mapView
     }
 
-    fun init() {
-//        lifecycleProvider.getLifecycle()!!.addObserver(this)
-//        mapView.getMapAsync(this)
-    }
-
-    private fun moveCamera(cameraUpdate: CameraUpdate) {
-//        mapboxMap!!.moveCamera(cameraUpdate)
-    }
-
-    private fun animateCamera(cameraUpdate: CameraUpdate) {
-//        mapboxMap!!.animateCamera(cameraUpdate)
-    }
-
-    private val cameraPosition: CameraOptions?
-        private get() = if (trackCameraPosition) mapboxMap!!.cameraState.toCameraOptions() else null
-//
-//    private fun symbol(symbolId: String?): SymbolController {
-//        return symbols[symbolId]
-//                ?: throw IllegalArgumentException("Unknown symbol: $symbolId")
-//    }
-
-//    private fun newLineBuilder(): LineBuilder {
-//        return LineBuilder(lineManager)
-//    }
-
-//    private fun removeLine(lineId: String?) {
-//        val lineController = lines.remove(lineId)
-//        lineController?.remove(lineManager)
-//    }
-//
-//    private fun line(lineId: String?): LineController {
-//        return lines[lineId] ?: throw IllegalArgumentException("Unknown line: $lineId")
-//    }
-//
-//    private fun newCircleBuilder(): CircleBuilder {
-//        return CircleBuilder(circleManager)
-//    }
-//
-//    private fun removeCircle(circleId: String?) {
-//        val circleController = circles.remove(circleId)
-//        circleController?.remove(circleManager)
-//    }
-//
-//    private fun circle(circleId: String?): CircleController {
-//        return circles[circleId]
-//                ?: throw IllegalArgumentException("Unknown circle: $circleId")
-//    }
-//
-//    private fun newFillBuilder(): FillBuilder {
-//        return FillBuilder(fillManager)
-//    }
-//
-//    private fun removeFill(fillId: String?) {
-//        val fillController = fills.remove(fillId)
-//        fillController?.remove(fillManager)
-//    }
-//
-//    private fun fill(fillId: String?): FillController {
-//        return fills[fillId] ?: throw IllegalArgumentException("Unknown fill: $fillId")
-//    }
-
-//    fun onMapReady(mapboxMap: MapboxMap) {
-//        this.mapboxMap = mapboxMap
-//        if (mapReadyResult != null) {
-//            mapReadyResult!!.success(null)
-//            mapReadyResult = null
-//        }
-//        mapboxMap.addOnCameraMoveStartedListener(this)
-//        mapboxMap.addOnCameraMoveListener(this)
-//        mapboxMap.addOnCameraIdleListener(this)
-//        mapView.addOnStyleImageMissingListener { id: String ->
-//            val displayMetrics = context.resources.displayMetrics
-//            val bitmap = getScaledImage(id, displayMetrics.density)
-//            if (bitmap != null) {
-//                mapboxMap.style!!.addImage(id, bitmap)
-//            }
-//        }
-//        setStyleString(styleStringInitial)
-//        // updateMyLocationEnabled();
-//    }
 
     override fun setStyleString(styleString: String?) {
-//        // Check if json, url, absolute path or asset path:
-//        if (styleString == null || styleString.isEmpty()) {
-//            Log.e(TAG, "setStyleString - string empty or null")
-//        } else if (styleString.startsWith("{") || styleString.startsWith("[")) {
-//            mapboxMap!!.setStyle(Style.Builder().fromJson(styleString), onStyleLoadedCallback)
-//        } else if (styleString.startsWith("/")) {
-//            // Absolute path
-//            mapboxMap!!.setStyle(Style.Builder().fromUri("file://$styleString"), onStyleLoadedCallback)
-//        } else if (!styleString.startsWith("http://") &&
-//                !styleString.startsWith("https://") &&
-//                !styleString.startsWith("mapbox://")) {
-//            // We are assuming that the style will be loaded from an asset here.
-//            val key: String = MapboxMapsPlugin.Companion.flutterAssets!!.getAssetFilePathByName(styleString)
-//            mapboxMap!!.setStyle(Style.Builder().fromUri("asset://$key"), onStyleLoadedCallback)
-//        } else {
-//            mapboxMap!!.setStyle(Style.Builder().fromUri(styleString), onStyleLoadedCallback)
-//        }
+        mapView.getMapboxMap().apply {
+            // Check if json, url, absolute path or asset path:
+            if (styleString == null || styleString.isEmpty()) {
+                Log.e(TAG, "setStyleString - string empty or null")
+            } else if (styleString.startsWith("{") || styleString.startsWith("[")) {
+                loadStyleJson(styleString, onStyleLoaded = null);
+                // setStyle(Style.Builder().fromJson(styleString), onStyleLoadedCallback)
+            } else if (styleString.startsWith("/")) {
+                // Absolute path
+                    loadStyleUri("file://$styleString")
+            } else if (!styleString.startsWith("http://") &&
+                    !styleString.startsWith("https://") &&
+                    !styleString.startsWith("mapbox://")) {
+                // We are assuming that the style will be loaded from an asset here.
+                val key: String = MapboxMapsPlugin.flutterAssets!!.getAssetFilePathByName(styleString)
+                loadStyleUri("asset://$key")
+            } else {
+                loadStyleUri(styleString)
+            }
+        }
     }
 
-//    var onStyleLoadedCallback = OnStyleLoaded { nextStyle ->
-//        style = nextStyle
-//        for (annotationType in annotationOrder!!) {
-//            when (annotationType) {
-//                "AnnotationType.fill" -> enableFillManager(style!!)
-//                "AnnotationType.line" -> enableLineManager(style!!)
-//                "AnnotationType.circle" -> enableCircleManager(style!!)
-//                "AnnotationType.symbol" -> enableSymbolManager(style!!)
-//                else -> throw IllegalArgumentException("Unknown annotation type: $annotationType, must be either 'fill', 'line', 'circle' or 'symbol'")
-//            }
-//        }
-//        if (myLocationEnabled) {
-//            enableLocationComponent(style!!)
-//        }
-//        // needs to be placed after SymbolManager#addClickListener,
-//        // is fixed with 0.6.0 of annotations plugin
-//        mapboxMap!!.addOnMapClickListener(this@MapboxMapController)
-//        mapboxMap!!.addOnMapLongClickListener(this@MapboxMapController)
-//
-//        mapView.let {
-//            localizationPlugin = LocalizationPlugin(mapView, mapboxMap!!, style!!)
-//            methodChannel.invokeMethod("map#onStyleLoaded", null)
-//        }
-//
-//
-//    }
 
-    private fun enableLocationComponent(style: Style) {
-//        if (hasLocationPermission()) {
-//            locationEngine = LocationEngineProvider.getBestLocationEngine(context)
-//            val locationComponentOptions = LocationComponentOptions.builder(context)
-//                    .trackingGesturesManagement(true)
-//                    .build()
-//            locationComponent = mapboxMap!!.locationComponent
-//            locationComponent!!.activateLocationComponent(context, style, locationComponentOptions)
-//            locationComponent!!.isLocationComponentEnabled = true
-//            // locationComponent.setRenderMode(RenderMode.COMPASS); // remove or keep default?
-//            locationComponent!!.locationEngine = locationEngine
-//            locationComponent!!.setMaxAnimationFps(30)
-//            updateMyLocationTrackingMode()
-//            setMyLocationTrackingMode(myLocationTrackingMode)
-//            updateMyLocationRenderMode()
-//            setMyLocationRenderMode(myLocationRenderMode)
-//            locationComponent!!.addOnCameraTrackingChangedListener(this)
-//        } else {
-//            Log.e(TAG, "missing location permissions")
-//        }
+    private fun addGeoJsonSource(sourceName: String, geoJson: String) {
+        mapView.getMapboxMap().getStyle()?.let { style ->
+            val sourceBuilder = GeoJsonSource.Builder(sourceName)
+            sourceBuilder.data(geoJson)
+            style.addSource(sourceBuilder.build())
+        }
     }
 
-    private fun onUserLocationUpdate(location: Location?) {
-//        if (location == null) {
-//            return
-//        }
-//        val userLocation: MutableMap<String, Any?> = HashMap(6)
-//        userLocation.put("position", doubleArrayOf(location.latitude, location.longitude))
-//        userLocation.put("altitude", location.altitude)
-//        userLocation.put("bearing", location.bearing)
-//        userLocation.put("horizontalAccuracy", location.accuracy)
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            userLocation.put("verticalAccuracy", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) location.verticalAccuracyMeters else null)
-//        }
-//        userLocation.put("timestamp", location.time)
-//        val arguments: MutableMap<String, Any> = HashMap(1)
-//        arguments.put("userLocation", userLocation)
-//        methodChannel.invokeMethod("map#onUserLocationUpdated", arguments)
+    private fun addVectorSource(sourceName: String, properties: HashMap<String, *>) {
+
+        mapView.getMapboxMap().getStyle()?.let { style ->
+            val sourceJson = JSONObject(properties).toString()
+
+            val sourceValue = Value.fromJson(sourceJson)
+
+            style.addStyleSource(sourceName, sourceValue.value!!)
+        }
     }
 
-    private fun addGeoJsonSource(sourceName: String?, geojson: String?) {
-//        val featureCollection = FeatureCollection.fromJson(geojson!!)
-//        val geoJsonSource = GeoJsonSource(sourceName, featureCollection)
-//        style!!.addSource(geoJsonSource)
+    private fun updateLayer(layerName: String,
+                            properties: HashMap<String, Any?>) {
+        mapView.getMapboxMap().getStyle()?.let { style ->
+            val json = JSONObject(properties).toString()
+            val layerValue = Value.fromJson(json)
+            style.setStyleLayerProperties(layerName, layerValue.value!!)
+        }
     }
 
-//    private fun addVectorSource(sourceName: String?, properties: HashMap<String, *>) {
-//        Log.d("MapBoxController_$id", "addVectorSource, idx: 4")
-//        if (properties.containsKey("url")) {
-//            val vectorSource = VectorSource(sourceName, properties["url"] as String?)
-//            style!!.addSource(vectorSource)
-//            val a: Number = 1
-//        } else {
-//            var tileVersion = properties["tileVersion"] as String?
-//            if (tileVersion == null) {
-//                tileVersion = "2.2.0"
-//            }
-//            val tilesObjectArray: Array<Any> = (properties["tiles"] as ArrayList<*>).toTypedArray()
-//            val tileUrls = Arrays.copyOf<String, Any>(tilesObjectArray, tilesObjectArray.size, Array<String>::class.java)
-//            var i = 0
-//            while (i < tileUrls.size) {
-//                try {
-//                    tileUrls[i] = URLDecoder.decode(tileUrls[i], "UTF-8")
-//                    val tileSet = TileSet(
-//                            tileVersion,
-//                            *tileUrls
-//                    )
-//                    val minZoom = properties["minZoom"] as Number?
-//                    if (minZoom != null) {
-//                        tileSet.minZoom = minZoom.toFloat()
-//                    }
-//                    val maxZoom = properties["maxZoom"] as Number?
-//                    if (maxZoom != null) {
-//                        tileSet.maxZoom = maxZoom.toFloat()
-//                    }
-//                    val vectorSource = VectorSource(sourceName, tileSet)
-//                    style!!.addSource(vectorSource)
-//                } catch (e: UnsupportedEncodingException) {
-//                }
-//                i = i + 1
-//            }
-//            val a: Number = 1
-//        }
-//    }
-//
-//    private fun addSymbolLayer(layerName: String?,
-//                               sourceName: String?,
-//                               sourceLayer: String?,
-//                               properties: Array<PropertyValue<*>>?) {
-//        val symbolLayer = SymbolLayer(layerName, sourceName)
-//        if (sourceLayer != null) {
-//            symbolLayer.sourceLayer = sourceLayer
-//        }
-//        symbolLayer.setProperties(*properties!!)
-//        style!!.addLayer(symbolLayer)
-//    }
-//
-//    private fun updateSymbolLayer(layerName: String?,
-//                                  properties: Array<PropertyValue<*>>?) {
-//        val lineLayer = style!!.getLayerAs<LineLayer>(layerName!!)
-//        lineLayer!!.setProperties(*properties!!)
-//    }
-//
-//    private fun addLineLayer(layerName: String?,
-//                             sourceName: String?,
-//                             sourceLayer: String?,
-//                             properties: Array<PropertyValue<*>>?) {
-//        val lineLayer = LineLayer(layerName, sourceName)
-//        if (sourceLayer != null) {
-//            lineLayer.sourceLayer = sourceLayer
-//        }
-//        lineLayer.setProperties(*properties!!)
-//        style!!.addLayer(lineLayer)
-//    }
-//
-//    private fun updateLineLayer(layerName: String?,
-//                                properties: Array<PropertyValue<*>>?) {
-//        val lineLayer = style!!.getLayerAs<LineLayer>(layerName!!)
-//        lineLayer!!.setProperties(*properties!!)
-//    }
+    private fun addSymbolLayer(layerName: String,
+                               sourceName: String,
+                               sourceLayer: String?,
+                               properties: HashMap<String, Any?>) {
+        mapView.getMapboxMap().getStyle()?.let { style ->
+            val map: HashMap<String, Any> = hashMapOf(
+                    "id" to layerName,
+                    "type" to "symbol",
+                    "source" to sourceName,
+                    "source-layer" to (sourceLayer ?: "")
+            )
 
-//    private fun enableSymbolManager(style: Style) {
-//        if (symbolManager == null) {
-//            symbolManager = SymbolManager(mapView, mapboxMap!!, style)
-//            symbolManager!!.iconAllowOverlap = true
-//            symbolManager!!.iconIgnorePlacement = true
-//            symbolManager!!.textAllowOverlap = true
-//            symbolManager!!.textIgnorePlacement = true
-//            //symbolManager!!.addClickListener(OnSymbolClickListener { annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*> -> this@MapboxMapController.onAnnotationClick(annotation) })
-//        }
-//    }
+            val json = JSONObject(map + properties).toString()
+            val layerValue = Value.fromJson(json)
+            style.addStyleLayer(layerValue.value!!, null)
+        }
+    }
 
-//    private fun enableLineManager(style: Style) {
-//        if (lineManager == null) {
-//            lineManager = LineManager(mapView, mapboxMap!!, style)
-//            //lineManager!!.addClickListener(OnLineClickListener { annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*> -> this@MapboxMapController.onAnnotationClick(annotation) })
-//        }
-//    }
-//
-//    private fun enableCircleManager(style: Style) {
-//        if (circleManager == null) {
-//            circleManager = CircleManager(mapView, mapboxMap!!, style)
-//            // circleManager!!.addClickListener(OnCircleClickListener { annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*> -> this@MapboxMapController.onAnnotationClick(annotation) })
-//        }
-//    }
-//
-//    private fun enableFillManager(style: Style) {
-//        if (fillManager == null) {
-//            fillManager = FillManager(mapView, mapboxMap!!, style)
-//            // fillManager!!.addClickListener(OnFillClickListener { annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*> -> this@MapboxMapController.onAnnotationClick(annotation) })
-//        }
-//    }
+    private fun addLineLayer(layerName: String,
+                             sourceName: String,
+                             sourceLayer: String?,
+                             properties: HashMap<String, Any?>) {
+
+        mapView.getMapboxMap().getStyle()?.let { style ->
+            val map: HashMap<String, Any> = hashMapOf(
+                    "id" to layerName,
+                    "type" to "line",
+                    "source" to sourceName,
+                    "source-layer" to (sourceLayer ?: "")
+            )
+
+            val json = JSONObject(map + properties).toString()
+            val layerValue = Value.fromJson(json)
+            style.addStyleLayer(layerValue.value!!, null)
+        }
+    }
+
+    private fun addCircleLayer(layerName: String,
+                               sourceName: String,
+                               sourceLayer: String?,
+                               properties: HashMap<String, Any?>) {
+
+        mapView.getMapboxMap().getStyle()?.let { style ->
+            val map: HashMap<String, Any> = hashMapOf(
+                    "id" to layerName,
+                    "type" to "circle",
+                    "source" to sourceName,
+                    "source-layer" to (sourceLayer ?: "")
+            )
+
+            val json = JSONObject(map + properties).toString()
+            val layerValue = Value.fromJson(json)
+            style.addStyleLayer(layerValue.value!!, null)
+        }
+    }
+
+
+    private fun addImage(name: String, bytes: ByteArray, length: Int, sdf: Boolean = false) {
+        mapView.getMapboxMap().getStyle()?.let { style ->
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, length)
+            style.addImage(name, bitmap, sdf)
+        }
+    }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "map#waitForMap" -> {
-                if (mapboxMap != null) {
-                    result.success(null)
-                    return
-                }
-//                mapReadyResult = result
+                result.success(null)
             }
-//            "map#update" -> {
-//                Convert.interpretMapboxMapOptions(call.argument("options"), this)
-//                result.success(Convert.toJson(cameraPosition))
-//            }
+            "map#update" -> {
+                Convert.interpretMapboxMapOptions(call.argument<HashMap<String, Any?>>("options")!!, this)
+                result.success(Convert.toJson(mapView.getMapboxMap().cameraState))
+            }
 //            "map#updateMyLocationTrackingMode" -> {
 //                val myLocationTrackingMode = call.argument<Int>("mode")!!
 //                setMyLocationTrackingMode(myLocationTrackingMode)
@@ -446,51 +259,26 @@ internal class MapboxMapController(
 //                reply.put("metersperpixel", retVal)
 //                result.success(reply)
 //            }
-//            "camera#move" -> {
-//                val cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density)
-//                if (cameraUpdate != null) {
-//                    // camera transformation not handled yet
-//                    mapboxMap!!.moveCamera(cameraUpdate, object : OnCameraMoveFinishedListener() {
-//                        override fun onFinish() {
-//                            super.onFinish()
-//                            result.success(true)
-//                        }
-//
-//                        override fun onCancel() {
-//                            super.onCancel()
-//                            result.success(false)
-//                        }
-//                    })
-//
-//                    // moveCamera(cameraUpdate);
-//                } else {
-//                    result.success(false)
-//                }
-//            }
-//            "camera#animate" -> {
-//                val cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density)
-//                val duration = call.argument<Int>("duration")
-//                val onCameraMoveFinishedListener: OnCameraMoveFinishedListener = object : OnCameraMoveFinishedListener() {
-//                    override fun onFinish() {
-//                        super.onFinish()
-//                        result.success(true)
-//                    }
-//
-//                    override fun onCancel() {
-//                        super.onCancel()
-//                        result.success(false)
-//                    }
-//                }
-//                if (cameraUpdate != null && duration != null) {
-//                    // camera transformation not handled yet
-//                    mapboxMap!!.animateCamera(cameraUpdate, duration, onCameraMoveFinishedListener)
-//                } else if (cameraUpdate != null) {
-//                    // camera transformation not handled yet
-//                    mapboxMap!!.animateCamera(cameraUpdate, onCameraMoveFinishedListener)
-//                } else {
-//                    result.success(false)
-//                }
-//            }
+            "camera#move" -> {
+                val cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapView.getMapboxMap())
+
+                cameraUpdate?.let {
+                    mapView.getMapboxMap().setCamera(cameraUpdate)
+                    result.success(true)
+                } ?: result.success(false)
+            }
+            "camera#animate" -> {
+                val cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapView.getMapboxMap())
+                val durationTime = call.argument<Long?>("duration") ?: 300
+                cameraUpdate?.let {
+                    mapView.getMapboxMap().flyTo(cameraUpdate, MapAnimationOptions.mapAnimationOptions {
+                        duration(durationTime)
+                    })
+                    result.success(true)
+                } ?: result.success(false)
+
+
+            }
 //            "map#queryRenderedFeatures" -> {
 //                val reply: MutableMap<String, Any> = HashMap()
 //                val features: List<Feature>
@@ -822,88 +610,92 @@ internal class MapboxMapController(
 //                fill.update(fillManager)
 //                result.success(null)
 //            }
-//            "vectorSource#add" -> {
-//                val sourceId = call.argument<String>("sourceId")
-//                val properties = call.argument<HashMap<String, *>>("properties")!!
-//                addVectorSource(sourceId, properties)
-//                result.success(null)
-//            }
-//            "geoJsonSource#add" -> {
-//                val sourceId = call.argument<String>("sourceId")
-//                val geoJson = call.argument<String>("geojson")
-//                addGeoJsonSource(sourceId, geoJson)
-//                result.success(null)
-//            }
-//            "symbolLayer#add" -> {
-//                val sourceId = call.argument<String>("source")
-//                val layerId = call.argument<String>("id")
-//                val sourceLayerId = call.argument<String>("source-layer")
-//                val tappable = call.argument<Boolean>("tappable")
-//                val properties = Convert.interpretSymbolLayerProperties(call.argument("properties"))
-//                addSymbolLayer(layerId, sourceId, sourceLayerId, properties)
-//                if (tappable!!) {
-//                    tappableLayers.add(layerId)
-//                } else {
-//                    tappableLayers.remove(layerId)
-//                }
-//                result.success(null)
-//            }
-//            "symbolLayer#update" -> {
-//                val layerId = call.argument<String>("id")
-//                val properties = Convert.interpretSymbolLayerProperties(call.argument("properties"))
-//                updateSymbolLayer(layerId, properties)
-//                result.success(null)
-//            }
-//            "lineLayer#add" -> {
-//                val sourceId = call.argument<String>("source")
-//                val layerId = call.argument<String>("id")
-//                val sourceLayerId = call.argument<String>("source-layer")
-//                val tappable = call.argument<Boolean>("tappable")
-//                val properties = Convert.interpretLineLayerProperties(call.argument("properties"))
-//                addLineLayer(layerId, sourceId, sourceLayerId, properties)
-//                if (tappable!!) {
-//                    tappableLayers.add(layerId)
-//                } else {
-//                    tappableLayers.remove(layerId)
-//                }
-//                result.success(null)
-//            }
-//            "lineLayer#update" -> {
-//                val layerId = call.argument<String>("id")
-//                val properties = Convert.interpretLineLayerProperties(call.argument("properties"))
-//                updateLineLayer(layerId, properties)
-//                result.success(null)
-//            }
-//            "locationComponent#getLastLocation" -> {
-//                Log.e(TAG, "location component: getLastLocation")
-//                if (myLocationEnabled && locationComponent != null && locationEngine != null) {
-//                    val reply: MutableMap<String, Any> = HashMap()
-//                    locationEngine!!.getLastLocation(object : LocationEngineCallback<LocationEngineResult> {
-//                        override fun onSuccess(locationEngineResult: LocationEngineResult) {
-//                            val lastLocation = locationEngineResult.lastLocation
-//                            if (lastLocation != null) {
-//                                reply.put("latitude", lastLocation.latitude)
-//                                reply.put("longitude", lastLocation.longitude)
-//                                reply.put("altitude", lastLocation.altitude)
-//                                result.success(reply)
-//                            } else {
-//                                result.error("", "", null) // ???
-//                            }
-//                        }
-//
-//                        override fun onFailure(exception: Exception) {
-//                            result.error("", "", null) // ???
-//                        }
-//                    })
-//                }
-//            }
-//            "style#addImage" -> {
-//                if (style == null) {
-//                    result.error("STYLE IS NULL", "The style is null. Has onStyleLoaded() already been invoked?", null)
-//                }
-//                style!!.addImage(call.argument("name")!!, BitmapFactory.decodeByteArray(call.argument("bytes"), 0, call.argument("length")!!), call.argument("sdf")!!)
-//                result.success(null)
-//            }
+            "style#vectorSourceAdd" -> {
+                val sourceId = call.argument<String>("sourceId")!!
+                val properties = call.argument<HashMap<String, Any?>>("properties")!!
+                addVectorSource(sourceId, properties)
+                result.success(null)
+            }
+            "style#geoJsonSourceAdd" -> {
+                val sourceId = call.argument<String>("sourceId")!!
+                val geoJson = call.argument<String>("geojson")!!
+                addGeoJsonSource(sourceId, geoJson)
+                result.success(null)
+            }
+            "style#symbolLayerAdd" -> {
+                val sourceId = call.argument<String>("source")!!
+                val layerId = call.argument<String>("id")!!
+                val sourceLayerId = call.argument<String>("source-layer")
+                val tappable = call.argument<Boolean>("tappable")!!
+                val properties = call.argument<HashMap<String, Any?>>("properties")!!
+                addSymbolLayer(layerId, sourceId, sourceLayerId, properties)
+                if (tappable) {
+                    tappableLayers.add(layerId)
+                } else {
+                    tappableLayers.remove(layerId)
+                }
+                result.success(null)
+            }
+            "style#symbolLayerUpdate" -> {
+                val layerId = call.argument<String>("id")!!
+                val properties = call.argument<HashMap<String, Any?>>("properties")!!
+                updateLayer(layerId, properties)
+                result.success(null)
+            }
+            "style#lineLayerAdd" -> {
+                val sourceId = call.argument<String>("source")!!
+                val layerId = call.argument<String>("id")!!
+                val sourceLayerId = call.argument<String?>("source-layer")
+                val tappable = call.argument<Boolean>("tappable")!!
+                val properties = call.argument<HashMap<String, Any?>>("properties")!!
+                //val properties = Convert.interpretLineLayerProperties(call.argument("properties"))
+
+                addLineLayer(layerId, sourceId, sourceLayerId, properties)
+                if (tappable!!) {
+                    tappableLayers.add(layerId)
+                } else {
+                    tappableLayers.remove(layerId)
+                }
+                result.success(null)
+            }
+            "style#lineLayerUpdate" -> {
+                val layerId = call.argument<String>("id")!!
+                val properties = call.argument<HashMap<String, Any?>>("properties")!!
+                updateLayer(layerId, properties)
+                result.success(null)
+            }
+            "style#circleLayerAdd" -> {
+                val sourceId = call.argument<String>("source")!!
+                val layerId = call.argument<String>("id")!!
+                val sourceLayerId = call.argument<String?>("source-layer")
+                val tappable = call.argument<Boolean>("tappable")!!
+                val properties = call.argument<HashMap<String, Any?>>("properties")!!
+                //val properties = Convert.interpretLineLayerProperties(call.argument("properties"))
+
+                addCircleLayer(layerId, sourceId, sourceLayerId, properties)
+                if (tappable!!) {
+                    tappableLayers.add(layerId)
+                } else {
+                    tappableLayers.remove(layerId)
+                }
+                result.success(null)
+            }
+            "style#circleLayerUpdate" -> {
+                val layerId = call.argument<String>("id")!!
+                val properties = call.argument<HashMap<String, Any?>>("properties")!!
+                updateLayer(layerId, properties)
+                result.success(null)
+            }
+            "style#addImage" -> {
+                val name: String = call.argument<String>("name")!!
+                val length: Int = call.argument<Int>("length")!!
+                val bytes: ByteArray = call.argument<ByteArray>("bytes")!!
+                val sdf: Boolean = call.argument<Boolean?>("sdf") ?: false
+
+                addImage(name, bytes, length, sdf)
+
+                result.success(null)
+            }
 //            "style#addImageSource" -> {
 //                if (style == null) {
 //                    result.error("STYLE IS NULL", "The style is null. Has onStyleLoaded() already been invoked?", null)
@@ -944,127 +736,6 @@ internal class MapboxMapController(
         }
     }
 
-//    fun onCameraMoveStarted(reason: Int) {
-//        val arguments: MutableMap<String, Any> = HashMap(2)
-//        val isGesture = reason == OnCameraMoveStartedListener.REASON_API_GESTURE
-//        arguments.put("isGesture", isGesture)
-//        methodChannel.invokeMethod("camera#onMoveStarted", arguments)
-//    }
-//
-//    fun onCameraMove() {
-//        if (!trackCameraPosition) {
-//            return
-//        }
-//        val arguments: MutableMap<String, Any?> = HashMap(2)
-//        arguments.put("position", Convert.toJson(mapboxMap!!.cameraPosition))
-//        methodChannel.invokeMethod("camera#onMove", arguments)
-//    }
-//
-//    fun onCameraIdle() {
-//        val arguments: MutableMap<String, Any?> = HashMap(2)
-//        if (trackCameraPosition) {
-//            arguments.put("position", Convert.toJson(mapboxMap!!.cameraPosition))
-//        }
-//        methodChannel.invokeMethod("camera#onIdle", arguments)
-//    }
-//
-//    fun onCameraTrackingChanged(currentMode: Int) {
-//        val arguments: MutableMap<String, Any> = HashMap(2)
-//        arguments.put("mode", currentMode)
-//        methodChannel.invokeMethod("map#onCameraTrackingChanged", arguments)
-//    }
-//
-//    override fun onCameraTrackingDismissed() {
-//        myLocationTrackingMode = 0
-//        methodChannel.invokeMethod("map#onCameraTrackingDismissed", HashMap<Any, Any>())
-//    }
-//
-//    override fun onAnnotationClick(annotation: com.mapbox.mapboxsdk.plugins.annotation.Annotation<*>): Boolean {
-//        if (annotation is Symbol) {
-//            val symbolController = symbols[annotation.getId().toString()]
-//            if (symbolController != null) {
-//                return symbolController.onTap()
-//            }
-//        }
-//        if (annotation is Line) {
-//            val lineController = lines[annotation.getId().toString()]
-//            if (lineController != null) {
-//                return lineController.onTap()
-//            }
-//        }
-//        if (annotation is Circle) {
-//            val circleController = circles[annotation.getId().toString()]
-//            if (circleController != null) {
-//                return circleController.onTap()
-//            }
-//        }
-//        if (annotation is Fill) {
-//            val fillController = fills[annotation.getId().toString()]
-//            if (fillController != null) {
-//                return fillController.onTap()
-//            }
-//        }
-//        return false
-//    }
-//
-//    override fun onSymbolTapped(symbol: Symbol) {
-//        val arguments: MutableMap<String, Any> = HashMap(2)
-//        arguments.put("symbol", symbol.id.toString())
-//        methodChannel.invokeMethod("symbol#onTap", arguments)
-//    }
-//
-//    override fun onLineTapped(line: Line) {
-//        val arguments: MutableMap<String, Any> = HashMap(2)
-//        arguments.put("line", line.id.toString())
-//        methodChannel.invokeMethod("line#onTap", arguments)
-//    }
-//
-//    override fun onCircleTapped(circle: Circle) {
-//        val arguments: MutableMap<String, Any> = HashMap(2)
-//        arguments.put("circle", circle.id.toString())
-//        methodChannel.invokeMethod("circle#onTap", arguments)
-//    }
-//
-//    override fun onFillTapped(fill: Fill) {
-//        val arguments: MutableMap<String, Any> = HashMap(2)
-//        arguments.put("fill", fill.id.toString())
-//        methodChannel.invokeMethod("fill#onTap", arguments)
-//    }
-//
-//    override fun onMapClick(point: LatLng): Boolean {
-//        val pointf = mapboxMap!!.projection.toScreenLocation(point)
-//        for (tappableLayer in tappableLayers) {
-//            val features = mapboxMap!!.queryRenderedFeatures(pointf, tappableLayer)
-//            for (feature in features) {
-//                val fArguments: MutableMap<String, Any?> = HashMap(5)
-//                fArguments.put("layerId", tappableLayer)
-//                fArguments.put("x", pointf.x)
-//                fArguments.put("y", pointf.y)
-//                fArguments.put("lng", (feature.geometry() as Point?)!!.longitude())
-//                fArguments.put("lat", (feature.geometry() as Point?)!!.latitude())
-//                methodChannel.invokeMethod("map#onLayerTap", fArguments)
-//                return true
-//            }
-//        }
-//        val arguments: MutableMap<String, Any> = HashMap(5)
-//        arguments.put("x", pointf.x)
-//        arguments.put("y", pointf.y)
-//        arguments.put("lng", point.longitude)
-//        arguments.put("lat", point.latitude)
-//        methodChannel.invokeMethod("map#onMapClick", arguments)
-//        return true
-//    }
-//
-//    override fun onMapLongClick(point: LatLng): Boolean {
-//        val pointf = mapboxMap!!.projection.toScreenLocation(point)
-//        val arguments: MutableMap<String, Any> = HashMap(5)
-//        arguments.put("x", pointf.x)
-//        arguments.put("y", pointf.y)
-//        arguments.put("lng", point.longitude)
-//        arguments.put("lat", point.latitude)
-//        methodChannel.invokeMethod("map#onMapLongClick", arguments)
-//        return true
-//    }
 
     override fun dispose() {
         if (disposed) {
@@ -1072,39 +743,21 @@ internal class MapboxMapController(
         }
         disposed = true
         methodChannel.setMethodCallHandler(null)
-//        destroyMapViewIfNecessary()
-//        val lifecycle = lifecycleProvider.getLifecycle()
-//        lifecycle?.removeObserver(this)
+        destroyMapViewIfNecessary()
     }
 
-//    private fun destroyMapViewIfNecessary() {
-//        if (mapView == null) {
-//            return
-//        }
-//        if (locationComponent != null) {
-//            locationComponent!!.isLocationComponentEnabled = false
-//        }
-//        if (symbolManager != null) {
-//            symbolManager!!.onDestroy()
-//        }
-//        if (lineManager != null) {
-//            lineManager!!.onDestroy()
-//        }
-//        if (circleManager != null) {
-//            circleManager!!.onDestroy()
-//        }
-//        if (fillManager != null) {
-//            fillManager!!.onDestroy()
-//        }
-//        stopListeningForLocationUpdates()
-//        mapView.onDestroy()
-//    }
+    private fun destroyMapViewIfNecessary() {
+        if (mapView == null) {
+            return
+        }
+        stopListeningForLocationUpdates()
+        mapView.onDestroy()
+    }
 
     override fun onCreate(owner: LifecycleOwner) {
         if (disposed) {
             return
         }
-//        mapView.onCreate(null)
     }
 
     override fun onStart(owner: LifecycleOwner) {
@@ -1118,7 +771,6 @@ internal class MapboxMapController(
         if (disposed) {
             return
         }
-//        mapView.onResume()
         if (myLocationEnabled) {
             startListeningForLocationUpdates()
         }
@@ -1128,7 +780,6 @@ internal class MapboxMapController(
         if (disposed) {
             return
         }
-//        mapView.onResume()
     }
 
     override fun onStop(owner: LifecycleOwner) {
@@ -1148,39 +799,54 @@ internal class MapboxMapController(
 
     // MapboxMapOptionsSink methods
     override fun setCameraTargetBounds(bounds: LatLngBounds?) {
+
 //        mapboxMap!!.setLatLngBoundsForCameraTarget(bounds)
     }
 
-    override fun setCompassEnabled(compassEnabled: Boolean) {
-//        mapboxMap!!.uiSettings.isCompassEnabled = compassEnabled
+    override fun setCompassEnabled(enabled: Boolean) {
+        mapView.compass.visibility = enabled
+    }
+
+    override fun setScaleBarEnabled(enabled: Boolean) {
+        mapView.compass.visibility = enabled
     }
 
     override fun setTrackCameraPosition(trackCameraPosition: Boolean) {
         this.trackCameraPosition = trackCameraPosition
     }
 
-    override fun setRotateGesturesEnabled(rotateGesturesEnabled: Boolean) {
-//        mapboxMap!!.uiSettings.isRotateGesturesEnabled = rotateGesturesEnabled
+    override fun setRotateGesturesEnabled(enabled: Boolean) {
+        mapView.gestures.rotateEnabled = enabled
     }
 
-    override fun setScrollGesturesEnabled(scrollGesturesEnabled: Boolean) {
-//        mapboxMap!!.uiSettings.isScrollGesturesEnabled = scrollGesturesEnabled
+    override fun setScrollGesturesEnabled(enabled: Boolean) {
+        mapView.gestures.scrollEnabled = enabled
     }
 
-    override fun setTiltGesturesEnabled(tiltGesturesEnabled: Boolean) {
-//        mapboxMap!!.uiSettings.isTiltGesturesEnabled = tiltGesturesEnabled
+    override fun setPitchGesturesEnabled(enabled: Boolean) {
+        mapView.gestures.pitchEnabled = enabled
     }
 
-    override fun setMinMaxZoomPreference(min: Float?, max: Float?) {
-//        mapboxMap!!.setMinZoomPreference((min ?: MapboxConstants.MINIMUM_ZOOM).toDouble())
-//        mapboxMap!!.setMaxZoomPreference((max ?: MapboxConstants.MAXIMUM_ZOOM).toDouble())
+    override fun setMinMaxZoomPreference(min: Double, max: Double) {
+        val builder = CameraBoundsOptions.Builder()
+            builder.minZoom(min)
+        builder.maxZoom(min)
+        mapView.getMapboxMap().setBounds(builder.build())
     }
 
-    override fun setZoomGesturesEnabled(zoomGesturesEnabled: Boolean) {
-//        mapboxMap!!.uiSettings.isZoomGesturesEnabled = zoomGesturesEnabled
+
+    override fun setMinMaxPitchPreference(min: Double, max: Double) {
+        val builder = CameraBoundsOptions.Builder()
+        builder.minPitch(min)
+        builder.maxPitch(min)
+        mapView.getMapboxMap().setBounds(builder.build())
     }
 
-    override fun setMyLocationEnabled(myLocationEnabled: Boolean) {
+    override fun setZoomGesturesEnabled(enabled: Boolean) {
+        mapView.gestures.pinchToZoomEnabled = enabled
+    }
+
+    override fun setMyLocationEnabled(enabled: Boolean) {
 //        if (this.myLocationEnabled == myLocationEnabled) {
 //            return
 //        }
@@ -1210,32 +876,152 @@ internal class MapboxMapController(
 //        }
     }
 
-    override fun setLogoViewMargins(x: Int, y: Int) {
-//        mapboxMap!!.uiSettings.setLogoMargins(x, 0, 0, y)
+    override fun setLogoPosition(gravity: Int) {
+        mapView.logo.apply {
+            position = when (position) {
+                0 -> Gravity.TOP or Gravity.START
+                1 -> Gravity.TOP or Gravity.END
+                2 -> Gravity.BOTTOM or Gravity.START
+                3 -> Gravity.BOTTOM or Gravity.END
+                else -> Gravity.TOP or Gravity.END
+            }
+        }
+
     }
 
-    override fun setCompassGravity(gravity: Int) {
-//        when (gravity) {
-//            0 -> mapboxMap!!.uiSettings.compassGravity = Gravity.TOP or Gravity.START
-//            1 -> mapboxMap!!.uiSettings.compassGravity = Gravity.TOP or Gravity.END
-//            2 -> mapboxMap!!.uiSettings.compassGravity = Gravity.BOTTOM or Gravity.START
-//            3 -> mapboxMap!!.uiSettings.compassGravity = Gravity.BOTTOM or Gravity.END
-//            else -> mapboxMap!!.uiSettings.compassGravity = Gravity.TOP or Gravity.END
-//        }
+    override fun setLogoViewMargins(x: Int, y: Int) {
+        mapView.logo.apply {
+            when (position) {
+                Gravity.TOP or Gravity.START -> {
+                    marginLeft = x.toFloat()
+                    marginTop = y.toFloat()
+                    marginRight = 0f
+                    marginBottom = 0f
+                }
+                Gravity.TOP or Gravity.END -> {
+                    marginLeft = 0f
+                    marginTop = y.toFloat()
+                    marginRight = x.toFloat()
+                    marginBottom = 0f
+                }
+                Gravity.BOTTOM or Gravity.START -> {
+                    marginLeft = x.toFloat()
+                    marginTop = 0f
+                    marginRight = 0f
+                    marginBottom = y.toFloat()
+                }
+                Gravity.BOTTOM or Gravity.END -> {
+                    marginLeft = 0f
+                    marginTop = 0f
+                    marginRight = x.toFloat()
+                    marginBottom = y.toFloat()
+                }
+                else -> {
+                    marginLeft = 0f
+                    marginTop = y.toFloat()
+                    marginRight = x.toFloat()
+                    marginBottom = 0f
+                }
+            }
+        }
+    }
+
+    override fun setCompassViewPosition(gravity: Int) {
+        mapView.compass.apply {
+            position = when (position) {
+                0 -> Gravity.TOP or Gravity.START
+                1 -> Gravity.TOP or Gravity.END
+                2 -> Gravity.BOTTOM or Gravity.START
+                3 -> Gravity.BOTTOM or Gravity.END
+                else -> Gravity.TOP or Gravity.END
+            }
+        }
     }
 
     override fun setCompassViewMargins(x: Int, y: Int) {
-//        when (mapboxMap!!.uiSettings.compassGravity) {
-//            Gravity.TOP or Gravity.START -> mapboxMap!!.uiSettings.setCompassMargins(x, y, 0, 0)
-//            Gravity.TOP or Gravity.END -> mapboxMap!!.uiSettings.setCompassMargins(0, y, x, 0)
-//            Gravity.BOTTOM or Gravity.START -> mapboxMap!!.uiSettings.setCompassMargins(x, 0, 0, y)
-//            Gravity.BOTTOM or Gravity.END -> mapboxMap!!.uiSettings.setCompassMargins(0, 0, x, y)
-//            else -> mapboxMap!!.uiSettings.setCompassMargins(0, y, x, 0)
-//        }
+        mapView.compass.apply {
+            when (position) {
+                Gravity.TOP or Gravity.START -> {
+                    marginLeft = x.toFloat()
+                    marginTop = y.toFloat()
+                    marginRight = 0f
+                    marginBottom = 0f
+                }
+                Gravity.TOP or Gravity.END -> {
+                    marginLeft = 0f
+                    marginTop = y.toFloat()
+                    marginRight = x.toFloat()
+                    marginBottom = 0f
+                }
+                Gravity.BOTTOM or Gravity.START -> {
+                    marginLeft = x.toFloat()
+                    marginTop = 0f
+                    marginRight = 0f
+                    marginBottom = y.toFloat()
+                }
+                Gravity.BOTTOM or Gravity.END -> {
+                    marginLeft = 0f
+                    marginTop = 0f
+                    marginRight = x.toFloat()
+                    marginBottom = y.toFloat()
+                }
+                else -> {
+                    marginLeft = 0f
+                    marginTop = y.toFloat()
+                    marginRight = x.toFloat()
+                    marginBottom = 0f
+                }
+            }
+        }
+    }
+
+    override fun setAttributionButtonPosition(gravity: Int) {
+        mapView.attribution.apply {
+            position = when (position) {
+                0 -> Gravity.TOP or Gravity.START
+                1 -> Gravity.TOP or Gravity.END
+                2 -> Gravity.BOTTOM or Gravity.START
+                3 -> Gravity.BOTTOM or Gravity.END
+                else -> Gravity.TOP or Gravity.END
+            }
+        }
     }
 
     override fun setAttributionButtonMargins(x: Int, y: Int) {
-//        mapboxMap!!.uiSettings.setAttributionMargins(0, 0, x, y)
+        mapView.attribution.apply {
+            when (position) {
+                Gravity.TOP or Gravity.START -> {
+                    marginLeft = x.toFloat()
+                    marginTop = y.toFloat()
+                    marginRight = 0f
+                    marginBottom = 0f
+                }
+                Gravity.TOP or Gravity.END -> {
+                    marginLeft = 0f
+                    marginTop = y.toFloat()
+                    marginRight = x.toFloat()
+                    marginBottom = 0f
+                }
+                Gravity.BOTTOM or Gravity.START -> {
+                    marginLeft = x.toFloat()
+                    marginTop = 0f
+                    marginRight = 0f
+                    marginBottom = y.toFloat()
+                }
+                Gravity.BOTTOM or Gravity.END -> {
+                    marginLeft = 0f
+                    marginTop = 0f
+                    marginRight = x.toFloat()
+                    marginBottom = y.toFloat()
+                }
+                else -> {
+                    marginLeft = 0f
+                    marginTop = y.toFloat()
+                    marginRight = x.toFloat()
+                    marginBottom = 0f
+                }
+            }
+        }
     }
 
     private fun updateMyLocationEnabled() {
@@ -1290,96 +1076,87 @@ internal class MapboxMapController(
     }
 
     private fun checkSelfPermission(permission: String?): Int {
-        kotlin.requireNotNull(permission) { "permission is null" }
+        requireNotNull(permission) { "permission is null" }
         return context.checkPermission(
                 permission, Process.myPid(), Process.myUid())
     }
 
-    /**
-     * Tries to find highest scale image for display type
-     * @param imageId
-     * @param density
-     * @return
-     */
-//    private fun getScaledImage(imageId: String, density: Float): Bitmap? {
-//        var assetFileDescriptor: AssetFileDescriptor
-//
-//        // Split image path into parts.
-//        val imagePathList = Arrays.asList<String>(*imageId.split("/").toTypedArray())
-//        val assetPathList: MutableList<String> = ArrayList()
-//
-//        // "On devices with a device pixel ratio of 1.8, the asset .../2.0x/my_icon.png would be chosen.
-//        // For a device pixel ratio of 2.7, the asset .../3.0x/my_icon.png would be chosen."
-//        // Source: https://flutter.dev/docs/development/ui/assets-and-images#resolution-aware
-//        for (i in Math.ceil(density.toDouble()).toInt() downTo 1) {
-//            var assetPath: String
-//            assetPath = if (i == 1) {
-//                // If density is 1.0x then simply take the default asset path
-//                MapboxMapsPlugin.Companion.flutterAssets!!.getAssetFilePathByName(imageId)
-//            } else {
-//                // Build a resolution aware asset path as follows:
-//                // <directory asset>/<ratio>/<image name>
-//                // where ratio is 1.0x, 2.0x or 3.0x.
-//                val stringBuilder = StringBuilder()
-//                for (j in 0 until imagePathList.size - 1) {
-//                    stringBuilder.append(imagePathList[j])
-//                    stringBuilder.append("/")
-//                }
-//                stringBuilder.append((i as Float).toString() + "x")
-//                stringBuilder.append("/")
-//                stringBuilder.append(imagePathList[imagePathList.size - 1])
-//                MapboxMapsPlugin.Companion.flutterAssets!!.getAssetFilePathByName(stringBuilder.toString())
-//            }
-//            // Build up a list of resolution aware asset paths.
-//            assetPathList.add(assetPath)
-//        }
-//
-//        // Iterate over asset paths and get the highest scaled asset (as a bitmap).
-//        var bitmap: Bitmap? = null
-//        for (assetPath in assetPathList) {
-//            try {
-//                // Read path (throws exception if doesn't exist).
-//                assetFileDescriptor = mapView.context.assets.openFd(assetPath)
-//                val assetStream: InputStream = assetFileDescriptor.createInputStream()
-//                bitmap = BitmapFactory.decodeStream(assetStream)
-//                assetFileDescriptor.close() // Close for memory
-//                break // If exists, break
-//            } catch (e: IOException) {
-//                // Skip
-//            }
-//        }
-//        return bitmap
-//    }
+    override fun onStyleLoaded(eventData: StyleLoadedEventData) {
+        methodChannel.invokeMethod("map#onStyleLoaded", null)
+    }
 
-    /**
-     * Simple Listener to listen for the status of camera movements.
-     */
-//    open inner class OnCameraMoveFinishedListener : CancelableCallback {
-//        override fun onFinish() {}
-//        override fun onCancel() {}
-//    }
+    override fun onMapClick(point: Point): Boolean {
+        mapView.getMapboxMap().apply {
+            val pixel = pixelForCoordinate(point);
+            methodChannel.invokeMethod("map#onMapClick", mapOf(
+                    "x" to pixel.x / density,
+                    "y" to pixel.y / density,
+                    "lng" to point.longitude(),
+                    "lat" to point.latitude()
+
+            ))
+
+            if (tappableLayers.isNotEmpty()) {
+                val qOptions = RenderedQueryOptions(tappableLayers.distinct(), Value.nullValue())
+
+                val boxModifier = 24 * density
+                val screenBox = ScreenBox(
+                        ScreenCoordinate(pixel.x - boxModifier, pixel.y - boxModifier),
+                        ScreenCoordinate(pixel.x + boxModifier, pixel.y + boxModifier)
+                )
+                queryRenderedFeatures(screenBox, qOptions, QueryFeaturesCallback { result ->
+                    if (!result.isError && result.isValue && result.value!!.isNotEmpty()) {
+                        result.value!!.first { qFeature ->
+                            (qFeature.feature.geometry() as Point?)?.let { point ->
+                                val data = qFeature.feature.properties()
+                                val dataMap: Map<String, Any> = Gson().fromJson(
+                                        data.toString(),
+                                        object : TypeToken<HashMap<String?, Any?>?>() {}.type
+                                )
+
+                                methodChannel.invokeMethod("map#onMapClick", mapOf(
+                                        "source" to qFeature.source,
+                                        "sourceLayer" to qFeature.sourceLayer as Any,
+                                        "x" to pixel.x / density,
+                                        "y" to pixel.y / density,
+                                        "lng" to point.longitude(),
+                                        "lat" to point.latitude(),
+                                        "data" to dataMap
+
+                                ))
+                            }
+                            return@QueryFeaturesCallback
+                        }
+
+                    }
+                })
+            }
+
+            methodChannel.invokeMethod("map#onLayerTap", null)
+            return true
+
+        }
+    }
+
 
     companion object {
         private const val TAG = "MapboxMapController"
     }
 
     init {
+        density = context.resources.displayMetrics.density;
+
         val mapOptions = MapOptions.Builder()
+            .pixelRatio(density);
 
         val resourceOptions =  ResourceOptions.Builder()
-
-
-        val initialCameraOptions = CameraOptions.Builder()
-                .center(Point.fromLngLat(-122.4194, 37.7749))
-                .zoom(9.0)
-
-                .bearing(120.0)
-        val cameraBoundsOptions = CameraBoundsOptions.Builder()
-
-
         (params["accessToken"] as String?)?.let { accessToken ->
             resourceOptions.accessToken(accessToken)
         }
+
+        val initialCameraOptions = CameraOptions.Builder()
+        val cameraBoundsOptions = CameraBoundsOptions.Builder()
+
 
 
         (params["initialCameraPosition"] as? Map<String, Any>)?.let { position ->
@@ -1417,21 +1194,22 @@ internal class MapboxMapController(
         }
 
         val mapInitOptions = MapInitOptions(
-            context,
-            resourceOptions.build(),
-            mapOptions.build(),
-            listOf(),
-            initialCameraOptions.build(),
-            true
+                context,
+                resourceOptions.build(),
+                mapOptions.build(),
+                cameraOptions = initialCameraOptions.build(),
+                textureView = false
         )
 
-        mapView = MapView(context,  mapInitOptions)
+        mapView = MapView(context, mapInitOptions)
 
+        // set all options
         (params["options"] as Map<String, Any>?)?.let { options ->
-            (options["styleString"] as String?)?.let { styleString ->
-                mapView.getMapboxMap().loadStyleUri(styleString)
-            }
+            Convert.interpretMapboxMapOptions(options, this)
         }
+
+        mapView.getMapboxMap().addOnStyleLoadedListener(this)
+        mapView.gestures.addOnMapClickListener(this)
 
         methodChannel = MethodChannel(messenger, "plugins.flutter.io/mapbox_maps_$id")
         methodChannel.setMethodCallHandler(this)

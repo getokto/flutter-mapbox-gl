@@ -10,21 +10,25 @@ import com.google.android.gms.maps.model.LatLngBounds
  */
 internal interface MapboxMapOptionsSink {
     fun setCameraTargetBounds(bounds: LatLngBounds?) //todo: dddd replace with CameraPosition.Builder target
-    fun setCompassEnabled(compassEnabled: Boolean)
+    fun setCompassEnabled(enabled: Boolean)
+    fun setScaleBarEnabled(enabled: Boolean)
 
     // TODO: styleString is not actually a part of options. consider moving
     fun setStyleString(styleString: String?)
-    fun setMinMaxZoomPreference(min: Float?, max: Float?)
-    fun setRotateGesturesEnabled(rotateGesturesEnabled: Boolean)
-    fun setScrollGesturesEnabled(scrollGesturesEnabled: Boolean)
-    fun setTiltGesturesEnabled(tiltGesturesEnabled: Boolean)
+    fun setMinMaxZoomPreference(min: Double, max: Double)
+    fun setMinMaxPitchPreference(min: Double, max: Double)
+    fun setRotateGesturesEnabled(enabled: Boolean)
+    fun setScrollGesturesEnabled(enabled: Boolean)
+    fun setPitchGesturesEnabled(enabled: Boolean)
     fun setTrackCameraPosition(trackCameraPosition: Boolean)
-    fun setZoomGesturesEnabled(zoomGesturesEnabled: Boolean)
-    fun setMyLocationEnabled(myLocationEnabled: Boolean)
+    fun setZoomGesturesEnabled(enabled: Boolean)
+    fun setMyLocationEnabled(enabled: Boolean)
     fun setMyLocationTrackingMode(myLocationTrackingMode: Int)
     fun setMyLocationRenderMode(myLocationRenderMode: Int)
+    fun setLogoPosition(gravity: Int)
     fun setLogoViewMargins(x: Int, y: Int)
-    fun setCompassGravity(gravity: Int)
+    fun setCompassViewPosition(gravity: Int)
     fun setCompassViewMargins(x: Int, y: Int)
+    fun setAttributionButtonPosition(gravity: Int)
     fun setAttributionButtonMargins(x: Int, y: Int)
 }
