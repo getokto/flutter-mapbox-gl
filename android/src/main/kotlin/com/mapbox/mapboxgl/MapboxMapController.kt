@@ -30,6 +30,7 @@ import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.logo.logo
+import com.mapbox.maps.plugin.scalebar.scalebar
 import io.flutter.Log
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
@@ -61,7 +62,7 @@ internal class MapboxMapController(
     private var myLocationRenderMode = 0
     private var disposed = false
     private var eventChannel: EventChannel? = null
-    private val density: Float
+    private val density: Float = context.resources.displayMetrics.density
     private val context: Context = context
 
     private val tappableLayers = HashSet<String>()
@@ -799,11 +800,11 @@ internal class MapboxMapController(
     // MapboxMapOptionsSink methods
 
     override fun setCompassEnabled(enabled: Boolean) {
-        mapView.compass.visibility = enabled
+        mapView.compass.enabled = enabled
     }
 
     override fun setScaleBarEnabled(enabled: Boolean) {
-        mapView.compass.visibility = enabled
+        mapView.scalebar.enabled = enabled
     }
 
     override fun setTrackCameraPosition(trackCameraPosition: Boolean) {
@@ -1109,7 +1110,7 @@ internal class MapboxMapController(
                                         object : TypeToken<HashMap<String?, Any?>?>() {}.type
                                 )
 
-                                methodChannel.invokeMethod("map#onMapClick", mapOf(
+                                methodChannel.invokeMethod("map#onLayerTap", mapOf(
                                         "source" to qFeature.source,
                                         "sourceLayer" to qFeature.sourceLayer as Any,
                                         "x" to pixel.x / density,
@@ -1126,8 +1127,6 @@ internal class MapboxMapController(
                     }
                 })
             }
-
-            methodChannel.invokeMethod("map#onLayerTap", null)
             return true
 
         }
@@ -1139,8 +1138,6 @@ internal class MapboxMapController(
     }
 
     init {
-        density = context.resources.displayMetrics.density;
-
         val mapOptions = MapOptions.Builder()
                 .pixelRatio(density);
 
