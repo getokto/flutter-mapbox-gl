@@ -3,13 +3,10 @@
 // found in the LICENSE file.
 package com.mapbox.mapboxgl
 
-import com.google.android.gms.maps.model.LatLngBounds
-
 /**
  * Receiver of MapboxMap configuration options.
  */
 internal interface MapboxMapOptionsSink {
-    fun setCameraTargetBounds(bounds: LatLngBounds?) //todo: dddd replace with CameraPosition.Builder target
     fun setCompassEnabled(enabled: Boolean)
     fun setScaleBarEnabled(enabled: Boolean)
 

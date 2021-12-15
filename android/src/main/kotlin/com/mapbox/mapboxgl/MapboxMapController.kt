@@ -14,14 +14,12 @@ import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import app.loup.streams_channel.StreamsChannel
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.maps.*
 import com.mapbox.maps.extension.observable.eventdata.StyleLoadedEventData
-import com.mapbox.maps.extension.style.expressions.dsl.generated.switchCase
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
@@ -799,10 +797,6 @@ internal class MapboxMapController(
     }
 
     // MapboxMapOptionsSink methods
-    override fun setCameraTargetBounds(bounds: LatLngBounds?) {
-
-//        mapboxMap!!.setLatLngBoundsForCameraTarget(bounds)
-    }
 
     override fun setCompassEnabled(enabled: Boolean) {
         mapView.compass.visibility = enabled

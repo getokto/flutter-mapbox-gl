@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 package com.mapbox.mapboxgl
 
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraOptions
@@ -107,24 +105,24 @@ internal object Convert {
         return listOf(latLng.latitude(), latLng.longitude())
     }
 
-    private fun toLatLng(o: Any?): LatLng {
-        val data = toList(o)
-        return LatLng(toDouble(data!![0]!!), toDouble(data[1]!!))
-    }
-
-    private fun toLatLngBounds(o: Any?): LatLngBounds? {
-        if (o == null) {
-            return null
-        }
-        val data = toList(o)
-        val boundsArray = arrayOf(toLatLng(data!![0]), toLatLng(data[1]))
-        val bounds = listOf(*boundsArray)
-        val builder = LatLngBounds.Builder()
-        for(bound in bounds) {
-            builder.include(bound)
-        }
-        return builder.build()
-    }
+//    private fun toLatLng(o: Any?): LatLng {
+//        val data = toList(o)
+//        return LatLng(toDouble(data!![0]!!), toDouble(data[1]!!))
+//    }
+//
+//    private fun toLatLngBounds(o: Any?): LatLngBounds? {
+//        if (o == null) {
+//            return null
+//        }
+//        val data = toList(o)
+//        val boundsArray = arrayOf(toLatLng(data!![0]), toLatLng(data[1]))
+//        val bounds = listOf(*boundsArray)
+//        val builder = LatLngBounds.Builder()
+//        for(bound in bounds) {
+//            builder.include(bound)
+//        }
+//        return builder.build()
+//    }
 
     private fun toList(o: Any?): List<*>? {
         return o as List<*>?
@@ -153,11 +151,11 @@ internal object Convert {
 
     fun interpretMapboxMapOptions(o: Map<String, Any?>, sink: MapboxMapOptionsSink) {
         toMap(o)?.let { data ->
-            val cameraTargetBounds = data["cameraTargetBounds"]
-            if (cameraTargetBounds != null) {
-                val targetData = toList(cameraTargetBounds)
-                sink.setCameraTargetBounds(toLatLngBounds(targetData!![0]))
-            }
+//            val cameraTargetBounds = data["cameraTargetBounds"]
+//            if (cameraTargetBounds != null) {
+//                val targetData = toList(cameraTargetBounds)
+//                sink.setCameraTargetBounds(toLatLngBounds(targetData!![0]))
+//            }
             val compassEnabled = data["compassEnabled"]
             if (compassEnabled != null) {
                 sink.setCompassEnabled(toBoolean(compassEnabled))
