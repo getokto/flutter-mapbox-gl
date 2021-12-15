@@ -18,7 +18,7 @@ import io.flutter.plugin.common.MethodChannel
  * the map. A Texture drawn using MapboxMap bitmap snapshots can then be shown instead of the
  * overlay.
  */
-class MapboxMapsPlugin : FlutterPlugin, ActivityAware {
+class MapboxMapsPlugin : FlutterPlugin, ActivityAware, LifecycleProvider {
     private var lifecycle: Lifecycle? = null
 
     // New Plugin APIs
@@ -29,11 +29,7 @@ class MapboxMapsPlugin : FlutterPlugin, ActivityAware {
         binding
                 .platformViewRegistry
                 .registerViewFactory(
-                        "plugins.flutter.io/mapbox_gl", MapboxMapFactory(binding.binaryMessenger, object : LifecycleProvider {
-                    override fun getLifecycle(): Lifecycle? {
-                        return lifecycle
-                    }
-                }))
+                        "plugins.flutter.io/mapbox_gl", MapboxMapFactory(binding.binaryMessenger, this))
     }
 
     override fun onDetachedFromEngine(binding: FlutterPluginBinding) {
@@ -56,13 +52,18 @@ class MapboxMapsPlugin : FlutterPlugin, ActivityAware {
         lifecycle = null
     }
 
-    interface LifecycleProvider {
-        fun getLifecycle(): Lifecycle?
-    }
 
     companion object {
         private const val VIEW_TYPE = "plugins.flutter.io/mapbox_gl"
         var flutterAssets: FlutterAssets? = null
 
     }
+
+    override fun getLifecycle(): Lifecycle? {
+        return lifecycle
+    }
+}
+
+interface LifecycleProvider {
+    fun getLifecycle(): Lifecycle?
 }

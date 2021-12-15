@@ -22,14 +22,17 @@ import com.mapbox.maps.*
 import com.mapbox.maps.extension.observable.eventdata.StyleLoadedEventData
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.plugin.Plugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
 import com.mapbox.maps.plugin.attribution.attribution
+import com.mapbox.maps.plugin.compass.CompassPlugin
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.logo.logo
+import com.mapbox.maps.plugin.scalebar.ScaleBarPlugin
 import com.mapbox.maps.plugin.scalebar.scalebar
 import io.flutter.Log
 import io.flutter.plugin.common.BinaryMessenger
@@ -50,11 +53,13 @@ internal class MapboxMapController(
         id: Int,
         context: Context,
         messenger: BinaryMessenger?,
-        params: Map<String, Any>) : DefaultLifecycleObserver, OnMapClickListener, OnStyleLoadedListener, MapboxMapOptionsSink, MethodCallHandler, PlatformView {
+        params: Map<String, Any>,
+        lifecycleProvider: LifecycleProvider
+) : DefaultLifecycleObserver, OnMapClickListener, OnStyleLoadedListener, MapboxMapOptionsSink, MethodCallHandler, PlatformView {
     private val id: Int = id
     private var methodChannel: MethodChannel
     private var streamChannel: StreamsChannel
-
+    private var lifecycleProvider:  LifecycleProvider = lifecycleProvider;
     private var mapView: MapView
     private var trackCameraPosition = false
     private var myLocationEnabled = false
@@ -66,6 +71,12 @@ internal class MapboxMapController(
     private val context: Context = context
 
     private val tappableLayers = HashSet<String>()
+
+
+    fun init() {
+        lifecycleProvider.getLifecycle()!!.addObserver(this)
+    }
+
     override fun getView(): View {
         return mapView
     }
@@ -744,6 +755,7 @@ internal class MapboxMapController(
         disposed = true
         methodChannel.setMethodCallHandler(null)
         destroyMapViewIfNecessary()
+        lifecycleProvider.getLifecycle()?.removeObserver(this)
     }
 
     private fun destroyMapViewIfNecessary() {
@@ -794,7 +806,8 @@ internal class MapboxMapController(
         if (disposed) {
             return
         }
-//        destroyMapViewIfNecessary()
+        destroyMapViewIfNecessary()
+        mapView.onDestroy()
     }
 
     // MapboxMapOptionsSink methods
@@ -1189,6 +1202,10 @@ internal class MapboxMapController(
                 context,
                 resourceOptions.build(),
                 mapOptions.build(),
+                // remove the lifecycle plugin so we can handle lifecycle our self
+                plugins = MapInitOptions.defaultPluginList.filter {
+                    item -> !arrayOf(Plugin.MAPBOX_LIFECYCLE_PLUGIN_ID).contains(item.id)
+                },
                 cameraOptions = initialCameraOptions.build(),
                 textureView = false
         )
