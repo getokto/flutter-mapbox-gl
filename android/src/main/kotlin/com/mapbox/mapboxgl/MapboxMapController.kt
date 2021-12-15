@@ -8,21 +8,20 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.location.Location
 import android.os.Process
 import android.view.Gravity
 import android.view.View
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.google.android.gms.maps.CameraUpdate
+import app.loup.streams_channel.StreamsChannel
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.maps.*
 import com.mapbox.maps.extension.observable.eventdata.StyleLoadedEventData
+import com.mapbox.maps.extension.style.expressions.dsl.generated.switchCase
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
@@ -35,13 +34,14 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.logo.logo
 import io.flutter.Log
 import io.flutter.plugin.common.BinaryMessenger
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.platform.PlatformView
 import org.json.JSONObject
 import java.util.*
-import kotlin.collections.HashMap
+
 
 /**
  * Controller of a single MapboxMaps MapView instance.
@@ -54,14 +54,15 @@ internal class MapboxMapController(
         params: Map<String, Any>) : DefaultLifecycleObserver, OnMapClickListener, OnStyleLoadedListener, MapboxMapOptionsSink, MethodCallHandler, PlatformView {
     private val id: Int = id
     private var methodChannel: MethodChannel
+    private var streamChannel: StreamsChannel
 
-    private  var mapView: MapView
+    private var mapView: MapView
     private var trackCameraPosition = false
     private var myLocationEnabled = false
     private var myLocationTrackingMode = 0
     private var myLocationRenderMode = 0
     private var disposed = false
-
+    private var eventChannel: EventChannel? = null
     private val density: Float
     private val context: Context = context
 
@@ -81,7 +82,7 @@ internal class MapboxMapController(
                 // setStyle(Style.Builder().fromJson(styleString), onStyleLoadedCallback)
             } else if (styleString.startsWith("/")) {
                 // Absolute path
-                    loadStyleUri("file://$styleString")
+                loadStyleUri("file://$styleString")
             } else if (!styleString.startsWith("http://") &&
                     !styleString.startsWith("https://") &&
                     !styleString.startsWith("mapbox://")) {
@@ -829,7 +830,7 @@ internal class MapboxMapController(
 
     override fun setMinMaxZoomPreference(min: Double, max: Double) {
         val builder = CameraBoundsOptions.Builder()
-            builder.minZoom(min)
+        builder.minZoom(min)
         builder.maxZoom(min)
         mapView.getMapboxMap().setBounds(builder.build())
     }
@@ -1147,9 +1148,9 @@ internal class MapboxMapController(
         density = context.resources.displayMetrics.density;
 
         val mapOptions = MapOptions.Builder()
-            .pixelRatio(density);
+                .pixelRatio(density);
 
-        val resourceOptions =  ResourceOptions.Builder()
+        val resourceOptions = ResourceOptions.Builder()
         (params["accessToken"] as String?)?.let { accessToken ->
             resourceOptions.accessToken(accessToken)
         }
@@ -1212,7 +1213,37 @@ internal class MapboxMapController(
         mapView.gestures.addOnMapClickListener(this)
 
         methodChannel = MethodChannel(messenger, "plugins.flutter.io/mapbox_maps_$id")
+
+        streamChannel = StreamsChannel(messenger, "plugins.flutter.io/mapbox_maps_event_stream")
+
+        val streamHandlerFactory = object : StreamsChannel.StreamHandlerFactory {
+            override fun create(arguments: Any?): EventChannel.StreamHandler? {
+                (arguments as Map<String, Any>?)?.let { args ->
+                    val source = args["source"] as String
+                    (args["handler"] as String?)?.let { handlerName ->
+                        when (handlerName) {
+                            "dataChanged" -> {
+                                return FeaturesStreamHandler(
+                                        mapView,
+                                        source,
+                                        args["source-layers"] as List<String>?,
+                                        args["filter"]
+                                )
+                            }
+                            else -> {
+                                return null
+                            }
+                        }
+                    }
+                }
+                return null
+            }
+        }
+
+        streamChannel.setStreamHandlerFactory(streamHandlerFactory)
+
+
         methodChannel.setMethodCallHandler(this)
     }
-}
 
+}

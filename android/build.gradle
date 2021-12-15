@@ -61,15 +61,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     dependencies {
+        compileOnly rootProject.findProject(":streams_channel3")
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
         implementation 'com.mapbox.maps:android:10.1.0'
         implementation "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
-//        implementation 'com.mapbox.plugin:maps-gestures:0.1.0'
-//        implementation 'com.mapbox.plugin:maps-annotation:0.1.0'
-//        implementation 'com.mapbox.plugin:maps-compass:0.1.0'
     }
-}
-
-dependencies {
-    implementation 'com.google.android.gms:play-services-maps:18.0.0'
 }

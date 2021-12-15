@@ -64,7 +64,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
 
 
 
-    await _mapController.addVectorSource('test', VectorSource(
+    await _mapController.addVectorSource('auto-points', VectorSource(
       minZoom: 6,
       maxZoom: 14,
       tiles: [
@@ -75,7 +75,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
     await _mapController.addCircleLayer(CircleLayer(
       id: 'agp-circle',
       sourceLayer: "agp",
-      source: 'test',
+      source: 'auto-points',
         options: CircleLayerOptions(
           circleColor: ConstantLayerProperty(Colors.red),
           circleRadius: ConstantLayerProperty(5),
