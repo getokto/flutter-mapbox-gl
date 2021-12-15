@@ -28,6 +28,7 @@ import 'scrolling_map.dart';
 import 'vector_source.dart';
 
 final List<ExamplePage> _allPages = <ExamplePage>[
+  VectorSourceMvtExamplePage(),
   MapUiPage(),
   FullMapPage(),
   AnimateCameraPage(),
@@ -45,7 +46,6 @@ final List<ExamplePage> _allPages = <ExamplePage>[
   BatchAddPage(),
   VectorSourceExamplePage(),
   GeoJsonExamplePage(),
-  VectorSourceMvtExamplePage(),
 ];
 
 class MapsDemo extends StatelessWidget {

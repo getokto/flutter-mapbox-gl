@@ -64,7 +64,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
 
 
 
-    await _mapController.addVectorSource('test', VectorSource(
+    await _mapController.addVectorSource('auto-points', VectorSource(
       minZoom: 6,
       maxZoom: 14,
       tiles: [
@@ -75,7 +75,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
     await _mapController.addCircleLayer(CircleLayer(
       id: 'agp-circle',
       sourceLayer: "agp",
-      source: 'test',
+      source: 'auto-points',
         options: CircleLayerOptions(
           circleColor: ConstantLayerProperty(Colors.red),
           circleRadius: ConstantLayerProperty(5),
@@ -94,9 +94,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
     // ), tappable: true);
 
 
-    _mapController.featureDataStream('test',
-      sourceLayers: ["agp"],
-    ).listen(_handleDataStream);
+    _mapController.streamSourceFeaturesQuery('auto-points', sourceLayers: ['agp']).listen(_handleDataStream);
   }
 
   void _handleDataStream (event) {
