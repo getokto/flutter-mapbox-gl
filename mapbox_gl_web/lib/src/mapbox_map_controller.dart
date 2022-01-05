@@ -628,9 +628,14 @@ class MapboxMapController extends MapboxGlPlatform
 
   @override
   void setMinMaxZoomPreference(num? min, num? max) {
-    // FIX: why is called indefinitely? (map_ui page)
     _map.setMinZoom(min);
     _map.setMaxZoom(max);
+  }
+
+  @override
+  void setMinMaxPitchPreference(num? min, num? max) {
+    _map.setMinPitch(min);
+    _map.setMaxPitch(max);
   }
 
   @override

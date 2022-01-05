@@ -172,8 +172,16 @@ internal object Convert {
             if (minMaxZoomPreference != null) {
                 val zoomPreferenceData = toList(minMaxZoomPreference)!!
                 sink.setMinMaxZoomPreference( //
-                        zoomPreferenceData[0] as Double,
-                        zoomPreferenceData[1] as Double
+                    zoomPreferenceData[0] as Double?,
+                    zoomPreferenceData[1] as Double?
+                )
+            }
+            val minMaxPitchPreference = data["minMaxPitchPreference"]
+            if (minMaxPitchPreference != null) {
+                val pitchPreferenceData = toList(minMaxPitchPreference)!!
+                sink.setMinMaxPitchPreference( //
+                    pitchPreferenceData[0] as Double?,
+                    pitchPreferenceData[1] as Double?
                 )
             }
             val rotateGesturesEnabled = data["rotateGesturesEnabled"]

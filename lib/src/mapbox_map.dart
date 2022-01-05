@@ -426,6 +426,7 @@ class _MapboxMapOptions {
     addIfNonNull('cameraTargetBounds', cameraTargetBounds?.toJson());
     addIfNonNull('styleString', styleString);
     addIfNonNull('minMaxZoomPreference', minMaxZoomPreference?.toJson());
+    addIfNonNull('minMaxPitchPreference', minMaxPitchPreference?.toJson());
     addIfNonNull('rotateGesturesEnabled', rotateGesturesEnabled);
     addIfNonNull('scrollGesturesEnabled', scrollGesturesEnabled);
     addIfNonNull('tiltGesturesEnabled', pitchGesturesEnabled);

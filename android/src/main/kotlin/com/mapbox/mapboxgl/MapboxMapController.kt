@@ -9,13 +9,15 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.os.Process
-import android.view.Gravity
-import android.view.View
+import android.view.*
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import app.loup.streams_channel.StreamsChannel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.mapbox.android.gestures.MoveGestureDetector
+import com.mapbox.android.gestures.RotateGestureDetector
+import com.mapbox.android.gestures.StandardScaleGestureDetector
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.maps.*
@@ -26,13 +28,10 @@ import com.mapbox.maps.plugin.Plugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
 import com.mapbox.maps.plugin.attribution.attribution
-import com.mapbox.maps.plugin.compass.CompassPlugin
 import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
-import com.mapbox.maps.plugin.gestures.OnMapClickListener
-import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.gestures.*
 import com.mapbox.maps.plugin.logo.logo
-import com.mapbox.maps.plugin.scalebar.ScaleBarPlugin
 import com.mapbox.maps.plugin.scalebar.scalebar
 import io.flutter.Log
 import io.flutter.plugin.common.BinaryMessenger
@@ -41,6 +40,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.platform.PlatformView
+import io.flutter.view.TextureRegistry
 import org.json.JSONObject
 import java.util.*
 
@@ -50,11 +50,11 @@ import java.util.*
  */
 @SuppressLint("MissingPermission")
 internal class MapboxMapController(
-        id: Int,
-        context: Context,
-        messenger: BinaryMessenger?,
-        params: Map<String, Any>,
-        lifecycleProvider: LifecycleProvider
+    id: Int,
+    context: Context,
+    messenger: BinaryMessenger?,
+    params: Map<String, Any>,
+    lifecycleProvider: LifecycleProvider
 ) : DefaultLifecycleObserver, OnMapClickListener, OnStyleLoadedListener, MapboxMapOptionsSink, MethodCallHandler, PlatformView {
     private val id: Int = id
     private var methodChannel: MethodChannel
@@ -836,18 +836,17 @@ internal class MapboxMapController(
         mapView.gestures.pitchEnabled = enabled
     }
 
-    override fun setMinMaxZoomPreference(min: Double, max: Double) {
+    override fun setMinMaxZoomPreference(min: Double?, max: Double?) {
         val builder = CameraBoundsOptions.Builder()
-        builder.minZoom(min)
-        builder.maxZoom(min)
+        min.let { builder.minZoom(it) }
+        max.let { builder.maxZoom(it) }
         mapView.getMapboxMap().setBounds(builder.build())
     }
 
-
-    override fun setMinMaxPitchPreference(min: Double, max: Double) {
+    override fun setMinMaxPitchPreference(min: Double?, max: Double?) {
         val builder = CameraBoundsOptions.Builder()
-        builder.minPitch(min)
-        builder.maxPitch(min)
+        min.let { builder.minPitch(it) }
+        max.let { builder.maxPitch(it) }
         mapView.getMapboxMap().setBounds(builder.build())
     }
 

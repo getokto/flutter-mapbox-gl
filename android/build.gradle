@@ -64,7 +64,11 @@ android {
         compileOnly rootProject.findProject(":streams_channel3")
         compileOnly rootProject.findProject(":flutter_plugin_android_lifecycle")
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-        implementation 'com.mapbox.maps:android:10.2.0-rc.1'
         implementation "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+        implementation "com.mapbox.maps:android:10.2.0"
     }
+}
+
+dependencies {
+    implementation project(path: ':streams_channel3')
 }

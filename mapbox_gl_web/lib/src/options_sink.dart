@@ -11,6 +11,8 @@ abstract class MapboxMapOptionsSink {
 
   void setMinMaxZoomPreference(num? min, num? max);
 
+  void setMinMaxPitchPreference(num? min, num? max);
+
   void setRotateGesturesEnabled(bool rotateGesturesEnabled);
 
   void setScrollGesturesEnabled(bool scrollGesturesEnabled);

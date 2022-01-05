@@ -12,8 +12,8 @@ internal interface MapboxMapOptionsSink {
 
     // TODO: styleString is not actually a part of options. consider moving
     fun setStyleString(styleString: String?)
-    fun setMinMaxZoomPreference(min: Double, max: Double)
-    fun setMinMaxPitchPreference(min: Double, max: Double)
+    fun setMinMaxZoomPreference(min: Double?, max: Double?)
+    fun setMinMaxPitchPreference(min: Double?, max: Double?)
     fun setRotateGesturesEnabled(enabled: Boolean)
     fun setScrollGesturesEnabled(enabled: Boolean)
     fun setPitchGesturesEnabled(enabled: Boolean)

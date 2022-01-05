@@ -26,6 +26,10 @@ class Convert {
       sink.setMinMaxZoomPreference(options['minMaxZoomPreference'][0],
           options['minMaxZoomPreference'][1]);
     }
+    if (options.containsKey('minMaxPitchPreference')) {
+      sink.setMinMaxPitchPreference(options['minMaxPitchPreference'][0],
+          options['minMaxPitchPreference'][1]);
+    }
     if (options.containsKey('rotateGesturesEnabled')) {
       sink.setRotateGesturesEnabled(options['rotateGesturesEnabled']);
     }

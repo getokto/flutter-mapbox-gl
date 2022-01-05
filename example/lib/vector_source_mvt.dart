@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -39,7 +38,7 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
 
   Future<void> _onStyleLoadedCallback() async {
 
-    await addImageFromAsset("assett-image", "assets/symbols/custom-icon.png");
+    // await addImageFromAsset("assett-image", "assets/symbols/custom-icon.png");
 
       await _mapController.addVectorSource('mapillary', VectorSource(
         minZoom: 6,
@@ -83,15 +82,15 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
     ), tappable: true);
 
 
-    // await _mapController.addSymbolLayer(SymbolLayer(
-    //   id: 'agp',
-    //   sourceLayer: "agp",
-    //   source: 'test',
-    //     options: SymbolLayerOptions(
-    //       iconImage: ImageLayerProperty('rocket-15'),
-    //       iconColor: ConstantLayerProperty(Colors.blue),
-    //     ),
-    // ), tappable: true);
+    await _mapController.addSymbolLayer(SymbolLayer(
+      id: 'agp',
+      sourceLayer: "agp",
+      source: 'test',
+        options: SymbolLayerOptions(
+          iconImage: ImageLayerProperty('rocket-15'),
+          iconColor: ConstantLayerProperty(Colors.blue),
+        ),
+    ), tappable: true);
 
 
     _mapController.streamSourceFeaturesQuery('auto-points', sourceLayers: ['agp']).listen(_handleDataStream);
@@ -134,12 +133,12 @@ class VectorSourceExampleState extends State<VectorSourceExample> {
               onLayerTap: (sourceId, sourceLayerId, point, coordinates, data) {
                 int a = 1;
               },
-              minMaxZoomPreference: MinMaxPreference(14, 20),
+              minMaxZoomPreference: MinMaxPreference(10, 20),
               minMaxPitchPreference: MinMaxPreference(0, 45),
               onStyleLoadedCallback: _onStyleLoadedCallback,
               initialCameraPosition: const CameraPosition(
                 target: LatLng(41.878781, -87.622088),
-                pitch: 0,
+                pitch: 30,
                 zoom: 14,
               ),
             ),
