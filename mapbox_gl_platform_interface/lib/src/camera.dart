@@ -55,6 +55,18 @@ class CameraPosition {
         'zoom': zoom,
       };
 
+  CameraPosition copyWith({
+    double? bearing,
+    LatLng? target,
+    double? pitch,
+    double? zoom,
+  }) => CameraPosition(
+    bearing: bearing ?? this.bearing,
+    target: target ?? this.target,
+    pitch: pitch ?? this.pitch,
+    zoom: zoom ?? this.zoom,
+  );
+
   @visibleForTesting
   static CameraPosition? fromMap(dynamic json) {
     if (json == null) {

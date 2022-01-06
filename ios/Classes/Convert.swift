@@ -81,13 +81,19 @@ class Convert {
                         pitch: pitch
                     )
                 }
-                /*
             case "newLatLng":
                 guard let coordinate = cameraUpdate[1] as? [Double] else { return nil }
-                let camera = mapView.camera
-                camera.cameraViewContainerView.center = CLLocationCoordinate2D.fromArray(coordinate)
-                camera.centerCoordinate = CLLocationCoordinate2D.fromArray(coordinate)
-                return camera
+                if let camera = mapView.camera {
+                    return  CameraOptions(
+                        center: CLLocationCoordinate2D.fromArray(coordinate),
+                        padding: nil,
+                        anchor: nil,
+                        zoom: nil,
+                        bearing: nil,
+                        pitch: nil
+                    )
+                }
+                /*
             case "newLatLngBounds":
                 guard let bounds = cameraUpdate[1] as? [[Double]] else { return nil }
                 guard let paddingLeft = cameraUpdate[2] as? CGFloat else { return nil }

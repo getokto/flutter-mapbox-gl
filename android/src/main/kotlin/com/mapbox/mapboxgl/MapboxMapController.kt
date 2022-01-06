@@ -3,34 +3,38 @@
 // found in the LICENSE file.
 package com.mapbox.mapboxgl
 
-import android.Manifest
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.os.Process
+import android.location.Location
+import android.os.Build
 import android.view.*
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import app.loup.streams_channel.StreamsChannel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.android.gestures.RotateGestureDetector
-import com.mapbox.android.gestures.StandardScaleGestureDetector
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.maps.*
+import com.mapbox.maps.extension.observable.eventdata.MapIdleEventData
 import com.mapbox.maps.extension.observable.eventdata.StyleLoadedEventData
+import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.Plugin
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
+import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.animation.flyTo
 import com.mapbox.maps.plugin.attribution.attribution
 import com.mapbox.maps.plugin.compass.compass
+import com.mapbox.maps.plugin.delegates.listeners.OnMapIdleListener
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.plugin.gestures.*
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.logo.logo
 import com.mapbox.maps.plugin.scalebar.scalebar
 import io.flutter.Log
@@ -40,7 +44,6 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.platform.PlatformView
-import io.flutter.view.TextureRegistry
 import org.json.JSONObject
 import java.util.*
 
@@ -55,16 +58,13 @@ internal class MapboxMapController(
     messenger: BinaryMessenger?,
     params: Map<String, Any>,
     lifecycleProvider: LifecycleProvider
-) : DefaultLifecycleObserver, OnMapClickListener, OnStyleLoadedListener, MapboxMapOptionsSink, MethodCallHandler, PlatformView {
+) : DefaultLifecycleObserver, OnMapClickListener, MapboxMapOptionsSink, MethodCallHandler, PlatformView {
     private val id: Int = id
     private var methodChannel: MethodChannel
     private var streamChannel: StreamsChannel
     private var lifecycleProvider:  LifecycleProvider = lifecycleProvider;
     private var mapView: MapView
     private var trackCameraPosition = false
-    private var myLocationEnabled = false
-    private var myLocationTrackingMode = 0
-    private var myLocationRenderMode = 0
     private var disposed = false
     private var eventChannel: EventChannel? = null
     private val density: Float = context.resources.displayMetrics.density
@@ -762,7 +762,6 @@ internal class MapboxMapController(
         if (mapView == null) {
             return
         }
-        stopListeningForLocationUpdates()
         mapView.onDestroy()
     }
 
@@ -782,9 +781,6 @@ internal class MapboxMapController(
     override fun onResume(owner: LifecycleOwner) {
         if (disposed) {
             return
-        }
-        if (myLocationEnabled) {
-            startListeningForLocationUpdates()
         }
     }
 
@@ -811,7 +807,6 @@ internal class MapboxMapController(
     }
 
     // MapboxMapOptionsSink methods
-
     override fun setCompassEnabled(enabled: Boolean) {
         mapView.compass.enabled = enabled
     }
@@ -855,34 +850,14 @@ internal class MapboxMapController(
     }
 
     override fun setMyLocationEnabled(enabled: Boolean) {
-//        if (this.myLocationEnabled == myLocationEnabled) {
-//            return
-//        }
-//        this.myLocationEnabled = myLocationEnabled
-//        if (mapboxMap != null) {
-//            updateMyLocationEnabled()
-//        }
+        mapView.location.updateSettings {
+            this.enabled = enabled
+        }
     }
 
-    override fun setMyLocationTrackingMode(myLocationTrackingMode: Int) {
-//        if (this.myLocationTrackingMode == myLocationTrackingMode) {
-//            return
-//        }
-//        this.myLocationTrackingMode = myLocationTrackingMode
-//        if (mapboxMap != null && locationComponent != null) {
-//            updateMyLocationTrackingMode()
-//        }
-    }
+    override fun setMyLocationTrackingMode(myLocationTrackingMode: Int) { }
 
-    override fun setMyLocationRenderMode(myLocationRenderMode: Int) {
-//        if (this.myLocationRenderMode == myLocationRenderMode) {
-//            return
-//        }
-//        this.myLocationRenderMode = myLocationRenderMode
-//        if (mapboxMap != null && locationComponent != null) {
-//            updateMyLocationRenderMode()
-//        }
-    }
+    override fun setMyLocationRenderMode(myLocationRenderMode: Int) { }
 
     override fun setLogoPosition(gravity: Int) {
         mapView.logo.apply {
@@ -1032,66 +1007,87 @@ internal class MapboxMapController(
         }
     }
 
-    private fun updateMyLocationEnabled() {
-//        if (locationComponent == null && myLocationEnabled) {
-//            enableLocationComponent(mapboxMap!!.style!!)
-//        }
-//        if (myLocationEnabled) {
-//            startListeningForLocationUpdates()
-//        } else {
-//            stopListeningForLocationUpdates()
-//        }
-//        locationComponent!!.isLocationComponentEnabled = myLocationEnabled
+
+    private fun initLocationComponent() {
+
+        mapView.location.updateSettings {
+            this.locationPuck = LocationPuck2D(
+                topImage = AppCompatResources.getDrawable(
+                    context,
+                    com.mapbox.maps.plugin.locationcomponent.R.drawable.mapbox_user_icon
+                ),
+                bearingImage = AppCompatResources.getDrawable(
+                    context,
+                    com.mapbox.maps.plugin.locationcomponent.R.drawable.mapbox_user_bearing_icon
+                ),
+                shadowImage = AppCompatResources.getDrawable(
+                    context,
+                    com.mapbox.maps.plugin.locationcomponent.R.drawable.mapbox_user_stroke_icon
+                ),
+                scaleExpression = interpolate {
+                    linear()
+                    zoom()
+                    stop {
+                        literal(0.0)
+                        literal(0.6)
+                    }
+                    stop {
+                        literal(20.0)
+                        literal(1.0)
+                    }
+                }.toJson()
+
+            )
+        }
+
+        mapView.location.setLocationProvider(CustomLocationProviderImpl(context))
+
+
+        mapView.location.getLocationProvider()?.registerLocationConsumer(locationConsumer = object:CustomLocationConsumer {
+            override fun onExtendedLocationUpdated(
+                location: Location,
+                options: (ValueAnimator.() -> Unit)?
+            ) {
+                if (!mapView.location.enabled) { return }
+
+                location.longitude;
+                val userLocation: MutableMap<String, Any?> = HashMap(6)
+                userLocation["position"] = doubleArrayOf(location.latitude, location.longitude)
+                userLocation["speed"] = location.speed
+                userLocation["altitude"] = location.altitude
+                userLocation["bearing"] = location.bearing
+                userLocation["horizontalAccuracy"] = location.accuracy
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    userLocation["verticalAccuracy"] = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) location.verticalAccuracyMeters else null
+                }
+                userLocation["timestamp"] = location.time
+                val arguments: MutableMap<String, Any> = HashMap(1)
+                arguments["userLocation"] = userLocation
+                methodChannel.invokeMethod("map#onUserLocationUpdated", arguments)
+            }
+
+            override fun onBearingUpdated(vararg bearing: Double, options: (ValueAnimator.() -> Unit)?) {}
+
+            override fun onLocationUpdated(vararg location: Point, options: (ValueAnimator.() -> Unit)?) {}
+
+            override fun onPuckBearingAnimatorDefaultOptionsUpdated(options: ValueAnimator.() -> Unit) {}
+
+            override fun onPuckLocationAnimatorDefaultOptionsUpdated(options: ValueAnimator.() -> Unit) {}
+        })
     }
 
-    private fun startListeningForLocationUpdates() {
-//        var _locationEngineCallback = locationEngineCallback;
+//    private fun hasLocationPermission(): Boolean {
+//        return (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+//                == PackageManager.PERMISSION_GRANTED
+//                || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+//                == PackageManager.PERMISSION_GRANTED)
+//    }
 //
-//        if (_locationEngineCallback == null && locationComponent != null && locationComponent!!.locationEngine != null) {
-//            _locationEngineCallback = object : LocationEngineCallback<LocationEngineResult> {
-//                override fun onSuccess(result: LocationEngineResult) {
-//                    onUserLocationUpdate(result.lastLocation)
-//                }
-//
-//                override fun onFailure(exception: Exception) {}
-//            }
-//            locationComponent!!.locationEngine!!.requestLocationUpdates(locationComponent!!.locationEngineRequest, _locationEngineCallback, null)
-//        }
-    }
-
-    private fun stopListeningForLocationUpdates() {
-//        if (locationEngineCallback != null && locationComponent != null && locationComponent!!.locationEngine != null) {
-//            locationComponent!!.locationEngine!!.removeLocationUpdates(locationEngineCallback!!)
-//            locationEngineCallback = null
-//        }
-    }
-
-    private fun updateMyLocationTrackingMode() {
-//        val mapboxTrackingModes = intArrayOf(CameraMode.NONE, CameraMode.TRACKING, CameraMode.TRACKING_COMPASS, CameraMode.TRACKING_GPS)
-//        locationComponent!!.cameraMode = mapboxTrackingModes[myLocationTrackingMode]
-    }
-
-    private fun updateMyLocationRenderMode() {
-//        val mapboxRenderModes = intArrayOf(RenderMode.NORMAL, RenderMode.COMPASS, RenderMode.GPS)
-//        locationComponent!!.renderMode = mapboxRenderModes[myLocationRenderMode]
-    }
-
-    private fun hasLocationPermission(): Boolean {
-        return (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED
-                || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED)
-    }
-
-    private fun checkSelfPermission(permission: String?): Int {
-        requireNotNull(permission) { "permission is null" }
-        return context.checkPermission(
-                permission, Process.myPid(), Process.myUid())
-    }
-
-    override fun onStyleLoaded(eventData: StyleLoadedEventData) {
-        methodChannel.invokeMethod("map#onStyleLoaded", null)
-    }
+//    private fun checkSelfPermission(permission: String?): Int {
+//        requireNotNull(permission) { "permission is null" }
+//        return context.checkPermission(
+//                permission, Process.myPid(), Process.myUid())
+//    }
 
     override fun onMapClick(point: Point): Boolean {
         mapView.getMapboxMap().apply {
@@ -1160,7 +1156,9 @@ internal class MapboxMapController(
 
         val initialCameraOptions = CameraOptions.Builder()
         val cameraBoundsOptions = CameraBoundsOptions.Builder()
+        methodChannel = MethodChannel(messenger, "plugins.flutter.io/mapbox_maps_$id")
 
+        streamChannel = StreamsChannel(messenger, "plugins.flutter.io/mapbox_maps_event_stream")
 
 
         (params["initialCameraPosition"] as? Map<String, Any>)?.let { position ->
@@ -1216,12 +1214,34 @@ internal class MapboxMapController(
             Convert.interpretMapboxMapOptions(options, this)
         }
 
-        mapView.getMapboxMap().addOnStyleLoadedListener(this)
+        mapView.getMapboxMap().addOnStyleLoadedListener(object : OnStyleLoadedListener {
+
+            override fun onStyleLoaded(eventData: StyleLoadedEventData) {
+                initLocationComponent()
+                methodChannel.invokeMethod("map#onStyleLoaded", null)
+            }
+
+        })
+
+        mapView.getMapboxMap().addOnMapIdleListener(object : OnMapIdleListener {
+            override fun onMapIdle(eventData: MapIdleEventData) {
+                val cameraState = mapView.getMapboxMap().cameraState;
+                val response = mapOf(
+                    "position" to mapOf(
+                        "target" to Convert.toJson(cameraState.center),
+                        "zoom" to cameraState.zoom,
+                        "bearing" to cameraState.bearing,
+                        "pitch" to cameraState.pitch
+                    )
+                )
+                methodChannel.invokeMethod("camera#onIdle", response)
+
+            }
+
+        })
+
         mapView.gestures.addOnMapClickListener(this)
 
-        methodChannel = MethodChannel(messenger, "plugins.flutter.io/mapbox_maps_$id")
-
-        streamChannel = StreamsChannel(messenger, "plugins.flutter.io/mapbox_maps_event_stream")
 
         val streamHandlerFactory = object : StreamsChannel.StreamHandlerFactory {
             override fun create(arguments: Any?): EventChannel.StreamHandler? {
@@ -1236,6 +1256,9 @@ internal class MapboxMapController(
                                         args["source-layers"] as List<String>?,
                                         args["filter"]
                                 )
+                            }
+                            "userPositionChanged" -> {
+                                return UserPositionStreamHandler(mapView)
                             }
                             else -> {
                                 return null

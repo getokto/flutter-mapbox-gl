@@ -394,4 +394,10 @@ abstract class MapboxGlPlatform {
         'streamSourceFeaturesQuery() has not been implemented.');
   }
 
+
+  Stream<dynamic> userLocationChanges() {
+    throw UnimplementedError(
+        'userLocationChanges() has not been implemented.');
+  }
+
 }

@@ -52,7 +52,7 @@ internal object Convert {
 
         return when (action) {
             "newCameraPosition" -> toCameraPosition(data[1])
-//            "newLatLng" -> CameraUpdateFactory.newLatLng(toLatLng(data[1]))
+            "newLatLng" -> cameraOptions.center(toLatLng(data[1])).build()
 //            "newLatLngBounds" -> CameraUpdateFactory.newLatLngBounds(toLatLngBounds(data[1])!!, toPixels(data[2]!!, density),
 //                    toPixels(data[3]!!, density), toPixels(data[4]!!, density), toPixels(data[5]!!, density))
 //            "newLatLngZoom" -> CameraUpdateFactory.newLatLngZoom(toLatLng(data[1]), toFloat(data[2]).toDouble())
@@ -101,14 +101,14 @@ internal object Convert {
         return data
     }
 
-    private fun toJson(latLng: Point): Any {
+    fun toJson(latLng: Point): Any {
         return listOf(latLng.latitude(), latLng.longitude())
     }
 
-//    private fun toLatLng(o: Any?): LatLng {
-//        val data = toList(o)
-//        return LatLng(toDouble(data!![0]!!), toDouble(data[1]!!))
-//    }
+    private fun toLatLng(o: Any?): Point {
+        val data = toList(o)
+        return Point.fromLngLat(toDouble(data!![1]!!), toDouble(data!![0]!!))
+    }
 //
 //    private fun toLatLngBounds(o: Any?): LatLngBounds? {
 //        if (o == null) {

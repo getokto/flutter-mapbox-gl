@@ -184,7 +184,7 @@ class UserLocation {
   final double? verticalAccuracy;
 
   /// Time the user's location was observed
-  final DateTime timestamp;
+  // final DateTime timestamp;
 
   /// The heading of the user location, null if not available.
   final UserHeading? heading;
@@ -196,8 +196,32 @@ class UserLocation {
       required this.speed,
       required this.horizontalAccuracy,
       required this.verticalAccuracy,
-      required this.timestamp,
+      // required this.timestamp,
       required this.heading});
+
+
+  @override
+  bool operator ==(Object o) {
+    return o is UserLocation &&
+        o.position == position &&
+        o.altitude == altitude &&
+        o.bearing == bearing &&
+        o.speed == speed &&
+        o.horizontalAccuracy == horizontalAccuracy &&
+        o.verticalAccuracy == verticalAccuracy &&
+        o.heading == heading;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    position,
+    altitude,
+    bearing,
+    speed,
+    horizontalAccuracy,
+    verticalAccuracy,
+    heading,
+  );
 }
 
 /// Type represents a geomagnetic value, measured in microteslas, relative to a
@@ -228,13 +252,35 @@ class UserHeading {
   final double? z;
 
   /// Returns a timestamp for when the magnetic heading was determined.
-  final DateTime timestamp;
+  // final DateTime timestamp;
+
   const UserHeading(
       {required this.magneticHeading,
       required this.trueHeading,
       required this.headingAccuracy,
       required this.x,
       required this.y,
-      required this.z,
-      required this.timestamp});
+      required this.z});
+
+
+  @override
+  bool operator ==(Object o) {
+    return o is UserHeading &&
+      o.magneticHeading == magneticHeading &&
+      o.trueHeading == trueHeading &&
+      o.headingAccuracy == headingAccuracy &&
+      o.x == x &&
+      o.y == y &&
+      o.z == z;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    magneticHeading,
+    trueHeading,
+    headingAccuracy,
+    x,
+    y,
+    z
+  );
 }

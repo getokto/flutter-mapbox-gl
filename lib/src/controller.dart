@@ -1072,4 +1072,11 @@ class MapboxMapController extends ChangeNotifier {
     }
   }
 
+  Stream<LatLng> userLocationChanges() {
+    return MapboxGlPlatform
+        .getInstance(_id)
+        .userLocationChanges()
+        .map((event) => LatLng(event['lat'], event["lng"]))
+        .distinct();
+  }
 }

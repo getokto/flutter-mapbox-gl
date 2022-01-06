@@ -119,12 +119,11 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
                     headingAccuracy: heading['headingAccuracy'],
                     x: heading['x'],
                     y: heading['y'],
-                    z: heading['x'],
-                    timestamp: DateTime.fromMillisecondsSinceEpoch(
-                        heading['timestamp']),
+                    z: heading['z'],
+                    // timestamp: DateTime.fromMillisecondsSinceEpoch(heading['timestamp']),
                   ),
-            timestamp: DateTime.fromMillisecondsSinceEpoch(
-                userLocation['timestamp'])));
+            // timestamp: DateTime.fromMillisecondsSinceEpoch(userLocation['timestamp']),
+          ));
         break;
       default:
         throw MissingPluginException();
@@ -917,6 +916,13 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
       'source': source,
       'source-layers': sourceLayers,
       'filter': filter,
+    });
+  }
+
+  @override
+  Stream<dynamic> userLocationChanges() {
+    return _streamsChannel.receiveBroadcastStream({
+      'handler': 'userPositionChanged',
     });
   }
 

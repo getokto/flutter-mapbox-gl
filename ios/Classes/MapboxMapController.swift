@@ -3,20 +3,17 @@ import UIKit
 import MapboxMaps
 import streams_channel3
 
-
 public class CameraLocationConsumer: LocationConsumer {
-    weak var mapView: MapView?
     let duration: Double
+    let onLocationUpdate: (Location) -> ()
     
-    init(mapView: MapView, duration: Double) {
-        self.mapView = mapView
+    init(duration: Double, onLocationUpdate: @escaping (Location) -> ()) {
         self.duration = duration
+        self.onLocationUpdate = onLocationUpdate
     }
 
     public func locationUpdate(newLocation: Location) {
-        mapView?.camera.ease(
-            to: CameraOptions(center: newLocation.coordinate),
-            duration: 1.3)
+        onLocationUpdate(newLocation)
     }
 }
 
@@ -47,7 +44,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
     private var annotationOrder = [String]()
     private var annotationConsumeTapEvents = [String]()
     
-    private var cameraLocationConsumer: CameraLocationConsumer
+    private var cameraLocationConsumer: CameraLocationConsumer? = nil
 
 
     func view() -> UIView {
@@ -113,7 +110,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
         
         mapView = MapView(frame: frame, mapInitOptions: initOptions)
         
-        cameraLocationConsumer = CameraLocationConsumer(mapView: mapView, duration: 1.3)
+
+                
         
         try? mapView.mapboxMap.setCameraBounds(with: cameraBoundsOptions)
        
@@ -122,8 +120,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
         self.registrar = registrar
         
         super.init()
-       
         
+        cameraLocationConsumer = CameraLocationConsumer(duration: 1.3, onLocationUpdate: handleUserLocationChange)
+
         mapView.gestures.delegate = self
         
         mapView.mapboxMap.onNext(.mapLoaded) { _ in
@@ -135,7 +134,6 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
         
         channel = FlutterMethodChannel(name: "plugins.flutter.io/mapbox_maps_\(viewId)", binaryMessenger: registrar.messenger())
         channel!.setMethodCallHandler{ [weak self] in self?.onMethodCall(methodCall: $0, result: $1) }
-        
         
         streamChannel = FlutterStreamsChannel(name: "plugins.flutter.io/mapbox_maps_event_stream", binaryMessenger: registrar.messenger())
         
@@ -193,18 +191,10 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
         }
     }
     
-    
-    func locationManager(_ locationManager: LocationManager, didChangeAccuracyAuthorization accuracyAuthorization: CLAccuracyAuthorization) {
-        if accuracyAuthorization == .reducedAccuracy {
-             // Present a button on screen that asks for full accuracy
-             // This button can have a selector as defined above
-            }
-        }
-    
     func onMapStyleLoaded(event: Event) {
         isMapReady = true
-
-        mapReadyResult?(nil)
+        //mapReadyResult?(nil)
+        initLocationComponent();
         channel?.invokeMethod("map#onStyleLoaded", arguments: nil)
     }
 //    func removeAllForController(controller: MGLAnnotationController, ids: [String]){
@@ -216,11 +206,13 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
     func onMethodCall(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
         switch(methodCall.method) {
         case "map#waitForMap":
-            if isMapReady {
+            /*if isMapReady {
                 result(nil)
             } else {
                 mapReadyResult = result
-            }
+            }*/
+            
+            result(nil)
         case "map#update":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             Convert.interpretMapboxMapOptions(options: arguments["options"], delegate: self)
@@ -368,8 +360,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
             }
             result(nil)
          case "camera#animate":
-             guard let arguments = methodCall.arguments as? [String: Any] else { return }
-             guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
             if let cameraOptions = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
                  if let duration = arguments["duration"] as? TimeInterval {
                      mapView.camera.fly(to: cameraOptions, duration: duration) { position in
@@ -379,10 +371,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
                      mapView.camera.fly(to: cameraOptions, duration: nil) { position in
                          result(nil)
                      }
-                 }
-                
-             }
-             result(nil)
+                 }                
+            }
+             //result(nil)
         // case "symbols#addAll":
         //     guard let symbolAnnotationController = symbolAnnotationController else { return }
         //     guard let arguments = methodCall.arguments as? [String: Any] else { return }
@@ -984,24 +975,33 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
 //    }
 
 
+    private func initLocationComponent() {
+        if let cameraLocationConsumer = cameraLocationConsumer {
+            mapView.location.addLocationConsumer(newConsumer: cameraLocationConsumer as LocationConsumer)
+        }
+
+    }
 
     func setMyLocationTrackingMode(myLocationTrackingMode: MyLocationTrackingMode) {
-        switch myLocationTrackingMode {
-        case .None:
-            mapView.location.removeLocationConsumer(consumer: cameraLocationConsumer)
-        case .Tracking:fallthrough
-        case .TrackingCompass:fallthrough
-        case .TrackingGPS:
-            mapView.location.addLocationConsumer(newConsumer: cameraLocationConsumer)
-        }
-        
-        
-        if let channel = channel {
-            channel.invokeMethod("map#onCameraTrackingChanged", arguments: ["mode": myLocationTrackingMode.rawValue])
-            if myLocationTrackingMode == .None {
-                channel.invokeMethod("map#onCameraTrackingDismissed", arguments: [])
+        /*if let cameraLocationConsumer = cameraLocationConsumer {
+            switch myLocationTrackingMode {
+            case .None:
+                mapView.location.removeLocationConsumer(consumer: cameraLocationConsumer as LocationConsumer)
+            case .Tracking:fallthrough
+            case .TrackingCompass:fallthrough
+            case .TrackingGPS:
+                mapView.location.addLocationConsumer(newConsumer: cameraLocationConsumer as LocationConsumer)
             }
-        }
+            
+            
+            if let channel = channel {
+                channel.invokeMethod("map#onCameraTrackingChanged", arguments: ["mode": myLocationTrackingMode.rawValue])
+                if myLocationTrackingMode == .None {
+                    channel.invokeMethod("map#onCameraTrackingDismissed", arguments: [])
+                }
+            }
+        }*/
+
     }
     
     private func getCamera() -> CameraState? {
@@ -1018,6 +1018,17 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
             return String(data: jsonData, encoding: String.Encoding.utf16)
         }
         return nil;
+    }
+    
+    
+    private func handleUserLocationChange(userLocation: Location)  {
+        if let channel = self.channel {
+            let location = userLocation.location
+            channel.invokeMethod("map#onUserLocationUpdated", arguments: [
+                "userLocation": location.toDict(),
+                "heading": userLocation.heading?.toDict(),
+            ])
+        }
     }
     
     /*

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
@@ -10,6 +12,7 @@ import 'package:mapbox_gl_example/full_map.dart';
 import 'package:mapbox_gl_example/geojson_source.dart';
 import 'package:mapbox_gl_example/offline_regions.dart';
 import 'package:mapbox_gl_example/place_batch.dart';
+import 'package:mapbox_gl_example/user_location.dart';
 import 'package:mapbox_gl_example/vector_source_mvt.dart';
 
 import 'animate_camera.dart';
@@ -29,6 +32,7 @@ import 'vector_source.dart';
 
 final List<ExamplePage> _allPages = <ExamplePage>[
   VectorSourceMvtExamplePage(),
+  UserLocationPage(),
   MapUiPage(),
   FullMapPage(),
   AnimateCameraPage(),
@@ -47,6 +51,15 @@ final List<ExamplePage> _allPages = <ExamplePage>[
   VectorSourceExamplePage(),
   GeoJsonExamplePage(),
 ];
+
+class _CustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.unknown,
+      };
+}
 
 class MapsDemo extends StatelessWidget {
   //FIXME: Add your Mapbox access token here
@@ -84,5 +97,8 @@ class MapsDemo extends StatelessWidget {
 }
 
 void main() {
-  runApp(MaterialApp(home: MapsDemo()));
+  runApp(MaterialApp(
+    home: MapsDemo(),
+    scrollBehavior: _CustomScrollBehavior(),
+  ));
 }

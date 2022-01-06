@@ -71,4 +71,5 @@ android {
 
 dependencies {
     implementation project(path: ':streams_channel3')
+    implementation 'androidx.appcompat:appcompat-resources:1.2.0'
 }
