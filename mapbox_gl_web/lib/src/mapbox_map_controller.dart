@@ -506,7 +506,7 @@ class MapboxMapController extends MapboxGlPlatform
           horizontalAccuracy: e.coords.accuracy,
           verticalAccuracy: e.coords.altitudeAccuracy,
           heading: null,
-          timestamp: DateTime.fromMillisecondsSinceEpoch(e.timestamp)));
+        ));
     });
     _geolocateControl!.on('trackuserlocationstart', (_) {
       _onCameraTrackingChanged(true);

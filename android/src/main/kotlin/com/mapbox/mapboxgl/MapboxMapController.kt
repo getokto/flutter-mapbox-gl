@@ -72,11 +72,6 @@ internal class MapboxMapController(
 
     private val tappableLayers = HashSet<String>()
 
-
-    fun init() {
-        lifecycleProvider.getLifecycle()!!.addObserver(this)
-    }
-
     override fun getView(): View {
         return mapView
     }
@@ -1208,6 +1203,8 @@ internal class MapboxMapController(
         )
 
         mapView = MapView(context, mapInitOptions)
+
+        lifecycleProvider.getLifecycle()!!.addObserver(this)
 
         // set all options
         (params["options"] as Map<String, Any>?)?.let { options ->
