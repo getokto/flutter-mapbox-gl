@@ -16,6 +16,7 @@ import androidx.lifecycle.LifecycleOwner
 import app.loup.streams_channel.StreamsChannel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.bindgen.Value
 import com.mapbox.geojson.Point
 import com.mapbox.maps.*
@@ -34,9 +35,15 @@ import com.mapbox.maps.plugin.compass.compass
 import com.mapbox.maps.plugin.delegates.listeners.OnMapIdleListener
 import com.mapbox.maps.plugin.delegates.listeners.OnStyleLoadedListener
 import com.mapbox.maps.plugin.gestures.*
+import com.mapbox.maps.plugin.locationcomponent.LocationConsumer
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.logo.logo
 import com.mapbox.maps.plugin.scalebar.scalebar
+import com.mapbox.maps.plugin.viewport.ViewportStatus
+import com.mapbox.maps.plugin.viewport.ViewportStatusObserver
+import com.mapbox.maps.plugin.viewport.data.OverviewViewportStateOptions
+import com.mapbox.maps.plugin.viewport.data.ViewportStatusChangeReason
+import com.mapbox.maps.plugin.viewport.viewport
 import io.flutter.Log
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
@@ -48,6 +55,13 @@ import org.json.JSONObject
 import java.util.*
 
 
+enum class MyLocationTrackingMode {
+    None,
+    Tracking,
+    TrackingCompass,
+    TrackingGPS
+}
+
 /**
  * Controller of a single MapboxMaps MapView instance.
  */
@@ -58,7 +72,7 @@ internal class MapboxMapController(
     messenger: BinaryMessenger?,
     params: Map<String, Any>,
     lifecycleProvider: LifecycleProvider
-) : DefaultLifecycleObserver, OnMapClickListener, MapboxMapOptionsSink, MethodCallHandler, PlatformView {
+) : DefaultLifecycleObserver, OnMapClickListener, OnMoveListener, CustomLocationConsumer, MapboxMapOptionsSink, MethodCallHandler, PlatformView {
     private val id: Int = id
     private var methodChannel: MethodChannel
     private var streamChannel: StreamsChannel
@@ -199,14 +213,19 @@ internal class MapboxMapController(
                 result.success(null)
             }
             "map#update" -> {
-                Convert.interpretMapboxMapOptions(call.argument<HashMap<String, Any?>>("options")!!, this)
+                val options = call.argument<HashMap<String, Any?>>("options")!!;
+
+                Convert.interpretMapboxMapOptions(options, this)
                 result.success(Convert.toJson(mapView.getMapboxMap().cameraState))
             }
-//            "map#updateMyLocationTrackingMode" -> {
-//                val myLocationTrackingMode = call.argument<Int>("mode")!!
-//                setMyLocationTrackingMode(myLocationTrackingMode)
-//                result.success(null)
-//            }
+            "map#updateMyLocationTrackingMode" -> {
+                val myLocationTrackingMode = call.argument<Int>("mode")!!
+
+                setMyLocationTrackingMode(
+                    MyLocationTrackingMode.values()[myLocationTrackingMode as Int]
+                )
+                result.success(null)
+            }
 //            "map#matchMapLanguageWithDeviceDefault" -> {
 //                try {
 //                    localizationPlugin!!.matchMapLanguageWithDeviceDefault()
@@ -850,7 +869,27 @@ internal class MapboxMapController(
         }
     }
 
-    override fun setMyLocationTrackingMode(myLocationTrackingMode: Int) { }
+    var cameraTrackingMode: MyLocationTrackingMode? = null;
+    override fun setMyLocationTrackingMode(myLocationTrackingMode: MyLocationTrackingMode) {
+        if (cameraTrackingMode == myLocationTrackingMode) {
+            return
+        }
+
+        when(myLocationTrackingMode) {
+            MyLocationTrackingMode.None -> mapView.location.getLocationProvider()?.unRegisterLocationConsumer(this)
+            else -> mapView.location.getLocationProvider()?.registerLocationConsumer(this)
+        }
+
+        val arguments: MutableMap<String, Any> = HashMap(1)
+        arguments["mode"] = myLocationTrackingMode.ordinal
+
+        methodChannel.invokeMethod("map#onCameraTrackingChanged", arguments);
+
+        if (myLocationTrackingMode == MyLocationTrackingMode.None) {
+            methodChannel.invokeMethod("map#onCameraTrackingDismissed", HashMap<String, Any>(0))
+        }
+        cameraTrackingMode = myLocationTrackingMode
+    }
 
     override fun setMyLocationRenderMode(myLocationRenderMode: Int) { }
 
@@ -1037,40 +1076,6 @@ internal class MapboxMapController(
 
         mapView.location.setLocationProvider(CustomLocationProviderImpl(context))
 
-
-        mapView.location.getLocationProvider()?.registerLocationConsumer(locationConsumer = object:CustomLocationConsumer {
-            override fun onExtendedLocationUpdated(
-                location: Location,
-                options: (ValueAnimator.() -> Unit)?
-            ) {
-                if (!mapView.location.enabled) { return }
-
-                location.longitude;
-                val userLocation: MutableMap<String, Any?> = HashMap(6)
-                userLocation["position"] = doubleArrayOf(location.latitude, location.longitude)
-                userLocation["speed"] = location.speed
-                userLocation["altitude"] = location.altitude
-                userLocation["bearing"] = location.bearing
-                userLocation["horizontalAccuracy"] = location.accuracy
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    userLocation["verticalAccuracy"] = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) location.verticalAccuracyMeters else null
-                }
-                userLocation["timestamp"] = location.time
-                val arguments: MutableMap<String, Any> = HashMap(1)
-                arguments["userLocation"] = userLocation
-                methodChannel.invokeMethod("map#onUserLocationUpdated", arguments)
-            }
-
-            override fun onBearingUpdated(vararg bearing: Double, options: (ValueAnimator.() -> Unit)?) {}
-
-            override fun onLocationUpdated(vararg location: Point, options: (ValueAnimator.() -> Unit)?) {}
-
-            override fun onPuckBearingAnimatorDefaultOptionsUpdated(options: ValueAnimator.() -> Unit) {}
-
-            override fun onPuckLocationAnimatorDefaultOptionsUpdated(options: ValueAnimator.() -> Unit) {}
-        })
-    }
-
 //    private fun hasLocationPermission(): Boolean {
 //        return (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 //                == PackageManager.PERMISSION_GRANTED
@@ -1083,6 +1088,44 @@ internal class MapboxMapController(
 //        return context.checkPermission(
 //                permission, Process.myPid(), Process.myUid())
 //    }
+
+    override fun onMove(detector: MoveGestureDetector): Boolean {
+        return false;
+    }
+
+    override fun onMoveBegin(detector: MoveGestureDetector) {
+        setMyLocationTrackingMode(MyLocationTrackingMode.None);
+    }
+
+    override fun onMoveEnd(detector: MoveGestureDetector) {
+    }
+
+    override fun onExtendedLocationUpdated(
+        location: Location,
+        options: (ValueAnimator.() -> Unit)?
+    ) {
+        if (!mapView.location.enabled) { return }
+
+        location.longitude;
+        val userLocation: MutableMap<String, Any?> = HashMap(6)
+        userLocation["position"] = doubleArrayOf(location.latitude, location.longitude)
+        userLocation["speed"] = location.speed
+        userLocation["altitude"] = location.altitude
+        userLocation["bearing"] = location.bearing
+        userLocation["horizontalAccuracy"] = location.accuracy
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            userLocation["verticalAccuracy"] = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) location.verticalAccuracyMeters else null
+        }
+        userLocation["timestamp"] = location.time
+        val arguments: MutableMap<String, Any> = HashMap(1)
+        arguments["userLocation"] = userLocation
+        methodChannel.invokeMethod("map#onUserLocationUpdated", arguments)
+    }
+
+    override fun onBearingUpdated(vararg bearing: Double, options: (ValueAnimator.() -> Unit)?) { }
+    override fun onLocationUpdated(vararg location: Point, options: (ValueAnimator.() -> Unit)?) { }
+    override fun onPuckBearingAnimatorDefaultOptionsUpdated(options: ValueAnimator.() -> Unit) { }
+    override fun onPuckLocationAnimatorDefaultOptionsUpdated(options: ValueAnimator.() -> Unit) { }
 
     override fun onMapClick(point: Point): Boolean {
         mapView.getMapboxMap().apply {
@@ -1239,6 +1282,7 @@ internal class MapboxMapController(
 
         mapView.gestures.addOnMapClickListener(this)
 
+        mapView.gestures.addOnMoveListener(this);
 
         val streamHandlerFactory = object : StreamsChannel.StreamHandlerFactory {
             override fun create(arguments: Any?): EventChannel.StreamHandler? {

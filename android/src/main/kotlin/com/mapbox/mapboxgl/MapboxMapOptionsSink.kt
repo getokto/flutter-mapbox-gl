@@ -20,7 +20,7 @@ internal interface MapboxMapOptionsSink {
     fun setTrackCameraPosition(trackCameraPosition: Boolean)
     fun setZoomGesturesEnabled(enabled: Boolean)
     fun setMyLocationEnabled(enabled: Boolean)
-    fun setMyLocationTrackingMode(myLocationTrackingMode: Int)
+    fun setMyLocationTrackingMode(myLocationTrackingMode: MyLocationTrackingMode)
     fun setMyLocationRenderMode(myLocationRenderMode: Int)
     fun setLogoPosition(gravity: Int)
     fun setLogoViewMargins(x: Int, y: Int)

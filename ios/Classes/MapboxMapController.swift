@@ -45,6 +45,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
     private var annotationConsumeTapEvents = [String]()
     
     private var cameraLocationConsumer: CameraLocationConsumer? = nil
+    private var cameraTrackingMode: MyLocationTrackingMode? = nil
 
 
     func view() -> UIView {
@@ -194,7 +195,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
     func onMapStyleLoaded(event: Event) {
         isMapReady = true
         //mapReadyResult?(nil)
-        initLocationComponent();
+        //initLocationComponent();
         channel?.invokeMethod("map#onStyleLoaded", arguments: nil)
     }
 //    func removeAllForController(controller: MGLAnnotationController, ids: [String]){
@@ -364,11 +365,11 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
             guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
             if let cameraOptions = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
                  if let duration = arguments["duration"] as? TimeInterval {
-                     mapView.camera.fly(to: cameraOptions, duration: duration) { position in
+                     mapView.camera.fly(to: cameraOptions, duration: duration) { [weak self] _ in
                          result(nil)
                      }
                  } else {
-                     mapView.camera.fly(to: cameraOptions, duration: nil) { position in
+                     mapView.camera.fly(to: cameraOptions, duration: nil) { [weak self] _ in
                          result(nil)
                      }
                  }                
@@ -982,8 +983,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
 
     }
 
+    
+    
     func setMyLocationTrackingMode(myLocationTrackingMode: MyLocationTrackingMode) {
-        /*if let cameraLocationConsumer = cameraLocationConsumer {
+        if (cameraTrackingMode == myLocationTrackingMode) {
+            return;
+        }
+        
+        if let cameraLocationConsumer = cameraLocationConsumer {
             switch myLocationTrackingMode {
             case .None:
                 mapView.location.removeLocationConsumer(consumer: cameraLocationConsumer as LocationConsumer)
@@ -993,15 +1000,15 @@ class MapboxMapController: NSObject, FlutterPlatformView, MapboxMapOptionsSink, 
                 mapView.location.addLocationConsumer(newConsumer: cameraLocationConsumer as LocationConsumer)
             }
             
-            
             if let channel = channel {
                 channel.invokeMethod("map#onCameraTrackingChanged", arguments: ["mode": myLocationTrackingMode.rawValue])
                 if myLocationTrackingMode == .None {
                     channel.invokeMethod("map#onCameraTrackingDismissed", arguments: [])
                 }
             }
-        }*/
-
+        }
+        
+        cameraTrackingMode = myLocationTrackingMode
     }
     
     private func getCamera() -> CameraState? {

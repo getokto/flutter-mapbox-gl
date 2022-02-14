@@ -210,7 +210,9 @@ internal object Convert {
             }
             val myLocationTrackingMode = data["myLocationTrackingMode"]
             if (myLocationTrackingMode != null) {
-                sink.setMyLocationTrackingMode(toInt(myLocationTrackingMode))
+                val value = myLocationTrackingMode as Int;
+                val values = MyLocationTrackingMode.values();
+                sink.setMyLocationTrackingMode(values[value])
             }
             val myLocationRenderMode = data["myLocationRenderMode"]
             if (myLocationRenderMode != null) {

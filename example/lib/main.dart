@@ -13,6 +13,7 @@ import 'package:mapbox_gl_example/geojson_source.dart';
 import 'package:mapbox_gl_example/offline_regions.dart';
 import 'package:mapbox_gl_example/place_batch.dart';
 import 'package:mapbox_gl_example/user_location.dart';
+import 'package:mapbox_gl_example/user_tracking.dart';
 import 'package:mapbox_gl_example/vector_source_mvt.dart';
 
 import 'animate_camera.dart';
@@ -32,6 +33,7 @@ import 'vector_source.dart';
 
 final List<ExamplePage> _allPages = <ExamplePage>[
   VectorSourceMvtExamplePage(),
+  UserTrackingPage(),
   UserLocationPage(),
   MapUiPage(),
   FullMapPage(),
@@ -63,7 +65,7 @@ class _CustomScrollBehavior extends MaterialScrollBehavior {
 
 class MapsDemo extends StatelessWidget {
   //FIXME: Add your Mapbox access token here
-  static const String ACCESS_TOKEN = "pk.eyJ1IjoiYmphcnRlYm9yZSIsImEiOiJja3VnaTV2N3QwcWh5MnVva21tNWJhZHZ5In0.MCrnbGAC3tKA1piTeqqrkw";
+  static const String ACCESS_TOKEN = "";
 
   void _pushPage(BuildContext context, ExamplePage page) async {
     if (!kIsWeb) {
