@@ -1075,7 +1075,7 @@ internal class MapboxMapController(
         }
 
         mapView.location.setLocationProvider(CustomLocationProviderImpl(context))
-
+    }
 //    private fun hasLocationPermission(): Boolean {
 //        return (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
 //                == PackageManager.PERMISSION_GRANTED
